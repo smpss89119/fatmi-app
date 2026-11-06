@@ -1,10 +1,11 @@
-const C = "fatcat-1-20261106b";
+const C = "fatcat-2-20261107";
 const F = [
   "./",
   "index.html",
   "app.js",
   "app.css",
   "data.js",
+  "data.json",
   "manifest.webmanifest",
   "icon-180.png",
   "icon-512.png",
@@ -23,6 +24,18 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const u = new URL(e.request.url);
   if (u.origin !== location.origin) return;
+  if (u.pathname.endsWith("data.json")) {
+    e.respondWith(
+      fetch(e.request)
+        .then((r) => {
+          const copy = r.clone();
+          caches.open(C).then((c) => c.put(e.request, copy));
+          return r;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(
       (r) =>

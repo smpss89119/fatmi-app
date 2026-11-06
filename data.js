@@ -21,7 +21,7 @@ const WORKOUTS = {
     name: "家裡啞鈴快版",
     time: "約 25 分",
     where: "家裡",
-    tag: "預設訓練日",
+    tag: "睡眠或心率未達標時的替代",
     warm: "可選：關節繞圈 1–2 分鐘，不用拉很久。",
     steps: [
       { name: "高腳杯深蹲", dose: "3 × 10", video: "goblet" },
@@ -107,7 +107,7 @@ const GROCERY = [
   { id: "veg", name: "冷凍蔬菜", hint: "大量蔬菜、少油" },
   { id: "carb", name: "白米或地瓜", hint: "訓練日半碗～大半碗；休息日減半" },
   { id: "banana", name: "香蕉", hint: "練前 1–2 小時可加半根" },
-  { id: "whey", name: "乳清（選配）", hint: "補蛋白質用" },
+  { id: "whey", name: "樂維根無糖蛋白粉", hint: "1 scoop 40 g，練前 16:00；估計每 scoop 約 22 g 蛋白、185 kcal" },
   { id: "tea", name: "無糖茶／黑咖啡", hint: "飲料改無糖" },
 ];
 
@@ -128,3 +128,104 @@ const COOKS = [
     steps: "絞肉少油炒香，加板豆腐與大量青菜。休息日飯再減半或改地瓜。",
   },
 ];
+
+const PARTS = {
+  quads: "股四頭",
+  glutes: "臀",
+  hams: "腿後",
+  core: "核心",
+  chest: "胸",
+  tris: "三頭",
+  frontDelts: "前三角",
+  delts: "三角肌",
+  lats: "背闊",
+  midback: "中背",
+  bis: "二頭",
+  rearDelts: "後三角",
+  upperback: "上背",
+  rotator: "旋轉肌",
+  lowback: "下背穩定",
+};
+
+const MAIN_PARTS = ["quads", "glutes", "hams", "chest", "delts", "lats", "midback", "core"];
+
+const MOVE_MUSCLES = [
+  { keys: ["腿推"], primary: ["quads", "glutes"], secondary: ["hams"] },
+  { keys: ["高腳杯深蹲", "深蹲"], primary: ["quads", "glutes"], secondary: ["core"] },
+  { keys: ["臀橋", "臀推", "髖推"], primary: ["glutes"], secondary: ["hams"] },
+  { keys: ["胸推", "地板臥推", "臥推", "伏地挺身", "跪姿伏地"], primary: ["chest"], secondary: ["tris", "frontDelts"] },
+  { keys: ["坐姿啞鈴肩推", "肩推"], primary: ["delts"], secondary: ["tris"] },
+  { keys: ["坐姿划船", "單臂划船", "單手划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
+  { keys: ["下拉", "滑輪下拉"], primary: ["lats"], secondary: ["bis"] },
+  { keys: ["面拉"], primary: ["rearDelts", "upperback"], secondary: ["rotator"] },
+  { keys: ["死蟲"], primary: ["core"], secondary: ["lowback"] },
+  { keys: ["鳥狗"], primary: ["core"], secondary: ["lowback"] },
+];
+
+const EXTRA_FOR_PART = {
+  quads: { name: "腿推", dose: "1 × 10–12", video: "legpress" },
+  glutes: { name: "臀橋", dose: "1 × 10–12", video: "bridge" },
+  hams: { name: "臀橋", dose: "1 × 10–12", video: "bridge" },
+  chest: { name: "胸推或啞鈴臥推", dose: "1 × 8–10", video: "chest" },
+  delts: { name: "坐姿啞鈴肩推", dose: "1 × 8–10", video: "press" },
+  lats: { name: "下拉", dose: "1 × 10–12", video: "pulldown" },
+  midback: { name: "坐姿划船", dose: "1 × 10–12", video: "seatedrow" },
+  core: { name: "死蟲", dose: "1 × 8–10 / 側", video: "deadbug" },
+};
+
+const NO_WEIGHT = /死蟲|鳥狗|伏地|跪姿伏地/;
+
+const PROTEIN_SWAPS = [
+  { id: "chicken200", name: "雞胸 200g", kcal: 220, protein: 46 },
+  { id: "shrimp150", name: "蝦仁 150g", kcal: 150, protein: 32 },
+  { id: "tilapia", name: "吳郭魚排 1 片", kcal: 150, protein: 30 },
+  { id: "eggs3", name: "雞蛋 3 顆", kcal: 210, protein: 19 },
+];
+
+const STARCH_SWAPS = [
+  { id: "rice150", name: "飯 150g", kcal: 195, protein: 4 },
+  { id: "yam150", name: "地瓜 150g", kcal: 130, protein: 2 },
+  { id: "sourdough2", name: "酸種麵包 2 片", kcal: 170, protein: 6 },
+];
+
+const VEG_ADDON = { name: "青菜", kcal: 40, protein: 2 };
+
+function composeSwapMeal(proteinId, starchId) {
+  const p = PROTEIN_SWAPS.find((x) => x.id === proteinId) || PROTEIN_SWAPS[0];
+  const s = STARCH_SWAPS.find((x) => x.id === starchId) || STARCH_SWAPS[0];
+  return {
+    name: `${p.name}＋${s.name}＋${VEG_ADDON.name}`,
+    kcal: p.kcal + s.kcal + VEG_ADDON.kcal,
+    protein: p.protein + s.protein + VEG_ADDON.protein,
+    proteinId: p.id,
+    starchId: s.id,
+  };
+}
+
+const MEAL_DEFS = {
+  breakfast: {
+    id: "breakfast",
+    label: "早餐",
+    base: { name: "蛋 2 顆＋無糖優格 200g＋燕麥 40g", kcal: 430, protein: 36 },
+  },
+  lunch: {
+    id: "lunch",
+    label: "午餐",
+    train: { name: "瘦肉便當、飯半碗到大半碗、大量青菜", kcal: 680, protein: 42 },
+    rest: { name: "瘦肉便當、飯半碗、大量青菜少油", kcal: 600, protein: 42 },
+  },
+  snack: {
+    id: "snack",
+    label: "午後",
+    train: { name: "樂維根無糖蛋白粉 1 scoop（40 g）", kcal: 185, protein: 22 },
+    rest: { name: "乳清或無糖優格", kcal: 150, protein: 24 },
+  },
+  dinner: {
+    id: "dinner",
+    label: "晚餐",
+    train: { name: "雞胸 200g＋大份蔬菜＋半碗飯或地瓜", kcal: 650, protein: 52 },
+    rest: { name: "手掌大蛋白質＋大份蔬菜＋碳水再減半", kcal: 500, protein: 45 },
+  },
+};
+
+const MEAL_ORDER = ["breakfast", "lunch", "snack", "dinner"];

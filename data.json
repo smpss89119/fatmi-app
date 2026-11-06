@@ -1,0 +1,5458 @@
+{
+  "exportedAt": "2026-11-06T23:56:09+07:00",
+  "timezone": "Asia/Bangkok",
+  "garmin": {
+    "daily": [
+      {
+        "date": "2026-10-08",
+        "kcal": 2236.0,
+        "steps": 5847,
+        "sleepHours": 7.3,
+        "restingHR": 48.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-09",
+        "kcal": 2725.0,
+        "steps": 17914,
+        "sleepHours": 5.3,
+        "restingHR": 54.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-10",
+        "kcal": 2380.0,
+        "steps": 11609,
+        "sleepHours": null,
+        "restingHR": 54.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-11",
+        "kcal": 2683.0,
+        "steps": 12091,
+        "sleepHours": 8.1,
+        "restingHR": 49.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-12",
+        "kcal": 2448.0,
+        "steps": 6688,
+        "sleepHours": 6.0,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-13",
+        "kcal": 2699.0,
+        "steps": 12355,
+        "sleepHours": 7.4,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-14",
+        "kcal": 2237.0,
+        "steps": 5509,
+        "sleepHours": 6.3,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-15",
+        "kcal": 2591.0,
+        "steps": 8823,
+        "sleepHours": 7.3,
+        "restingHR": 51.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-16",
+        "kcal": 2298.0,
+        "steps": 8530,
+        "sleepHours": 6.4,
+        "restingHR": 51.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-17",
+        "kcal": 2720.0,
+        "steps": 5749,
+        "sleepHours": 5.0,
+        "restingHR": 47.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-18",
+        "kcal": 2826.0,
+        "steps": 10020,
+        "sleepHours": 5.2,
+        "restingHR": 47.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-19",
+        "kcal": 2215.0,
+        "steps": 6019,
+        "sleepHours": 7.3,
+        "restingHR": 46.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-20",
+        "kcal": 2207.0,
+        "steps": 5938,
+        "sleepHours": 7.8,
+        "restingHR": 46.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-21",
+        "kcal": 2237.0,
+        "steps": 6861,
+        "sleepHours": 6.0,
+        "restingHR": 46.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-22",
+        "kcal": 2253.0,
+        "steps": 6336,
+        "sleepHours": 6.7,
+        "restingHR": 45.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-23",
+        "kcal": 2446.0,
+        "steps": 7781,
+        "sleepHours": 5.4,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-24",
+        "kcal": 2355.0,
+        "steps": 6791,
+        "sleepHours": 7.0,
+        "restingHR": 47.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-25",
+        "kcal": 2249.0,
+        "steps": 6361,
+        "sleepHours": null,
+        "restingHR": 51.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-26",
+        "kcal": 2190.0,
+        "steps": 5025,
+        "sleepHours": 6.9,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-27",
+        "kcal": 2175.0,
+        "steps": 4811,
+        "sleepHours": 6.8,
+        "restingHR": 49.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-28",
+        "kcal": 2206.0,
+        "steps": 5388,
+        "sleepHours": 5.4,
+        "restingHR": 49.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-29",
+        "kcal": 2224.0,
+        "steps": 5578,
+        "sleepHours": 6.5,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-30",
+        "kcal": 2272.0,
+        "steps": 7072,
+        "sleepHours": 6.7,
+        "restingHR": 50.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-10-31",
+        "kcal": 2589.0,
+        "steps": 14413,
+        "sleepHours": 4.2,
+        "restingHR": 48.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-11-01",
+        "kcal": 2721.0,
+        "steps": 22316,
+        "sleepHours": 5.4,
+        "restingHR": 53.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-11-02",
+        "kcal": 2552.0,
+        "steps": 16877,
+        "sleepHours": 5.5,
+        "restingHR": 52.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-11-03",
+        "kcal": 2709.0,
+        "steps": 23017,
+        "sleepHours": 8.2,
+        "restingHR": 52.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-11-04",
+        "kcal": 2685.0,
+        "steps": 24739,
+        "sleepHours": 6.2,
+        "restingHR": 53.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-11-05",
+        "kcal": 2782.0,
+        "steps": 19772,
+        "sleepHours": 7.3,
+        "restingHR": 51.0,
+        "weightKg": null
+      },
+      {
+        "date": "2026-11-06",
+        "kcal": 2602.0,
+        "steps": 14476,
+        "sleepHours": 5.3,
+        "restingHR": 53.0,
+        "weightKg": null
+      }
+    ],
+    "activities": [
+      {
+        "type": "running",
+        "date": "2026-10-11",
+        "startTime": "2026-10-11 20:25:51",
+        "durationMin": 35.0,
+        "avgHR": 123.0,
+        "kcal": 425.0,
+        "name": "香山區 跑步"
+      },
+      {
+        "type": "strength_training",
+        "date": "2026-10-12",
+        "startTime": "2026-10-12 21:19:01",
+        "durationMin": 42.5,
+        "avgHR": 108.0,
+        "kcal": 310.0,
+        "name": "肌力訓練"
+      },
+      {
+        "type": "multi_sport",
+        "date": "2026-10-13",
+        "startTime": "2026-10-13 20:31:12",
+        "durationMin": 47.3,
+        "avgHR": null,
+        "kcal": 474.0,
+        "name": "複合式運動"
+      },
+      {
+        "type": "strength_training",
+        "date": "2026-10-15",
+        "startTime": "2026-10-15 22:27:17",
+        "durationMin": 38.8,
+        "avgHR": 117.0,
+        "kcal": 352.0,
+        "name": "肌力訓練"
+      },
+      {
+        "type": "multi_sport",
+        "date": "2026-10-17",
+        "startTime": "2026-10-17 07:12:22",
+        "durationMin": 95.9,
+        "avgHR": null,
+        "kcal": 646.0,
+        "name": "複合式運動"
+      },
+      {
+        "type": "multi_sport",
+        "date": "2026-10-18",
+        "startTime": "2026-10-18 10:07:48",
+        "durationMin": 42.7,
+        "avgHR": null,
+        "kcal": 478.0,
+        "name": "複合式運動"
+      }
+    ]
+  },
+  "inbody": [
+    {
+      "date": "2023-05-21",
+      "weightKg": 103.6,
+      "bfmKg": 39.9,
+      "pbf": 38.5,
+      "smmKg": 36.3,
+      "bmi": 33.3,
+      "whr": 0.0
+    },
+    {
+      "date": "2023-07-09",
+      "weightKg": 99.7,
+      "bfmKg": 36.0,
+      "pbf": 36.1,
+      "smmKg": 37.8,
+      "bmi": 32.0,
+      "whr": 0.0
+    },
+    {
+      "date": "2023-12-14",
+      "weightKg": 96.4,
+      "bfmKg": 29.7,
+      "pbf": 30.8,
+      "smmKg": 37.8,
+      "bmi": 30.9,
+      "whr": 0.0
+    },
+    {
+      "date": "2023-12-27",
+      "weightKg": 90.3,
+      "bfmKg": 23.2,
+      "pbf": 25.7,
+      "smmKg": 38.2,
+      "bmi": 29.0,
+      "whr": 0.0
+    },
+    {
+      "date": "2024-02-01",
+      "weightKg": 89.1,
+      "bfmKg": 20.2,
+      "pbf": 22.7,
+      "smmKg": 39.5,
+      "bmi": 28.6,
+      "whr": 0.0
+    },
+    {
+      "date": "2024-07-04",
+      "weightKg": 85.5,
+      "bfmKg": 18.5,
+      "pbf": 21.6,
+      "smmKg": 38.3,
+      "bmi": 27.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2024-07-05",
+      "weightKg": 84.3,
+      "bfmKg": 19.2,
+      "pbf": 22.8,
+      "smmKg": 37.2,
+      "bmi": 27.1,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-07-06",
+      "weightKg": 84.8,
+      "bfmKg": 19.4,
+      "pbf": 22.8,
+      "smmKg": 37.5,
+      "bmi": 27.2,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-07",
+      "weightKg": 86.6,
+      "bfmKg": 20.1,
+      "pbf": 23.2,
+      "smmKg": 38.0,
+      "bmi": 27.8,
+      "whr": 0.94
+    },
+    {
+      "date": "2024-07-08",
+      "weightKg": 85.5,
+      "bfmKg": 20.5,
+      "pbf": 24.0,
+      "smmKg": 37.2,
+      "bmi": 27.4,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-09",
+      "weightKg": 85.0,
+      "bfmKg": 19.6,
+      "pbf": 23.0,
+      "smmKg": 37.4,
+      "bmi": 27.3,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-10",
+      "weightKg": 85.4,
+      "bfmKg": 19.8,
+      "pbf": 23.2,
+      "smmKg": 37.5,
+      "bmi": 27.4,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-11",
+      "weightKg": 84.7,
+      "bfmKg": 19.1,
+      "pbf": 22.6,
+      "smmKg": 37.6,
+      "bmi": 27.2,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-12",
+      "weightKg": 84.7,
+      "bfmKg": 18.1,
+      "pbf": 21.4,
+      "smmKg": 38.2,
+      "bmi": 27.2,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-13",
+      "weightKg": 84.3,
+      "bfmKg": 19.1,
+      "pbf": 22.6,
+      "smmKg": 37.2,
+      "bmi": 27.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-14",
+      "weightKg": 84.9,
+      "bfmKg": 19.1,
+      "pbf": 22.5,
+      "smmKg": 37.7,
+      "bmi": 27.2,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-15",
+      "weightKg": 85.0,
+      "bfmKg": 19.3,
+      "pbf": 22.7,
+      "smmKg": 37.6,
+      "bmi": 27.3,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-16",
+      "weightKg": 85.1,
+      "bfmKg": 19.6,
+      "pbf": 23.1,
+      "smmKg": 37.3,
+      "bmi": 27.3,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-17",
+      "weightKg": 84.2,
+      "bfmKg": 19.4,
+      "pbf": 23.0,
+      "smmKg": 37.1,
+      "bmi": 27.0,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-18",
+      "weightKg": 84.2,
+      "bfmKg": 19.4,
+      "pbf": 23.0,
+      "smmKg": 37.2,
+      "bmi": 27.0,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-19",
+      "weightKg": 83.0,
+      "bfmKg": 18.8,
+      "pbf": 22.6,
+      "smmKg": 36.8,
+      "bmi": 26.6,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-20",
+      "weightKg": 83.5,
+      "bfmKg": 19.2,
+      "pbf": 23.0,
+      "smmKg": 36.7,
+      "bmi": 26.8,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-21",
+      "weightKg": 83.3,
+      "bfmKg": 18.7,
+      "pbf": 22.4,
+      "smmKg": 37.0,
+      "bmi": 26.7,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-22",
+      "weightKg": 83.6,
+      "bfmKg": 19.4,
+      "pbf": 23.3,
+      "smmKg": 36.7,
+      "bmi": 26.8,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-23",
+      "weightKg": 83.6,
+      "bfmKg": 18.2,
+      "pbf": 21.8,
+      "smmKg": 37.3,
+      "bmi": 26.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-07-24",
+      "weightKg": 83.6,
+      "bfmKg": 18.7,
+      "pbf": 22.3,
+      "smmKg": 37.1,
+      "bmi": 26.8,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-25",
+      "weightKg": 83.8,
+      "bfmKg": 18.2,
+      "pbf": 21.7,
+      "smmKg": 37.6,
+      "bmi": 26.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-26",
+      "weightKg": 83.4,
+      "bfmKg": 19.1,
+      "pbf": 22.9,
+      "smmKg": 36.8,
+      "bmi": 26.8,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-07-27",
+      "weightKg": 83.1,
+      "bfmKg": 18.9,
+      "pbf": 22.8,
+      "smmKg": 36.7,
+      "bmi": 26.7,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-28",
+      "weightKg": 83.3,
+      "bfmKg": 19.1,
+      "pbf": 23.0,
+      "smmKg": 36.8,
+      "bmi": 26.7,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-07-29",
+      "weightKg": 83.3,
+      "bfmKg": 19.4,
+      "pbf": 23.3,
+      "smmKg": 36.5,
+      "bmi": 26.7,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-07-30",
+      "weightKg": 83.6,
+      "bfmKg": 19.3,
+      "pbf": 23.1,
+      "smmKg": 36.8,
+      "bmi": 26.8,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-07-31",
+      "weightKg": 82.6,
+      "bfmKg": 19.0,
+      "pbf": 23.0,
+      "smmKg": 36.5,
+      "bmi": 26.5,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-01",
+      "weightKg": 83.1,
+      "bfmKg": 19.2,
+      "pbf": 23.2,
+      "smmKg": 36.6,
+      "bmi": 26.7,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-02",
+      "weightKg": 82.7,
+      "bfmKg": 18.5,
+      "pbf": 22.4,
+      "smmKg": 36.8,
+      "bmi": 26.5,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-04",
+      "weightKg": 84.2,
+      "bfmKg": 18.7,
+      "pbf": 22.2,
+      "smmKg": 37.1,
+      "bmi": 27.0,
+      "whr": 0.85
+    },
+    {
+      "date": "2024-08-05",
+      "weightKg": 84.8,
+      "bfmKg": 19.2,
+      "pbf": 22.6,
+      "smmKg": 37.5,
+      "bmi": 27.2,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-06",
+      "weightKg": 83.8,
+      "bfmKg": 19.0,
+      "pbf": 22.7,
+      "smmKg": 37.1,
+      "bmi": 26.9,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-08-07",
+      "weightKg": 83.8,
+      "bfmKg": 18.4,
+      "pbf": 22.0,
+      "smmKg": 37.4,
+      "bmi": 26.9,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-08-08",
+      "weightKg": 83.8,
+      "bfmKg": 19.2,
+      "pbf": 23.0,
+      "smmKg": 36.8,
+      "bmi": 26.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-09",
+      "weightKg": 83.0,
+      "bfmKg": 18.8,
+      "pbf": 22.6,
+      "smmKg": 36.7,
+      "bmi": 26.6,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-08-10",
+      "weightKg": 82.9,
+      "bfmKg": 18.9,
+      "pbf": 22.8,
+      "smmKg": 36.5,
+      "bmi": 26.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-08-11",
+      "weightKg": 84.1,
+      "bfmKg": 19.1,
+      "pbf": 22.7,
+      "smmKg": 37.2,
+      "bmi": 27.0,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-12",
+      "weightKg": 84.6,
+      "bfmKg": 19.5,
+      "pbf": 23.0,
+      "smmKg": 37.3,
+      "bmi": 27.1,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-08-13",
+      "weightKg": 84.0,
+      "bfmKg": 19.5,
+      "pbf": 23.3,
+      "smmKg": 36.9,
+      "bmi": 27.0,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-08-14",
+      "weightKg": 84.3,
+      "bfmKg": 18.7,
+      "pbf": 22.1,
+      "smmKg": 37.6,
+      "bmi": 27.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-15",
+      "weightKg": 84.3,
+      "bfmKg": 18.2,
+      "pbf": 21.6,
+      "smmKg": 37.9,
+      "bmi": 27.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-16",
+      "weightKg": 83.7,
+      "bfmKg": 19.6,
+      "pbf": 23.4,
+      "smmKg": 36.8,
+      "bmi": 26.9,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-17",
+      "weightKg": 83.6,
+      "bfmKg": 19.1,
+      "pbf": 22.8,
+      "smmKg": 37.0,
+      "bmi": 26.8,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-18",
+      "weightKg": 83.5,
+      "bfmKg": 20.0,
+      "pbf": 23.9,
+      "smmKg": 36.4,
+      "bmi": 26.8,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-19",
+      "weightKg": 83.9,
+      "bfmKg": 19.2,
+      "pbf": 22.9,
+      "smmKg": 37.0,
+      "bmi": 26.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-20",
+      "weightKg": 83.3,
+      "bfmKg": 19.1,
+      "pbf": 22.9,
+      "smmKg": 36.8,
+      "bmi": 26.7,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-21",
+      "weightKg": 82.3,
+      "bfmKg": 18.9,
+      "pbf": 23.0,
+      "smmKg": 36.3,
+      "bmi": 26.4,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-22",
+      "weightKg": 82.4,
+      "bfmKg": 18.8,
+      "pbf": 22.8,
+      "smmKg": 36.5,
+      "bmi": 26.4,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-23",
+      "weightKg": 81.8,
+      "bfmKg": 18.6,
+      "pbf": 22.7,
+      "smmKg": 36.3,
+      "bmi": 26.2,
+      "whr": 0.94
+    },
+    {
+      "date": "2024-08-25",
+      "weightKg": 82.5,
+      "bfmKg": 18.1,
+      "pbf": 22.0,
+      "smmKg": 36.8,
+      "bmi": 26.5,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-26",
+      "weightKg": 83.3,
+      "bfmKg": 18.9,
+      "pbf": 22.7,
+      "smmKg": 36.8,
+      "bmi": 26.7,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-27",
+      "weightKg": 83.4,
+      "bfmKg": 18.5,
+      "pbf": 22.2,
+      "smmKg": 37.2,
+      "bmi": 26.8,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-08-29",
+      "weightKg": 82.1,
+      "bfmKg": 18.6,
+      "pbf": 22.7,
+      "smmKg": 36.4,
+      "bmi": 26.4,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-08-30",
+      "weightKg": 81.9,
+      "bfmKg": 18.9,
+      "pbf": 23.0,
+      "smmKg": 36.2,
+      "bmi": 26.3,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-09-02",
+      "weightKg": 84.3,
+      "bfmKg": 18.6,
+      "pbf": 22.1,
+      "smmKg": 37.5,
+      "bmi": 27.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-09-03",
+      "weightKg": 83.6,
+      "bfmKg": 19.4,
+      "pbf": 23.2,
+      "smmKg": 36.7,
+      "bmi": 26.8,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-04",
+      "weightKg": 82.5,
+      "bfmKg": 19.6,
+      "pbf": 23.8,
+      "smmKg": 35.9,
+      "bmi": 26.5,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-09-05",
+      "weightKg": 81.5,
+      "bfmKg": 18.6,
+      "pbf": 22.8,
+      "smmKg": 36.0,
+      "bmi": 26.2,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-09-06",
+      "weightKg": 81.6,
+      "bfmKg": 19.3,
+      "pbf": 23.7,
+      "smmKg": 35.6,
+      "bmi": 26.2,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-09-08",
+      "weightKg": 82.4,
+      "bfmKg": 19.0,
+      "pbf": 23.0,
+      "smmKg": 36.3,
+      "bmi": 26.4,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-09-09",
+      "weightKg": 82.9,
+      "bfmKg": 18.9,
+      "pbf": 22.8,
+      "smmKg": 36.6,
+      "bmi": 26.6,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-09-10",
+      "weightKg": 82.7,
+      "bfmKg": 18.5,
+      "pbf": 22.4,
+      "smmKg": 36.7,
+      "bmi": 26.5,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-09-11",
+      "weightKg": 81.7,
+      "bfmKg": 18.2,
+      "pbf": 22.3,
+      "smmKg": 36.4,
+      "bmi": 26.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-12",
+      "weightKg": 81.9,
+      "bfmKg": 17.6,
+      "pbf": 21.5,
+      "smmKg": 36.9,
+      "bmi": 26.3,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-13",
+      "weightKg": 81.0,
+      "bfmKg": 17.5,
+      "pbf": 21.6,
+      "smmKg": 36.4,
+      "bmi": 26.0,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-09-14",
+      "weightKg": 80.9,
+      "bfmKg": 17.8,
+      "pbf": 22.0,
+      "smmKg": 36.1,
+      "bmi": 26.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-09-21",
+      "weightKg": 84.3,
+      "bfmKg": 18.9,
+      "pbf": 22.5,
+      "smmKg": 37.4,
+      "bmi": 27.1,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-09-22",
+      "weightKg": 83.7,
+      "bfmKg": 18.1,
+      "pbf": 21.6,
+      "smmKg": 37.5,
+      "bmi": 26.9,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-23",
+      "weightKg": 84.3,
+      "bfmKg": 18.7,
+      "pbf": 22.2,
+      "smmKg": 37.5,
+      "bmi": 27.1,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-24",
+      "weightKg": 83.0,
+      "bfmKg": 18.4,
+      "pbf": 22.2,
+      "smmKg": 36.9,
+      "bmi": 26.6,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-09-25",
+      "weightKg": 82.1,
+      "bfmKg": 18.6,
+      "pbf": 22.7,
+      "smmKg": 36.4,
+      "bmi": 26.4,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-26",
+      "weightKg": 82.0,
+      "bfmKg": 18.8,
+      "pbf": 23.0,
+      "smmKg": 36.1,
+      "bmi": 26.3,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-09-27",
+      "weightKg": 81.3,
+      "bfmKg": 17.9,
+      "pbf": 22.0,
+      "smmKg": 36.3,
+      "bmi": 26.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-09-28",
+      "weightKg": 80.7,
+      "bfmKg": 18.7,
+      "pbf": 23.2,
+      "smmKg": 35.4,
+      "bmi": 25.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-09-29",
+      "weightKg": 81.8,
+      "bfmKg": 18.6,
+      "pbf": 22.7,
+      "smmKg": 36.0,
+      "bmi": 26.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-09-30",
+      "weightKg": 81.6,
+      "bfmKg": 18.5,
+      "pbf": 22.7,
+      "smmKg": 36.1,
+      "bmi": 26.2,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-10-01",
+      "weightKg": 82.1,
+      "bfmKg": 18.1,
+      "pbf": 22.1,
+      "smmKg": 36.6,
+      "bmi": 26.4,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-02",
+      "weightKg": 82.0,
+      "bfmKg": 17.9,
+      "pbf": 21.8,
+      "smmKg": 36.7,
+      "bmi": 26.3,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-04",
+      "weightKg": 82.6,
+      "bfmKg": 18.0,
+      "pbf": 21.8,
+      "smmKg": 36.9,
+      "bmi": 26.5,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-06",
+      "weightKg": 82.4,
+      "bfmKg": 19.2,
+      "pbf": 23.3,
+      "smmKg": 36.1,
+      "bmi": 26.4,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-07",
+      "weightKg": 82.0,
+      "bfmKg": 19.6,
+      "pbf": 23.9,
+      "smmKg": 35.7,
+      "bmi": 26.3,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-08",
+      "weightKg": 81.5,
+      "bfmKg": 18.9,
+      "pbf": 23.2,
+      "smmKg": 35.8,
+      "bmi": 26.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-09",
+      "weightKg": 81.5,
+      "bfmKg": 17.8,
+      "pbf": 21.8,
+      "smmKg": 36.5,
+      "bmi": 26.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-10",
+      "weightKg": 81.6,
+      "bfmKg": 17.3,
+      "pbf": 21.2,
+      "smmKg": 36.6,
+      "bmi": 26.2,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-10-11",
+      "weightKg": 81.4,
+      "bfmKg": 18.1,
+      "pbf": 22.2,
+      "smmKg": 36.3,
+      "bmi": 26.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-12",
+      "weightKg": 81.9,
+      "bfmKg": 17.7,
+      "pbf": 21.6,
+      "smmKg": 36.7,
+      "bmi": 26.3,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-13",
+      "weightKg": 83.0,
+      "bfmKg": 18.1,
+      "pbf": 21.8,
+      "smmKg": 36.9,
+      "bmi": 26.6,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-14",
+      "weightKg": 82.6,
+      "bfmKg": 18.6,
+      "pbf": 22.6,
+      "smmKg": 36.6,
+      "bmi": 26.5,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-10-15",
+      "weightKg": 81.4,
+      "bfmKg": 18.4,
+      "pbf": 22.6,
+      "smmKg": 36.1,
+      "bmi": 26.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-16",
+      "weightKg": 81.3,
+      "bfmKg": 18.1,
+      "pbf": 22.3,
+      "smmKg": 36.1,
+      "bmi": 26.1,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-17",
+      "weightKg": 81.4,
+      "bfmKg": 18.2,
+      "pbf": 22.4,
+      "smmKg": 36.2,
+      "bmi": 26.1,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-18",
+      "weightKg": 80.6,
+      "bfmKg": 18.5,
+      "pbf": 22.9,
+      "smmKg": 35.6,
+      "bmi": 25.9,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-19",
+      "weightKg": 80.8,
+      "bfmKg": 18.2,
+      "pbf": 22.5,
+      "smmKg": 35.8,
+      "bmi": 25.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-20",
+      "weightKg": 80.9,
+      "bfmKg": 18.1,
+      "pbf": 22.3,
+      "smmKg": 35.9,
+      "bmi": 26.0,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-21",
+      "weightKg": 80.8,
+      "bfmKg": 17.5,
+      "pbf": 21.7,
+      "smmKg": 36.3,
+      "bmi": 25.9,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-22",
+      "weightKg": 81.0,
+      "bfmKg": 17.0,
+      "pbf": 21.0,
+      "smmKg": 36.6,
+      "bmi": 26.0,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-10-23",
+      "weightKg": 81.3,
+      "bfmKg": 18.0,
+      "pbf": 22.2,
+      "smmKg": 36.3,
+      "bmi": 26.1,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-24",
+      "weightKg": 80.4,
+      "bfmKg": 18.5,
+      "pbf": 23.0,
+      "smmKg": 35.4,
+      "bmi": 25.8,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-25",
+      "weightKg": 80.6,
+      "bfmKg": 17.9,
+      "pbf": 22.2,
+      "smmKg": 35.9,
+      "bmi": 25.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-10-28",
+      "weightKg": 82.4,
+      "bfmKg": 18.0,
+      "pbf": 21.9,
+      "smmKg": 36.7,
+      "bmi": 26.4,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-10-29",
+      "weightKg": 81.1,
+      "bfmKg": 17.2,
+      "pbf": 21.1,
+      "smmKg": 36.5,
+      "bmi": 26.0,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-10-30",
+      "weightKg": 81.8,
+      "bfmKg": 17.6,
+      "pbf": 21.5,
+      "smmKg": 36.7,
+      "bmi": 26.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-10-31",
+      "weightKg": 80.8,
+      "bfmKg": 17.4,
+      "pbf": 21.5,
+      "smmKg": 36.4,
+      "bmi": 25.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-11-01",
+      "weightKg": 80.1,
+      "bfmKg": 18.4,
+      "pbf": 23.0,
+      "smmKg": 35.4,
+      "bmi": 25.7,
+      "whr": 0.93
+    },
+    {
+      "date": "2024-11-02",
+      "weightKg": 80.7,
+      "bfmKg": 17.3,
+      "pbf": 21.4,
+      "smmKg": 36.0,
+      "bmi": 25.9,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-04",
+      "weightKg": 81.4,
+      "bfmKg": 17.6,
+      "pbf": 21.6,
+      "smmKg": 36.6,
+      "bmi": 26.1,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-05",
+      "weightKg": 81.2,
+      "bfmKg": 16.9,
+      "pbf": 20.8,
+      "smmKg": 36.8,
+      "bmi": 26.1,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-11-06",
+      "weightKg": 80.8,
+      "bfmKg": 17.1,
+      "pbf": 21.1,
+      "smmKg": 36.6,
+      "bmi": 25.9,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-07",
+      "weightKg": 80.2,
+      "bfmKg": 17.0,
+      "pbf": 21.2,
+      "smmKg": 36.2,
+      "bmi": 25.7,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-08",
+      "weightKg": 79.5,
+      "bfmKg": 17.3,
+      "pbf": 21.8,
+      "smmKg": 35.8,
+      "bmi": 25.5,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-09",
+      "weightKg": 80.0,
+      "bfmKg": 17.4,
+      "pbf": 21.8,
+      "smmKg": 35.8,
+      "bmi": 25.7,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-11",
+      "weightKg": 80.5,
+      "bfmKg": 17.2,
+      "pbf": 21.4,
+      "smmKg": 36.2,
+      "bmi": 25.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-11-12",
+      "weightKg": 80.5,
+      "bfmKg": 17.1,
+      "pbf": 21.2,
+      "smmKg": 36.3,
+      "bmi": 25.8,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-13",
+      "weightKg": 80.2,
+      "bfmKg": 17.0,
+      "pbf": 21.2,
+      "smmKg": 36.2,
+      "bmi": 25.7,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-14",
+      "weightKg": 79.2,
+      "bfmKg": 17.1,
+      "pbf": 21.6,
+      "smmKg": 35.6,
+      "bmi": 25.4,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-15",
+      "weightKg": 79.2,
+      "bfmKg": 16.7,
+      "pbf": 21.1,
+      "smmKg": 36.0,
+      "bmi": 25.4,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-16",
+      "weightKg": 79.7,
+      "bfmKg": 16.0,
+      "pbf": 20.1,
+      "smmKg": 36.2,
+      "bmi": 25.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2024-11-18",
+      "weightKg": 81.8,
+      "bfmKg": 17.1,
+      "pbf": 20.9,
+      "smmKg": 36.9,
+      "bmi": 26.2,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-11-19",
+      "weightKg": 80.7,
+      "bfmKg": 16.6,
+      "pbf": 20.5,
+      "smmKg": 36.6,
+      "bmi": 25.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-11-20",
+      "weightKg": 80.3,
+      "bfmKg": 17.0,
+      "pbf": 21.1,
+      "smmKg": 36.3,
+      "bmi": 25.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-11-21",
+      "weightKg": 79.8,
+      "bfmKg": 16.8,
+      "pbf": 21.0,
+      "smmKg": 36.1,
+      "bmi": 25.6,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-22",
+      "weightKg": 78.9,
+      "bfmKg": 17.3,
+      "pbf": 21.9,
+      "smmKg": 35.3,
+      "bmi": 25.3,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-23",
+      "weightKg": 79.2,
+      "bfmKg": 17.5,
+      "pbf": 22.1,
+      "smmKg": 35.2,
+      "bmi": 25.4,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-24",
+      "weightKg": 79.8,
+      "bfmKg": 16.7,
+      "pbf": 20.9,
+      "smmKg": 36.3,
+      "bmi": 25.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-11-25",
+      "weightKg": 80.1,
+      "bfmKg": 17.0,
+      "pbf": 21.2,
+      "smmKg": 36.2,
+      "bmi": 25.7,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-26",
+      "weightKg": 80.1,
+      "bfmKg": 16.6,
+      "pbf": 20.7,
+      "smmKg": 36.4,
+      "bmi": 25.7,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-11-27",
+      "weightKg": 79.7,
+      "bfmKg": 17.1,
+      "pbf": 21.5,
+      "smmKg": 35.9,
+      "bmi": 25.6,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-11-28",
+      "weightKg": 79.5,
+      "bfmKg": 16.5,
+      "pbf": 20.7,
+      "smmKg": 36.2,
+      "bmi": 25.5,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-29",
+      "weightKg": 79.3,
+      "bfmKg": 17.3,
+      "pbf": 21.8,
+      "smmKg": 35.5,
+      "bmi": 25.4,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-11-30",
+      "weightKg": 78.7,
+      "bfmKg": 17.7,
+      "pbf": 22.5,
+      "smmKg": 34.8,
+      "bmi": 25.3,
+      "whr": 0.92
+    },
+    {
+      "date": "2024-12-01",
+      "weightKg": 79.8,
+      "bfmKg": 17.2,
+      "pbf": 21.5,
+      "smmKg": 35.8,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-02",
+      "weightKg": 79.6,
+      "bfmKg": 16.5,
+      "pbf": 20.7,
+      "smmKg": 36.2,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-03",
+      "weightKg": 78.8,
+      "bfmKg": 17.0,
+      "pbf": 21.6,
+      "smmKg": 35.4,
+      "bmi": 25.3,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-12-04",
+      "weightKg": 78.8,
+      "bfmKg": 17.0,
+      "pbf": 21.6,
+      "smmKg": 35.2,
+      "bmi": 25.3,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-12-05",
+      "weightKg": 78.4,
+      "bfmKg": 17.1,
+      "pbf": 21.8,
+      "smmKg": 35.1,
+      "bmi": 25.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2024-12-06",
+      "weightKg": 77.8,
+      "bfmKg": 16.5,
+      "pbf": 21.3,
+      "smmKg": 35.1,
+      "bmi": 25.0,
+      "whr": 0.9
+    },
+    {
+      "date": "2024-12-09",
+      "weightKg": 80.2,
+      "bfmKg": 15.8,
+      "pbf": 19.7,
+      "smmKg": 36.7,
+      "bmi": 25.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-10",
+      "weightKg": 79.4,
+      "bfmKg": 16.7,
+      "pbf": 21.1,
+      "smmKg": 35.8,
+      "bmi": 25.5,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-11",
+      "weightKg": 78.4,
+      "bfmKg": 16.2,
+      "pbf": 20.7,
+      "smmKg": 35.7,
+      "bmi": 25.2,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-12",
+      "weightKg": 78.5,
+      "bfmKg": 14.9,
+      "pbf": 19.0,
+      "smmKg": 36.4,
+      "bmi": 25.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-13",
+      "weightKg": 78.6,
+      "bfmKg": 14.3,
+      "pbf": 18.2,
+      "smmKg": 36.8,
+      "bmi": 25.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2024-12-15",
+      "weightKg": 79.4,
+      "bfmKg": 16.1,
+      "pbf": 20.3,
+      "smmKg": 35.8,
+      "bmi": 25.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2024-12-16",
+      "weightKg": 78.8,
+      "bfmKg": 14.9,
+      "pbf": 18.9,
+      "smmKg": 36.6,
+      "bmi": 25.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-17",
+      "weightKg": 77.8,
+      "bfmKg": 15.5,
+      "pbf": 19.9,
+      "smmKg": 35.7,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-18",
+      "weightKg": 77.4,
+      "bfmKg": 15.9,
+      "pbf": 20.5,
+      "smmKg": 35.2,
+      "bmi": 24.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-19",
+      "weightKg": 76.5,
+      "bfmKg": 13.7,
+      "pbf": 17.9,
+      "smmKg": 36.0,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2024-12-20",
+      "weightKg": 77.1,
+      "bfmKg": 14.8,
+      "pbf": 19.2,
+      "smmKg": 35.7,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-22",
+      "weightKg": 77.8,
+      "bfmKg": 16.4,
+      "pbf": 21.1,
+      "smmKg": 34.8,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2024-12-23",
+      "weightKg": 78.5,
+      "bfmKg": 15.9,
+      "pbf": 20.3,
+      "smmKg": 35.9,
+      "bmi": 25.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-24",
+      "weightKg": 77.7,
+      "bfmKg": 15.6,
+      "pbf": 20.1,
+      "smmKg": 35.5,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-25",
+      "weightKg": 77.7,
+      "bfmKg": 15.2,
+      "pbf": 19.6,
+      "smmKg": 35.9,
+      "bmi": 24.9,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-26",
+      "weightKg": 77.2,
+      "bfmKg": 15.7,
+      "pbf": 20.4,
+      "smmKg": 35.1,
+      "bmi": 24.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2024-12-27",
+      "weightKg": 77.6,
+      "bfmKg": 15.5,
+      "pbf": 20.0,
+      "smmKg": 35.6,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-30",
+      "weightKg": 78.7,
+      "bfmKg": 15.2,
+      "pbf": 19.4,
+      "smmKg": 36.3,
+      "bmi": 25.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2024-12-31",
+      "weightKg": 78.1,
+      "bfmKg": 15.6,
+      "pbf": 19.9,
+      "smmKg": 35.8,
+      "bmi": 25.1,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-01-02",
+      "weightKg": 77.7,
+      "bfmKg": 15.8,
+      "pbf": 20.3,
+      "smmKg": 35.5,
+      "bmi": 24.9,
+      "whr": 0.92
+    },
+    {
+      "date": "2025-01-03",
+      "weightKg": 77.6,
+      "bfmKg": 16.5,
+      "pbf": 21.3,
+      "smmKg": 35.0,
+      "bmi": 24.9,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-07",
+      "weightKg": 79.9,
+      "bfmKg": 16.5,
+      "pbf": 20.7,
+      "smmKg": 36.3,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-08",
+      "weightKg": 78.9,
+      "bfmKg": 16.6,
+      "pbf": 21.0,
+      "smmKg": 35.7,
+      "bmi": 25.3,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-09",
+      "weightKg": 78.6,
+      "bfmKg": 16.9,
+      "pbf": 21.5,
+      "smmKg": 35.3,
+      "bmi": 25.2,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-01-10",
+      "weightKg": 78.8,
+      "bfmKg": 16.1,
+      "pbf": 20.4,
+      "smmKg": 35.9,
+      "bmi": 25.3,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-11",
+      "weightKg": 78.9,
+      "bfmKg": 15.7,
+      "pbf": 19.9,
+      "smmKg": 36.2,
+      "bmi": 25.3,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-01-13",
+      "weightKg": 79.9,
+      "bfmKg": 16.2,
+      "pbf": 20.3,
+      "smmKg": 36.5,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-14",
+      "weightKg": 79.7,
+      "bfmKg": 16.1,
+      "pbf": 20.2,
+      "smmKg": 36.4,
+      "bmi": 25.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-01-15",
+      "weightKg": 79.0,
+      "bfmKg": 16.3,
+      "pbf": 20.7,
+      "smmKg": 36.0,
+      "bmi": 25.4,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-01-16",
+      "weightKg": 77.9,
+      "bfmKg": 15.8,
+      "pbf": 20.3,
+      "smmKg": 35.7,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-01-17",
+      "weightKg": 78.2,
+      "bfmKg": 15.6,
+      "pbf": 20.0,
+      "smmKg": 36.0,
+      "bmi": 25.1,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-18",
+      "weightKg": 78.9,
+      "bfmKg": 15.9,
+      "pbf": 20.1,
+      "smmKg": 36.1,
+      "bmi": 25.3,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-19",
+      "weightKg": 79.4,
+      "bfmKg": 15.5,
+      "pbf": 19.5,
+      "smmKg": 36.6,
+      "bmi": 25.5,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-01-20",
+      "weightKg": 79.6,
+      "bfmKg": 15.7,
+      "pbf": 19.7,
+      "smmKg": 36.6,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-21",
+      "weightKg": 78.8,
+      "bfmKg": 15.1,
+      "pbf": 19.1,
+      "smmKg": 36.5,
+      "bmi": 25.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-01-22",
+      "weightKg": 79.1,
+      "bfmKg": 16.0,
+      "pbf": 20.2,
+      "smmKg": 36.2,
+      "bmi": 25.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-01-23",
+      "weightKg": 79.0,
+      "bfmKg": 16.0,
+      "pbf": 20.2,
+      "smmKg": 36.2,
+      "bmi": 25.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-24",
+      "weightKg": 78.6,
+      "bfmKg": 15.7,
+      "pbf": 20.0,
+      "smmKg": 36.2,
+      "bmi": 25.2,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-01-25",
+      "weightKg": 78.6,
+      "bfmKg": 16.3,
+      "pbf": 20.8,
+      "smmKg": 35.7,
+      "bmi": 25.2,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-01-27",
+      "weightKg": 79.9,
+      "bfmKg": 16.1,
+      "pbf": 20.2,
+      "smmKg": 36.5,
+      "bmi": 25.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-01-28",
+      "weightKg": 80.2,
+      "bfmKg": 15.3,
+      "pbf": 19.1,
+      "smmKg": 37.1,
+      "bmi": 25.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-02-07",
+      "weightKg": 79.6,
+      "bfmKg": 16.3,
+      "pbf": 20.5,
+      "smmKg": 36.4,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-02-10",
+      "weightKg": 80.8,
+      "bfmKg": 16.4,
+      "pbf": 20.3,
+      "smmKg": 36.9,
+      "bmi": 25.9,
+      "whr": 0.9
+    },
+    {
+      "date": "2025-02-11",
+      "weightKg": 80.3,
+      "bfmKg": 16.3,
+      "pbf": 20.3,
+      "smmKg": 36.7,
+      "bmi": 25.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-02-14",
+      "weightKg": 79.5,
+      "bfmKg": 16.1,
+      "pbf": 20.2,
+      "smmKg": 36.3,
+      "bmi": 25.5,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-02-17",
+      "weightKg": 80.9,
+      "bfmKg": 15.9,
+      "pbf": 19.7,
+      "smmKg": 37.3,
+      "bmi": 26.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-02-18",
+      "weightKg": 81.3,
+      "bfmKg": 15.4,
+      "pbf": 19.0,
+      "smmKg": 37.7,
+      "bmi": 26.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-02-19",
+      "weightKg": 80.4,
+      "bfmKg": 15.6,
+      "pbf": 19.5,
+      "smmKg": 37.1,
+      "bmi": 25.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-02-20",
+      "weightKg": 79.6,
+      "bfmKg": 16.1,
+      "pbf": 20.2,
+      "smmKg": 36.3,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-02-21",
+      "weightKg": 79.7,
+      "bfmKg": 16.1,
+      "pbf": 20.2,
+      "smmKg": 36.5,
+      "bmi": 25.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-02-24",
+      "weightKg": 79.8,
+      "bfmKg": 15.3,
+      "pbf": 19.2,
+      "smmKg": 37.1,
+      "bmi": 25.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-02-25",
+      "weightKg": 79.2,
+      "bfmKg": 14.9,
+      "pbf": 18.8,
+      "smmKg": 37.0,
+      "bmi": 25.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-02-26",
+      "weightKg": 78.7,
+      "bfmKg": 15.5,
+      "pbf": 19.7,
+      "smmKg": 36.3,
+      "bmi": 25.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-02-27",
+      "weightKg": 79.3,
+      "bfmKg": 15.7,
+      "pbf": 19.8,
+      "smmKg": 36.5,
+      "bmi": 25.5,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-03-07",
+      "weightKg": 79.2,
+      "bfmKg": 15.6,
+      "pbf": 19.7,
+      "smmKg": 36.6,
+      "bmi": 25.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-03-10",
+      "weightKg": 80.8,
+      "bfmKg": 16.2,
+      "pbf": 20.0,
+      "smmKg": 36.9,
+      "bmi": 25.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-11",
+      "weightKg": 80.1,
+      "bfmKg": 15.5,
+      "pbf": 19.3,
+      "smmKg": 37.1,
+      "bmi": 25.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-12",
+      "weightKg": 79.1,
+      "bfmKg": 15.9,
+      "pbf": 20.1,
+      "smmKg": 36.3,
+      "bmi": 25.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-03-13",
+      "weightKg": 78.7,
+      "bfmKg": 15.8,
+      "pbf": 20.1,
+      "smmKg": 36.2,
+      "bmi": 25.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-14",
+      "weightKg": 78.5,
+      "bfmKg": 15.7,
+      "pbf": 20.1,
+      "smmKg": 36.1,
+      "bmi": 25.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-15",
+      "weightKg": 78.7,
+      "bfmKg": 14.7,
+      "pbf": 18.7,
+      "smmKg": 36.7,
+      "bmi": 25.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-16",
+      "weightKg": 78.2,
+      "bfmKg": 15.2,
+      "pbf": 19.5,
+      "smmKg": 36.2,
+      "bmi": 25.1,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-03-17",
+      "weightKg": 79.1,
+      "bfmKg": 14.6,
+      "pbf": 18.5,
+      "smmKg": 37.1,
+      "bmi": 25.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-03-18",
+      "weightKg": 78.1,
+      "bfmKg": 14.8,
+      "pbf": 19.0,
+      "smmKg": 36.3,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-03-20",
+      "weightKg": 77.5,
+      "bfmKg": 14.7,
+      "pbf": 19.0,
+      "smmKg": 36.2,
+      "bmi": 24.9,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-03-21",
+      "weightKg": 77.3,
+      "bfmKg": 14.1,
+      "pbf": 18.2,
+      "smmKg": 36.4,
+      "bmi": 24.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-24",
+      "weightKg": 77.6,
+      "bfmKg": 14.6,
+      "pbf": 18.9,
+      "smmKg": 36.0,
+      "bmi": 24.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-03-27",
+      "weightKg": 78.4,
+      "bfmKg": 14.7,
+      "pbf": 18.8,
+      "smmKg": 36.1,
+      "bmi": 25.2,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-03-28",
+      "weightKg": 77.0,
+      "bfmKg": 14.3,
+      "pbf": 18.6,
+      "smmKg": 36.0,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-03-31",
+      "weightKg": 77.8,
+      "bfmKg": 13.2,
+      "pbf": 17.0,
+      "smmKg": 37.2,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-04-01",
+      "weightKg": 77.9,
+      "bfmKg": 14.3,
+      "pbf": 18.3,
+      "smmKg": 36.5,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-04-02",
+      "weightKg": 77.8,
+      "bfmKg": 14.2,
+      "pbf": 18.2,
+      "smmKg": 36.6,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-04-08",
+      "weightKg": 79.4,
+      "bfmKg": 14.9,
+      "pbf": 18.8,
+      "smmKg": 37.0,
+      "bmi": 25.5,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-04-09",
+      "weightKg": 78.4,
+      "bfmKg": 14.7,
+      "pbf": 18.8,
+      "smmKg": 36.7,
+      "bmi": 25.2,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-04-10",
+      "weightKg": 78.0,
+      "bfmKg": 14.4,
+      "pbf": 18.4,
+      "smmKg": 36.7,
+      "bmi": 25.0,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-04-11",
+      "weightKg": 78.1,
+      "bfmKg": 14.5,
+      "pbf": 18.5,
+      "smmKg": 36.6,
+      "bmi": 25.1,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-04-12",
+      "weightKg": 77.2,
+      "bfmKg": 14.6,
+      "pbf": 18.9,
+      "smmKg": 35.8,
+      "bmi": 24.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-04-13",
+      "weightKg": 77.9,
+      "bfmKg": 14.6,
+      "pbf": 18.7,
+      "smmKg": 36.2,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-04-14",
+      "weightKg": 78.1,
+      "bfmKg": 13.8,
+      "pbf": 17.6,
+      "smmKg": 36.9,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-04-15",
+      "weightKg": 78.9,
+      "bfmKg": 13.7,
+      "pbf": 17.4,
+      "smmKg": 37.2,
+      "bmi": 25.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-04-17",
+      "weightKg": 78.0,
+      "bfmKg": 14.7,
+      "pbf": 18.8,
+      "smmKg": 36.4,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-04-18",
+      "weightKg": 77.5,
+      "bfmKg": 14.0,
+      "pbf": 18.1,
+      "smmKg": 36.5,
+      "bmi": 24.9,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-04-21",
+      "weightKg": 78.0,
+      "bfmKg": 14.4,
+      "pbf": 18.4,
+      "smmKg": 36.5,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-04-22",
+      "weightKg": 78.2,
+      "bfmKg": 14.6,
+      "pbf": 18.7,
+      "smmKg": 36.4,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-04-24",
+      "weightKg": 78.2,
+      "bfmKg": 13.7,
+      "pbf": 17.5,
+      "smmKg": 37.1,
+      "bmi": 25.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-04-25",
+      "weightKg": 77.4,
+      "bfmKg": 14.2,
+      "pbf": 18.4,
+      "smmKg": 36.3,
+      "bmi": 24.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-04-26",
+      "weightKg": 77.9,
+      "bfmKg": 13.4,
+      "pbf": 17.2,
+      "smmKg": 37.0,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-04-28",
+      "weightKg": 78.9,
+      "bfmKg": 14.1,
+      "pbf": 17.8,
+      "smmKg": 37.1,
+      "bmi": 25.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-04-29",
+      "weightKg": 78.6,
+      "bfmKg": 14.0,
+      "pbf": 17.8,
+      "smmKg": 36.8,
+      "bmi": 25.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-04-30",
+      "weightKg": 78.0,
+      "bfmKg": 14.0,
+      "pbf": 17.9,
+      "smmKg": 36.6,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-01",
+      "weightKg": 78.5,
+      "bfmKg": 13.8,
+      "pbf": 17.6,
+      "smmKg": 37.0,
+      "bmi": 25.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-02",
+      "weightKg": 78.1,
+      "bfmKg": 14.5,
+      "pbf": 18.5,
+      "smmKg": 36.5,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-03",
+      "weightKg": 77.9,
+      "bfmKg": 14.1,
+      "pbf": 18.1,
+      "smmKg": 36.5,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-04",
+      "weightKg": 77.5,
+      "bfmKg": 13.3,
+      "pbf": 17.1,
+      "smmKg": 36.7,
+      "bmi": 24.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-05",
+      "weightKg": 78.2,
+      "bfmKg": 13.4,
+      "pbf": 17.2,
+      "smmKg": 37.1,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-06",
+      "weightKg": 77.5,
+      "bfmKg": 13.3,
+      "pbf": 17.2,
+      "smmKg": 36.8,
+      "bmi": 24.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-07",
+      "weightKg": 77.7,
+      "bfmKg": 13.9,
+      "pbf": 17.9,
+      "smmKg": 36.6,
+      "bmi": 24.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-08",
+      "weightKg": 76.8,
+      "bfmKg": 14.0,
+      "pbf": 18.3,
+      "smmKg": 36.1,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-05-09",
+      "weightKg": 76.3,
+      "bfmKg": 14.2,
+      "pbf": 18.7,
+      "smmKg": 35.6,
+      "bmi": 24.5,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-05-10",
+      "weightKg": 75.5,
+      "bfmKg": 13.3,
+      "pbf": 17.6,
+      "smmKg": 35.8,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-05-11",
+      "weightKg": 77.1,
+      "bfmKg": 13.5,
+      "pbf": 17.5,
+      "smmKg": 36.5,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-12",
+      "weightKg": 77.5,
+      "bfmKg": 13.6,
+      "pbf": 17.5,
+      "smmKg": 36.7,
+      "bmi": 24.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-13",
+      "weightKg": 77.3,
+      "bfmKg": 13.8,
+      "pbf": 17.9,
+      "smmKg": 36.5,
+      "bmi": 24.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-05-14",
+      "weightKg": 76.9,
+      "bfmKg": 13.4,
+      "pbf": 17.5,
+      "smmKg": 36.4,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-15",
+      "weightKg": 77.0,
+      "bfmKg": 13.5,
+      "pbf": 17.5,
+      "smmKg": 36.4,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-16",
+      "weightKg": 77.1,
+      "bfmKg": 13.6,
+      "pbf": 17.7,
+      "smmKg": 36.4,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-17",
+      "weightKg": 77.5,
+      "bfmKg": 13.1,
+      "pbf": 16.9,
+      "smmKg": 37.0,
+      "bmi": 24.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-18",
+      "weightKg": 76.7,
+      "bfmKg": 13.6,
+      "pbf": 17.7,
+      "smmKg": 36.2,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-19",
+      "weightKg": 77.4,
+      "bfmKg": 14.0,
+      "pbf": 18.1,
+      "smmKg": 36.4,
+      "bmi": 24.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-05-20",
+      "weightKg": 77.0,
+      "bfmKg": 13.5,
+      "pbf": 17.6,
+      "smmKg": 36.4,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-05-21",
+      "weightKg": 77.0,
+      "bfmKg": 13.4,
+      "pbf": 17.4,
+      "smmKg": 36.5,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-05-22",
+      "weightKg": 76.3,
+      "bfmKg": 13.7,
+      "pbf": 18.0,
+      "smmKg": 35.9,
+      "bmi": 24.5,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-05-23",
+      "weightKg": 75.9,
+      "bfmKg": 12.9,
+      "pbf": 17.0,
+      "smmKg": 36.1,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-24",
+      "weightKg": 76.3,
+      "bfmKg": 12.2,
+      "pbf": 16.1,
+      "smmKg": 36.7,
+      "bmi": 24.5,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-05-26",
+      "weightKg": 76.5,
+      "bfmKg": 13.0,
+      "pbf": 17.0,
+      "smmKg": 36.2,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-05-27",
+      "weightKg": 76.9,
+      "bfmKg": 13.3,
+      "pbf": 17.3,
+      "smmKg": 36.4,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-05",
+      "weightKg": 77.5,
+      "bfmKg": 15.1,
+      "pbf": 19.5,
+      "smmKg": 35.9,
+      "bmi": 24.9,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-06-06",
+      "weightKg": 77.3,
+      "bfmKg": 13.9,
+      "pbf": 17.9,
+      "smmKg": 36.5,
+      "bmi": 24.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-06-07",
+      "weightKg": 77.3,
+      "bfmKg": 13.4,
+      "pbf": 17.4,
+      "smmKg": 36.7,
+      "bmi": 24.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-06-08",
+      "weightKg": 78.3,
+      "bfmKg": 13.1,
+      "pbf": 16.7,
+      "smmKg": 37.3,
+      "bmi": 25.1,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-06-09",
+      "weightKg": 78.3,
+      "bfmKg": 13.5,
+      "pbf": 17.3,
+      "smmKg": 37.1,
+      "bmi": 25.1,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-06-10",
+      "weightKg": 78.3,
+      "bfmKg": 13.4,
+      "pbf": 17.1,
+      "smmKg": 37.2,
+      "bmi": 25.1,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-06-13",
+      "weightKg": 76.9,
+      "bfmKg": 13.4,
+      "pbf": 17.4,
+      "smmKg": 36.5,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-06-16",
+      "weightKg": 78.1,
+      "bfmKg": 14.1,
+      "pbf": 18.1,
+      "smmKg": 36.7,
+      "bmi": 25.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-17",
+      "weightKg": 76.9,
+      "bfmKg": 13.1,
+      "pbf": 17.1,
+      "smmKg": 36.6,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-06-18",
+      "weightKg": 76.5,
+      "bfmKg": 12.5,
+      "pbf": 16.3,
+      "smmKg": 36.8,
+      "bmi": 24.6,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-06-19",
+      "weightKg": 76.6,
+      "bfmKg": 12.9,
+      "pbf": 16.8,
+      "smmKg": 36.6,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-20",
+      "weightKg": 77.2,
+      "bfmKg": 12.6,
+      "pbf": 16.3,
+      "smmKg": 37.2,
+      "bmi": 24.8,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-06-21",
+      "weightKg": 76.6,
+      "bfmKg": 13.4,
+      "pbf": 17.5,
+      "smmKg": 36.2,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-22",
+      "weightKg": 76.2,
+      "bfmKg": 13.2,
+      "pbf": 17.3,
+      "smmKg": 36.2,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-23",
+      "weightKg": 77.3,
+      "bfmKg": 12.9,
+      "pbf": 16.6,
+      "smmKg": 36.9,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-24",
+      "weightKg": 77.6,
+      "bfmKg": 13.9,
+      "pbf": 17.9,
+      "smmKg": 36.7,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-06-25",
+      "weightKg": 77.1,
+      "bfmKg": 12.9,
+      "pbf": 16.8,
+      "smmKg": 36.9,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-06-26",
+      "weightKg": 76.8,
+      "bfmKg": 13.2,
+      "pbf": 17.2,
+      "smmKg": 36.7,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-27",
+      "weightKg": 75.9,
+      "bfmKg": 13.7,
+      "pbf": 18.0,
+      "smmKg": 35.9,
+      "bmi": 24.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-06-28",
+      "weightKg": 76.9,
+      "bfmKg": 12.8,
+      "pbf": 16.6,
+      "smmKg": 36.7,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-29",
+      "weightKg": 77.1,
+      "bfmKg": 13.1,
+      "pbf": 17.0,
+      "smmKg": 36.7,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-06-30",
+      "weightKg": 77.3,
+      "bfmKg": 12.5,
+      "pbf": 16.2,
+      "smmKg": 37.1,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-01",
+      "weightKg": 77.5,
+      "bfmKg": 12.9,
+      "pbf": 16.7,
+      "smmKg": 37.0,
+      "bmi": 24.9,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-02",
+      "weightKg": 77.0,
+      "bfmKg": 12.9,
+      "pbf": 16.7,
+      "smmKg": 36.8,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-03",
+      "weightKg": 76.1,
+      "bfmKg": 13.0,
+      "pbf": 17.1,
+      "smmKg": 36.2,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-04",
+      "weightKg": 75.8,
+      "bfmKg": 12.5,
+      "pbf": 16.5,
+      "smmKg": 36.4,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-06",
+      "weightKg": 76.5,
+      "bfmKg": 12.8,
+      "pbf": 16.7,
+      "smmKg": 36.5,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-07-07",
+      "weightKg": 77.2,
+      "bfmKg": 12.8,
+      "pbf": 16.5,
+      "smmKg": 36.9,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-08",
+      "weightKg": 77.3,
+      "bfmKg": 12.0,
+      "pbf": 15.6,
+      "smmKg": 37.4,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-09",
+      "weightKg": 76.5,
+      "bfmKg": 14.0,
+      "pbf": 18.3,
+      "smmKg": 35.8,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-07-10",
+      "weightKg": 76.4,
+      "bfmKg": 12.7,
+      "pbf": 16.7,
+      "smmKg": 36.7,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-11",
+      "weightKg": 76.6,
+      "bfmKg": 12.6,
+      "pbf": 16.5,
+      "smmKg": 36.9,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-12",
+      "weightKg": 77.0,
+      "bfmKg": 12.8,
+      "pbf": 16.6,
+      "smmKg": 36.9,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-13",
+      "weightKg": 77.2,
+      "bfmKg": 12.6,
+      "pbf": 16.3,
+      "smmKg": 37.1,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-14",
+      "weightKg": 77.4,
+      "bfmKg": 12.5,
+      "pbf": 16.2,
+      "smmKg": 37.2,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-15",
+      "weightKg": 76.5,
+      "bfmKg": 13.4,
+      "pbf": 17.5,
+      "smmKg": 36.2,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-16",
+      "weightKg": 76.6,
+      "bfmKg": 12.9,
+      "pbf": 16.8,
+      "smmKg": 36.5,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-17",
+      "weightKg": 76.6,
+      "bfmKg": 12.6,
+      "pbf": 16.5,
+      "smmKg": 36.9,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-19",
+      "weightKg": 77.2,
+      "bfmKg": 12.4,
+      "pbf": 16.0,
+      "smmKg": 37.0,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-20",
+      "weightKg": 77.4,
+      "bfmKg": 12.8,
+      "pbf": 16.6,
+      "smmKg": 37.0,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-07-21",
+      "weightKg": 77.7,
+      "bfmKg": 14.3,
+      "pbf": 18.4,
+      "smmKg": 36.4,
+      "bmi": 24.9,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-07-22",
+      "weightKg": 76.8,
+      "bfmKg": 12.4,
+      "pbf": 16.2,
+      "smmKg": 37.0,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-23",
+      "weightKg": 76.3,
+      "bfmKg": 14.0,
+      "pbf": 18.3,
+      "smmKg": 35.8,
+      "bmi": 24.5,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-07-24",
+      "weightKg": 76.4,
+      "bfmKg": 12.8,
+      "pbf": 16.7,
+      "smmKg": 36.6,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-25",
+      "weightKg": 76.0,
+      "bfmKg": 12.9,
+      "pbf": 17.0,
+      "smmKg": 36.4,
+      "bmi": 24.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-07-26",
+      "weightKg": 77.4,
+      "bfmKg": 12.0,
+      "pbf": 15.5,
+      "smmKg": 37.4,
+      "bmi": 24.8,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-27",
+      "weightKg": 76.6,
+      "bfmKg": 13.1,
+      "pbf": 17.1,
+      "smmKg": 36.4,
+      "bmi": 24.6,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-28",
+      "weightKg": 76.3,
+      "bfmKg": 12.5,
+      "pbf": 16.4,
+      "smmKg": 36.7,
+      "bmi": 24.5,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-07-29",
+      "weightKg": 75.9,
+      "bfmKg": 12.9,
+      "pbf": 17.0,
+      "smmKg": 36.2,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-07-30",
+      "weightKg": 75.6,
+      "bfmKg": 13.2,
+      "pbf": 17.4,
+      "smmKg": 36.0,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-07-31",
+      "weightKg": 75.8,
+      "bfmKg": 12.1,
+      "pbf": 15.9,
+      "smmKg": 36.7,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-08-01",
+      "weightKg": 75.7,
+      "bfmKg": 13.1,
+      "pbf": 17.3,
+      "smmKg": 36.0,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-08-02",
+      "weightKg": 75.6,
+      "bfmKg": 12.2,
+      "pbf": 16.1,
+      "smmKg": 36.1,
+      "bmi": 24.3,
+      "whr": 0.83
+    },
+    {
+      "date": "2025-08-03",
+      "weightKg": 76.1,
+      "bfmKg": 12.5,
+      "pbf": 16.4,
+      "smmKg": 36.5,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-08-04",
+      "weightKg": 76.1,
+      "bfmKg": 12.5,
+      "pbf": 16.4,
+      "smmKg": 36.5,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-06",
+      "weightKg": 75.8,
+      "bfmKg": 12.4,
+      "pbf": 16.3,
+      "smmKg": 36.4,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-07",
+      "weightKg": 76.3,
+      "bfmKg": 11.8,
+      "pbf": 15.4,
+      "smmKg": 37.1,
+      "bmi": 24.5,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-08-08",
+      "weightKg": 76.4,
+      "bfmKg": 12.1,
+      "pbf": 15.8,
+      "smmKg": 36.9,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-09",
+      "weightKg": 75.3,
+      "bfmKg": 12.2,
+      "pbf": 16.2,
+      "smmKg": 36.3,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-08-10",
+      "weightKg": 75.4,
+      "bfmKg": 11.4,
+      "pbf": 15.1,
+      "smmKg": 36.6,
+      "bmi": 24.2,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-08-12",
+      "weightKg": 75.8,
+      "bfmKg": 12.3,
+      "pbf": 16.2,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-08-13",
+      "weightKg": 76.2,
+      "bfmKg": 12.7,
+      "pbf": 16.7,
+      "smmKg": 36.5,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-14",
+      "weightKg": 76.3,
+      "bfmKg": 12.4,
+      "pbf": 16.2,
+      "smmKg": 36.7,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-15",
+      "weightKg": 76.6,
+      "bfmKg": 11.9,
+      "pbf": 15.6,
+      "smmKg": 37.1,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-08-16",
+      "weightKg": 76.3,
+      "bfmKg": 11.9,
+      "pbf": 15.6,
+      "smmKg": 36.9,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-17",
+      "weightKg": 75.9,
+      "bfmKg": 12.0,
+      "pbf": 15.8,
+      "smmKg": 36.7,
+      "bmi": 24.4,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-08-18",
+      "weightKg": 76.2,
+      "bfmKg": 12.0,
+      "pbf": 15.7,
+      "smmKg": 36.9,
+      "bmi": 24.5,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-08-19",
+      "weightKg": 75.8,
+      "bfmKg": 12.6,
+      "pbf": 16.7,
+      "smmKg": 36.3,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-08-20",
+      "weightKg": 76.2,
+      "bfmKg": 13.5,
+      "pbf": 17.8,
+      "smmKg": 36.0,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-08-21",
+      "weightKg": 75.8,
+      "bfmKg": 12.5,
+      "pbf": 16.5,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-08-26",
+      "weightKg": 76.6,
+      "bfmKg": 13.1,
+      "pbf": 17.1,
+      "smmKg": 36.4,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-27",
+      "weightKg": 76.2,
+      "bfmKg": 12.1,
+      "pbf": 15.8,
+      "smmKg": 36.9,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-28",
+      "weightKg": 76.9,
+      "bfmKg": 11.9,
+      "pbf": 15.5,
+      "smmKg": 37.4,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-08-29",
+      "weightKg": 76.0,
+      "bfmKg": 12.4,
+      "pbf": 16.3,
+      "smmKg": 36.7,
+      "bmi": 24.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-01",
+      "weightKg": 76.7,
+      "bfmKg": 13.0,
+      "pbf": 17.0,
+      "smmKg": 36.6,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-03",
+      "weightKg": 75.8,
+      "bfmKg": 12.2,
+      "pbf": 16.0,
+      "smmKg": 36.6,
+      "bmi": 24.3,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-09-04",
+      "weightKg": 76.2,
+      "bfmKg": 11.9,
+      "pbf": 15.6,
+      "smmKg": 37.0,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-05",
+      "weightKg": 75.6,
+      "bfmKg": 13.1,
+      "pbf": 17.4,
+      "smmKg": 36.2,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-06",
+      "weightKg": 76.0,
+      "bfmKg": 12.1,
+      "pbf": 15.9,
+      "smmKg": 36.8,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-07",
+      "weightKg": 76.1,
+      "bfmKg": 12.3,
+      "pbf": 16.2,
+      "smmKg": 36.5,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-08",
+      "weightKg": 76.9,
+      "bfmKg": 13.4,
+      "pbf": 17.4,
+      "smmKg": 36.3,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-09-09",
+      "weightKg": 75.6,
+      "bfmKg": 13.2,
+      "pbf": 17.5,
+      "smmKg": 35.9,
+      "bmi": 24.3,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-09-10",
+      "weightKg": 75.5,
+      "bfmKg": 13.0,
+      "pbf": 17.2,
+      "smmKg": 36.0,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-11",
+      "weightKg": 75.6,
+      "bfmKg": 13.2,
+      "pbf": 17.4,
+      "smmKg": 35.9,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-12",
+      "weightKg": 76.1,
+      "bfmKg": 12.5,
+      "pbf": 16.5,
+      "smmKg": 36.5,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-13",
+      "weightKg": 75.1,
+      "bfmKg": 12.3,
+      "pbf": 16.4,
+      "smmKg": 35.8,
+      "bmi": 24.1,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-09-15",
+      "weightKg": 74.6,
+      "bfmKg": 12.3,
+      "pbf": 16.5,
+      "smmKg": 35.8,
+      "bmi": 23.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-16",
+      "weightKg": 75.5,
+      "bfmKg": 12.6,
+      "pbf": 16.7,
+      "smmKg": 36.2,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-17",
+      "weightKg": 75.4,
+      "bfmKg": 11.5,
+      "pbf": 15.3,
+      "smmKg": 36.7,
+      "bmi": 24.2,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-09-18",
+      "weightKg": 75.7,
+      "bfmKg": 13.5,
+      "pbf": 17.8,
+      "smmKg": 35.9,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-19",
+      "weightKg": 74.9,
+      "bfmKg": 11.3,
+      "pbf": 15.1,
+      "smmKg": 36.6,
+      "bmi": 24.0,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-20",
+      "weightKg": 74.3,
+      "bfmKg": 11.7,
+      "pbf": 15.7,
+      "smmKg": 36.0,
+      "bmi": 23.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-21",
+      "weightKg": 75.0,
+      "bfmKg": 11.7,
+      "pbf": 15.6,
+      "smmKg": 36.3,
+      "bmi": 24.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-22",
+      "weightKg": 75.1,
+      "bfmKg": 12.5,
+      "pbf": 16.7,
+      "smmKg": 35.9,
+      "bmi": 24.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-23",
+      "weightKg": 75.0,
+      "bfmKg": 12.3,
+      "pbf": 16.5,
+      "smmKg": 35.9,
+      "bmi": 24.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-09-24",
+      "weightKg": 75.3,
+      "bfmKg": 13.7,
+      "pbf": 18.2,
+      "smmKg": 35.3,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-25",
+      "weightKg": 74.9,
+      "bfmKg": 12.2,
+      "pbf": 16.3,
+      "smmKg": 36.1,
+      "bmi": 24.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-26",
+      "weightKg": 74.9,
+      "bfmKg": 12.1,
+      "pbf": 16.1,
+      "smmKg": 36.2,
+      "bmi": 24.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-09-27",
+      "weightKg": 74.1,
+      "bfmKg": 11.9,
+      "pbf": 16.1,
+      "smmKg": 35.8,
+      "bmi": 23.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-28",
+      "weightKg": 74.8,
+      "bfmKg": 12.2,
+      "pbf": 16.3,
+      "smmKg": 35.9,
+      "bmi": 24.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-09-29",
+      "weightKg": 75.2,
+      "bfmKg": 12.6,
+      "pbf": 16.7,
+      "smmKg": 35.9,
+      "bmi": 24.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-01",
+      "weightKg": 75.4,
+      "bfmKg": 12.0,
+      "pbf": 15.9,
+      "smmKg": 36.3,
+      "bmi": 24.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-02",
+      "weightKg": 75.8,
+      "bfmKg": 12.5,
+      "pbf": 16.5,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-10-03",
+      "weightKg": 75.4,
+      "bfmKg": 12.6,
+      "pbf": 16.7,
+      "smmKg": 36.3,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-10-07",
+      "weightKg": 75.4,
+      "bfmKg": 11.7,
+      "pbf": 15.5,
+      "smmKg": 36.6,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-08",
+      "weightKg": 75.9,
+      "bfmKg": 12.8,
+      "pbf": 16.9,
+      "smmKg": 36.2,
+      "bmi": 24.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-10-13",
+      "weightKg": 76.3,
+      "bfmKg": 12.2,
+      "pbf": 16.0,
+      "smmKg": 36.8,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-14",
+      "weightKg": 75.1,
+      "bfmKg": 12.1,
+      "pbf": 16.1,
+      "smmKg": 36.3,
+      "bmi": 24.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-15",
+      "weightKg": 75.3,
+      "bfmKg": 12.5,
+      "pbf": 16.6,
+      "smmKg": 36.2,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-16",
+      "weightKg": 75.2,
+      "bfmKg": 12.5,
+      "pbf": 16.6,
+      "smmKg": 36.1,
+      "bmi": 24.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-10-17",
+      "weightKg": 74.3,
+      "bfmKg": 13.3,
+      "pbf": 17.9,
+      "smmKg": 35.1,
+      "bmi": 23.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-10-19",
+      "weightKg": 74.8,
+      "bfmKg": 10.7,
+      "pbf": 14.4,
+      "smmKg": 36.7,
+      "bmi": 24.0,
+      "whr": 0.83
+    },
+    {
+      "date": "2025-10-20",
+      "weightKg": 75.4,
+      "bfmKg": 12.2,
+      "pbf": 16.2,
+      "smmKg": 36.3,
+      "bmi": 24.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-21",
+      "weightKg": 75.4,
+      "bfmKg": 12.7,
+      "pbf": 16.9,
+      "smmKg": 36.0,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-22",
+      "weightKg": 75.4,
+      "bfmKg": 13.0,
+      "pbf": 17.3,
+      "smmKg": 35.8,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-23",
+      "weightKg": 74.3,
+      "bfmKg": 12.5,
+      "pbf": 16.8,
+      "smmKg": 35.5,
+      "bmi": 23.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-24",
+      "weightKg": 75.0,
+      "bfmKg": 12.9,
+      "pbf": 17.2,
+      "smmKg": 35.3,
+      "bmi": 24.1,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-10-25",
+      "weightKg": 75.7,
+      "bfmKg": 11.6,
+      "pbf": 15.3,
+      "smmKg": 36.8,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-26",
+      "weightKg": 76.1,
+      "bfmKg": 12.3,
+      "pbf": 16.1,
+      "smmKg": 36.5,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-27",
+      "weightKg": 76.3,
+      "bfmKg": 12.4,
+      "pbf": 16.2,
+      "smmKg": 36.6,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-10-28",
+      "weightKg": 77.2,
+      "bfmKg": 12.4,
+      "pbf": 16.1,
+      "smmKg": 37.0,
+      "bmi": 24.8,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-10-29",
+      "weightKg": 76.6,
+      "bfmKg": 12.7,
+      "pbf": 16.6,
+      "smmKg": 36.8,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-30",
+      "weightKg": 76.2,
+      "bfmKg": 12.8,
+      "pbf": 16.8,
+      "smmKg": 36.5,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-10-31",
+      "weightKg": 75.8,
+      "bfmKg": 12.4,
+      "pbf": 16.3,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-11-01",
+      "weightKg": 75.5,
+      "bfmKg": 11.4,
+      "pbf": 15.1,
+      "smmKg": 36.7,
+      "bmi": 24.2,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-11-02",
+      "weightKg": 75.6,
+      "bfmKg": 12.1,
+      "pbf": 16.0,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-11-03",
+      "weightKg": 77.2,
+      "bfmKg": 11.5,
+      "pbf": 14.9,
+      "smmKg": 37.7,
+      "bmi": 24.8,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-11-04",
+      "weightKg": 74.9,
+      "bfmKg": 12.3,
+      "pbf": 16.4,
+      "smmKg": 35.9,
+      "bmi": 24.0,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-11-05",
+      "weightKg": 75.5,
+      "bfmKg": 11.9,
+      "pbf": 15.8,
+      "smmKg": 36.5,
+      "bmi": 24.2,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-11-06",
+      "weightKg": 76.2,
+      "bfmKg": 11.9,
+      "pbf": 15.6,
+      "smmKg": 37.0,
+      "bmi": 24.5,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-11-07",
+      "weightKg": 76.2,
+      "bfmKg": 11.4,
+      "pbf": 14.9,
+      "smmKg": 37.3,
+      "bmi": 24.5,
+      "whr": 0.84
+    },
+    {
+      "date": "2025-11-08",
+      "weightKg": 75.7,
+      "bfmKg": 11.7,
+      "pbf": 15.4,
+      "smmKg": 36.8,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-11-10",
+      "weightKg": 76.5,
+      "bfmKg": 12.9,
+      "pbf": 16.8,
+      "smmKg": 36.6,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-11-11",
+      "weightKg": 76.0,
+      "bfmKg": 12.0,
+      "pbf": 15.7,
+      "smmKg": 36.9,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-11-12",
+      "weightKg": 75.8,
+      "bfmKg": 11.9,
+      "pbf": 15.7,
+      "smmKg": 36.8,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-11-13",
+      "weightKg": 75.7,
+      "bfmKg": 12.5,
+      "pbf": 16.5,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-11-14",
+      "weightKg": 75.2,
+      "bfmKg": 12.2,
+      "pbf": 16.3,
+      "smmKg": 36.2,
+      "bmi": 24.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-11-17",
+      "weightKg": 77.1,
+      "bfmKg": 12.7,
+      "pbf": 16.4,
+      "smmKg": 36.8,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-11-18",
+      "weightKg": 76.2,
+      "bfmKg": 12.6,
+      "pbf": 16.5,
+      "smmKg": 36.4,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-11-19",
+      "weightKg": 75.6,
+      "bfmKg": 12.3,
+      "pbf": 16.3,
+      "smmKg": 36.4,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-03",
+      "weightKg": 76.9,
+      "bfmKg": 14.1,
+      "pbf": 18.3,
+      "smmKg": 36.3,
+      "bmi": 24.7,
+      "whr": 0.89
+    },
+    {
+      "date": "2025-12-04",
+      "weightKg": 76.5,
+      "bfmKg": 13.7,
+      "pbf": 17.9,
+      "smmKg": 36.2,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-05",
+      "weightKg": 76.1,
+      "bfmKg": 12.9,
+      "pbf": 17.0,
+      "smmKg": 36.5,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-08",
+      "weightKg": 77.8,
+      "bfmKg": 13.1,
+      "pbf": 16.8,
+      "smmKg": 37.2,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-09",
+      "weightKg": 76.7,
+      "bfmKg": 12.7,
+      "pbf": 16.6,
+      "smmKg": 36.8,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-10",
+      "weightKg": 76.1,
+      "bfmKg": 12.0,
+      "pbf": 15.8,
+      "smmKg": 37.0,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-11",
+      "weightKg": 75.5,
+      "bfmKg": 13.0,
+      "pbf": 17.2,
+      "smmKg": 36.0,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-12",
+      "weightKg": 76.0,
+      "bfmKg": 13.2,
+      "pbf": 17.4,
+      "smmKg": 36.1,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-13",
+      "weightKg": 75.5,
+      "bfmKg": 13.2,
+      "pbf": 17.5,
+      "smmKg": 35.8,
+      "bmi": 24.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-14",
+      "weightKg": 76.6,
+      "bfmKg": 12.1,
+      "pbf": 15.8,
+      "smmKg": 37.1,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-15",
+      "weightKg": 77.0,
+      "bfmKg": 13.5,
+      "pbf": 17.5,
+      "smmKg": 36.4,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-16",
+      "weightKg": 75.9,
+      "bfmKg": 13.3,
+      "pbf": 17.5,
+      "smmKg": 36.0,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-17",
+      "weightKg": 77.0,
+      "bfmKg": 13.2,
+      "pbf": 17.1,
+      "smmKg": 36.6,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-12-18",
+      "weightKg": 76.3,
+      "bfmKg": 14.2,
+      "pbf": 18.6,
+      "smmKg": 35.7,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-19",
+      "weightKg": 75.5,
+      "bfmKg": 13.5,
+      "pbf": 17.8,
+      "smmKg": 35.8,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2025-12-20",
+      "weightKg": 76.4,
+      "bfmKg": 12.6,
+      "pbf": 16.5,
+      "smmKg": 36.7,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-21",
+      "weightKg": 77.1,
+      "bfmKg": 12.8,
+      "pbf": 16.6,
+      "smmKg": 36.9,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2025-12-22",
+      "weightKg": 77.7,
+      "bfmKg": 12.5,
+      "pbf": 16.1,
+      "smmKg": 37.4,
+      "bmi": 24.9,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-12-23",
+      "weightKg": 76.8,
+      "bfmKg": 13.3,
+      "pbf": 17.3,
+      "smmKg": 36.5,
+      "bmi": 24.6,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-12-24",
+      "weightKg": 76.4,
+      "bfmKg": 13.2,
+      "pbf": 17.3,
+      "smmKg": 36.4,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-26",
+      "weightKg": 75.6,
+      "bfmKg": 13.2,
+      "pbf": 17.4,
+      "smmKg": 35.9,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2025-12-29",
+      "weightKg": 77.1,
+      "bfmKg": 12.4,
+      "pbf": 16.1,
+      "smmKg": 37.1,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2025-12-31",
+      "weightKg": 76.8,
+      "bfmKg": 12.4,
+      "pbf": 16.2,
+      "smmKg": 37.0,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-02",
+      "weightKg": 76.8,
+      "bfmKg": 13.4,
+      "pbf": 17.4,
+      "smmKg": 36.3,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-05",
+      "weightKg": 77.5,
+      "bfmKg": 13.0,
+      "pbf": 16.8,
+      "smmKg": 37.1,
+      "bmi": 24.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-06",
+      "weightKg": 77.3,
+      "bfmKg": 13.7,
+      "pbf": 17.7,
+      "smmKg": 36.5,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-07",
+      "weightKg": 77.3,
+      "bfmKg": 13.9,
+      "pbf": 18.0,
+      "smmKg": 36.4,
+      "bmi": 24.8,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-01-08",
+      "weightKg": 76.5,
+      "bfmKg": 13.4,
+      "pbf": 17.6,
+      "smmKg": 36.4,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-01-09",
+      "weightKg": 76.8,
+      "bfmKg": 13.4,
+      "pbf": 17.5,
+      "smmKg": 36.4,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-11",
+      "weightKg": 76.8,
+      "bfmKg": 13.5,
+      "pbf": 17.6,
+      "smmKg": 36.3,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-12",
+      "weightKg": 77.3,
+      "bfmKg": 13.3,
+      "pbf": 17.3,
+      "smmKg": 36.7,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-01-13",
+      "weightKg": 78.2,
+      "bfmKg": 12.3,
+      "pbf": 15.8,
+      "smmKg": 37.8,
+      "bmi": 25.1,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-01-14",
+      "weightKg": 76.9,
+      "bfmKg": 12.8,
+      "pbf": 16.6,
+      "smmKg": 37.0,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-15",
+      "weightKg": 76.4,
+      "bfmKg": 12.8,
+      "pbf": 16.7,
+      "smmKg": 36.8,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-16",
+      "weightKg": 76.6,
+      "bfmKg": 13.2,
+      "pbf": 17.2,
+      "smmKg": 36.6,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-01-19",
+      "weightKg": 78.4,
+      "bfmKg": 12.9,
+      "pbf": 16.5,
+      "smmKg": 37.6,
+      "bmi": 25.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-20",
+      "weightKg": 77.2,
+      "bfmKg": 12.5,
+      "pbf": 16.2,
+      "smmKg": 37.2,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-22",
+      "weightKg": 76.3,
+      "bfmKg": 12.1,
+      "pbf": 15.9,
+      "smmKg": 37.0,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-01-23",
+      "weightKg": 77.1,
+      "bfmKg": 14.0,
+      "pbf": 18.2,
+      "smmKg": 36.2,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-01-26",
+      "weightKg": 77.6,
+      "bfmKg": 12.6,
+      "pbf": 16.3,
+      "smmKg": 37.3,
+      "bmi": 24.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-01-27",
+      "weightKg": 77.4,
+      "bfmKg": 12.5,
+      "pbf": 16.2,
+      "smmKg": 37.3,
+      "bmi": 24.8,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-01-29",
+      "weightKg": 75.4,
+      "bfmKg": 14.0,
+      "pbf": 18.6,
+      "smmKg": 35.5,
+      "bmi": 24.2,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-01-30",
+      "weightKg": 75.4,
+      "bfmKg": 12.4,
+      "pbf": 16.5,
+      "smmKg": 36.3,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-02-01",
+      "weightKg": 77.0,
+      "bfmKg": 12.4,
+      "pbf": 16.1,
+      "smmKg": 37.1,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-02-02",
+      "weightKg": 77.5,
+      "bfmKg": 13.5,
+      "pbf": 17.4,
+      "smmKg": 36.7,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-02-03",
+      "weightKg": 76.8,
+      "bfmKg": 11.8,
+      "pbf": 15.4,
+      "smmKg": 37.3,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-02-04",
+      "weightKg": 77.0,
+      "bfmKg": 12.7,
+      "pbf": 16.5,
+      "smmKg": 36.9,
+      "bmi": 24.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-02-05",
+      "weightKg": 76.4,
+      "bfmKg": 11.7,
+      "pbf": 15.3,
+      "smmKg": 37.2,
+      "bmi": 24.5,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-02-08",
+      "weightKg": 75.8,
+      "bfmKg": 12.3,
+      "pbf": 16.2,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-02-09",
+      "weightKg": 76.1,
+      "bfmKg": 12.6,
+      "pbf": 16.5,
+      "smmKg": 36.4,
+      "bmi": 24.4,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-02-10",
+      "weightKg": 75.2,
+      "bfmKg": 12.8,
+      "pbf": 17.0,
+      "smmKg": 35.8,
+      "bmi": 24.1,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-02-12",
+      "weightKg": 75.8,
+      "bfmKg": 12.1,
+      "pbf": 15.9,
+      "smmKg": 36.5,
+      "bmi": 24.3,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-02-13",
+      "weightKg": 75.7,
+      "bfmKg": 11.7,
+      "pbf": 15.4,
+      "smmKg": 36.6,
+      "bmi": 24.3,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-02-19",
+      "weightKg": 77.8,
+      "bfmKg": 13.9,
+      "pbf": 17.9,
+      "smmKg": 36.5,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-02-20",
+      "weightKg": 76.7,
+      "bfmKg": 13.8,
+      "pbf": 18.0,
+      "smmKg": 36.2,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-02-21",
+      "weightKg": 77.2,
+      "bfmKg": 13.1,
+      "pbf": 16.9,
+      "smmKg": 36.8,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-02-23",
+      "weightKg": 78.9,
+      "bfmKg": 12.4,
+      "pbf": 15.8,
+      "smmKg": 38.1,
+      "bmi": 25.3,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-02-24",
+      "weightKg": 78.1,
+      "bfmKg": 13.3,
+      "pbf": 17.0,
+      "smmKg": 37.2,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-02-25",
+      "weightKg": 78.0,
+      "bfmKg": 14.2,
+      "pbf": 18.2,
+      "smmKg": 36.7,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-02-26",
+      "weightKg": 77.3,
+      "bfmKg": 12.8,
+      "pbf": 16.6,
+      "smmKg": 37.2,
+      "bmi": 24.8,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-02-27",
+      "weightKg": 76.6,
+      "bfmKg": 12.6,
+      "pbf": 16.5,
+      "smmKg": 36.8,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-03-02",
+      "weightKg": 76.9,
+      "bfmKg": 14.1,
+      "pbf": 18.3,
+      "smmKg": 36.1,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-03-03",
+      "weightKg": 77.2,
+      "bfmKg": 14.4,
+      "pbf": 18.6,
+      "smmKg": 36.1,
+      "bmi": 24.8,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-03-04",
+      "weightKg": 77.0,
+      "bfmKg": 13.9,
+      "pbf": 18.1,
+      "smmKg": 36.3,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-03-05",
+      "weightKg": 76.8,
+      "bfmKg": 14.6,
+      "pbf": 19.1,
+      "smmKg": 35.8,
+      "bmi": 24.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-03-06",
+      "weightKg": 76.6,
+      "bfmKg": 13.5,
+      "pbf": 17.6,
+      "smmKg": 36.5,
+      "bmi": 24.6,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-03-09",
+      "weightKg": 77.1,
+      "bfmKg": 16.1,
+      "pbf": 20.9,
+      "smmKg": 35.0,
+      "bmi": 24.7,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-03-10",
+      "weightKg": 76.2,
+      "bfmKg": 13.2,
+      "pbf": 17.3,
+      "smmKg": 36.2,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-03-11",
+      "weightKg": 77.4,
+      "bfmKg": 13.4,
+      "pbf": 17.3,
+      "smmKg": 36.8,
+      "bmi": 24.8,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-03-12",
+      "weightKg": 76.1,
+      "bfmKg": 13.2,
+      "pbf": 17.3,
+      "smmKg": 36.2,
+      "bmi": 24.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-03-13",
+      "weightKg": 76.5,
+      "bfmKg": 12.4,
+      "pbf": 16.2,
+      "smmKg": 37.0,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-03-16",
+      "weightKg": 76.4,
+      "bfmKg": 13.2,
+      "pbf": 17.3,
+      "smmKg": 36.3,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-03-17",
+      "weightKg": 75.8,
+      "bfmKg": 13.4,
+      "pbf": 17.6,
+      "smmKg": 36.0,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-03-18",
+      "weightKg": 76.0,
+      "bfmKg": 13.1,
+      "pbf": 17.3,
+      "smmKg": 36.3,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-03-19",
+      "weightKg": 75.3,
+      "bfmKg": 13.0,
+      "pbf": 17.3,
+      "smmKg": 35.9,
+      "bmi": 24.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-03-20",
+      "weightKg": 76.3,
+      "bfmKg": 12.7,
+      "pbf": 16.6,
+      "smmKg": 36.6,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-03-22",
+      "weightKg": 77.8,
+      "bfmKg": 12.6,
+      "pbf": 16.2,
+      "smmKg": 37.5,
+      "bmi": 25.0,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-03-23",
+      "weightKg": 78.2,
+      "bfmKg": 12.8,
+      "pbf": 16.4,
+      "smmKg": 37.5,
+      "bmi": 25.1,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-03-24",
+      "weightKg": 76.8,
+      "bfmKg": 13.3,
+      "pbf": 17.3,
+      "smmKg": 36.4,
+      "bmi": 24.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-03-25",
+      "weightKg": 76.8,
+      "bfmKg": 12.9,
+      "pbf": 16.8,
+      "smmKg": 36.7,
+      "bmi": 24.6,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-03-26",
+      "weightKg": 75.9,
+      "bfmKg": 12.2,
+      "pbf": 16.0,
+      "smmKg": 36.6,
+      "bmi": 24.4,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-03-27",
+      "weightKg": 75.5,
+      "bfmKg": 12.7,
+      "pbf": 16.8,
+      "smmKg": 36.1,
+      "bmi": 24.2,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-03-29",
+      "weightKg": 76.1,
+      "bfmKg": 11.8,
+      "pbf": 15.5,
+      "smmKg": 36.8,
+      "bmi": 24.4,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-03-30",
+      "weightKg": 75.7,
+      "bfmKg": 12.6,
+      "pbf": 16.7,
+      "smmKg": 36.1,
+      "bmi": 24.3,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-03-31",
+      "weightKg": 76.3,
+      "bfmKg": 11.8,
+      "pbf": 15.5,
+      "smmKg": 36.8,
+      "bmi": 24.5,
+      "whr": 0.83
+    },
+    {
+      "date": "2026-04-02",
+      "weightKg": 76.0,
+      "bfmKg": 12.5,
+      "pbf": 16.5,
+      "smmKg": 36.3,
+      "bmi": 24.4,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-04-03",
+      "weightKg": 75.6,
+      "bfmKg": 12.2,
+      "pbf": 16.1,
+      "smmKg": 36.4,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-04-09",
+      "weightKg": 75.0,
+      "bfmKg": 12.3,
+      "pbf": 16.3,
+      "smmKg": 35.9,
+      "bmi": 24.1,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-04-13",
+      "weightKg": 74.7,
+      "bfmKg": 12.3,
+      "pbf": 16.5,
+      "smmKg": 35.9,
+      "bmi": 24.0,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-04-14",
+      "weightKg": 74.5,
+      "bfmKg": 12.0,
+      "pbf": 16.2,
+      "smmKg": 35.9,
+      "bmi": 23.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-04-15",
+      "weightKg": 74.4,
+      "bfmKg": 11.9,
+      "pbf": 15.9,
+      "smmKg": 36.1,
+      "bmi": 23.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-04-16",
+      "weightKg": 73.7,
+      "bfmKg": 12.1,
+      "pbf": 16.4,
+      "smmKg": 35.4,
+      "bmi": 23.6,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-04-17",
+      "weightKg": 73.7,
+      "bfmKg": 11.6,
+      "pbf": 15.7,
+      "smmKg": 35.7,
+      "bmi": 23.6,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-04-18",
+      "weightKg": 72.6,
+      "bfmKg": 11.0,
+      "pbf": 15.1,
+      "smmKg": 35.3,
+      "bmi": 23.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-04-20",
+      "weightKg": 74.7,
+      "bfmKg": 12.1,
+      "pbf": 16.2,
+      "smmKg": 35.8,
+      "bmi": 24.0,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-04-21",
+      "weightKg": 74.7,
+      "bfmKg": 12.4,
+      "pbf": 16.6,
+      "smmKg": 35.8,
+      "bmi": 24.0,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-04-22",
+      "weightKg": 74.7,
+      "bfmKg": 12.2,
+      "pbf": 16.4,
+      "smmKg": 35.8,
+      "bmi": 24.0,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-04-23",
+      "weightKg": 73.9,
+      "bfmKg": 12.3,
+      "pbf": 16.6,
+      "smmKg": 35.4,
+      "bmi": 23.7,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-04-24",
+      "weightKg": 73.5,
+      "bfmKg": 12.4,
+      "pbf": 16.8,
+      "smmKg": 35.1,
+      "bmi": 23.6,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-05-06",
+      "weightKg": 74.4,
+      "bfmKg": 12.1,
+      "pbf": 16.3,
+      "smmKg": 35.7,
+      "bmi": 23.9,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-05-07",
+      "weightKg": 75.1,
+      "bfmKg": 12.0,
+      "pbf": 16.0,
+      "smmKg": 36.1,
+      "bmi": 24.1,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-05-10",
+      "weightKg": 75.9,
+      "bfmKg": 12.2,
+      "pbf": 16.1,
+      "smmKg": 36.4,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-05-12",
+      "weightKg": 75.5,
+      "bfmKg": 13.4,
+      "pbf": 17.8,
+      "smmKg": 35.7,
+      "bmi": 24.2,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-05-13",
+      "weightKg": 74.9,
+      "bfmKg": 14.2,
+      "pbf": 19.0,
+      "smmKg": 35.0,
+      "bmi": 24.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-05-14",
+      "weightKg": 75.1,
+      "bfmKg": 13.8,
+      "pbf": 18.4,
+      "smmKg": 35.4,
+      "bmi": 24.1,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-05-15",
+      "weightKg": 75.1,
+      "bfmKg": 14.1,
+      "pbf": 18.7,
+      "smmKg": 35.2,
+      "bmi": 24.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-05-18",
+      "weightKg": 75.2,
+      "bfmKg": 13.7,
+      "pbf": 18.3,
+      "smmKg": 35.1,
+      "bmi": 24.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-05-19",
+      "weightKg": 76.0,
+      "bfmKg": 14.3,
+      "pbf": 18.8,
+      "smmKg": 35.3,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-05-20",
+      "weightKg": 76.0,
+      "bfmKg": 14.1,
+      "pbf": 18.5,
+      "smmKg": 35.6,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-05-21",
+      "weightKg": 74.9,
+      "bfmKg": 13.8,
+      "pbf": 18.4,
+      "smmKg": 35.1,
+      "bmi": 24.0,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-05-22",
+      "weightKg": 75.3,
+      "bfmKg": 12.3,
+      "pbf": 16.4,
+      "smmKg": 36.1,
+      "bmi": 24.2,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-05-29",
+      "weightKg": 76.0,
+      "bfmKg": 14.5,
+      "pbf": 19.1,
+      "smmKg": 35.4,
+      "bmi": 24.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-01",
+      "weightKg": 77.1,
+      "bfmKg": 13.3,
+      "pbf": 17.2,
+      "smmKg": 36.6,
+      "bmi": 24.7,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-06-02",
+      "weightKg": 77.1,
+      "bfmKg": 15.4,
+      "pbf": 20.0,
+      "smmKg": 35.4,
+      "bmi": 24.7,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-06-03",
+      "weightKg": 76.4,
+      "bfmKg": 14.5,
+      "pbf": 19.0,
+      "smmKg": 35.6,
+      "bmi": 24.5,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-04",
+      "weightKg": 76.4,
+      "bfmKg": 13.3,
+      "pbf": 17.4,
+      "smmKg": 36.3,
+      "bmi": 24.5,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-06-05",
+      "weightKg": 76.4,
+      "bfmKg": 13.7,
+      "pbf": 17.9,
+      "smmKg": 36.0,
+      "bmi": 24.5,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-06-08",
+      "weightKg": 76.9,
+      "bfmKg": 14.4,
+      "pbf": 18.8,
+      "smmKg": 35.8,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-09",
+      "weightKg": 76.1,
+      "bfmKg": 14.6,
+      "pbf": 19.2,
+      "smmKg": 35.1,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-06-11",
+      "weightKg": 77.6,
+      "bfmKg": 14.2,
+      "pbf": 18.3,
+      "smmKg": 36.2,
+      "bmi": 24.9,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-06-15",
+      "weightKg": 77.8,
+      "bfmKg": 15.1,
+      "pbf": 19.4,
+      "smmKg": 35.8,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-16",
+      "weightKg": 77.8,
+      "bfmKg": 14.5,
+      "pbf": 18.7,
+      "smmKg": 36.2,
+      "bmi": 25.0,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-06-17",
+      "weightKg": 76.7,
+      "bfmKg": 14.0,
+      "pbf": 18.3,
+      "smmKg": 36.0,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-18",
+      "weightKg": 76.3,
+      "bfmKg": 14.6,
+      "pbf": 19.1,
+      "smmKg": 35.4,
+      "bmi": 24.5,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-19",
+      "weightKg": 75.8,
+      "bfmKg": 14.2,
+      "pbf": 18.7,
+      "smmKg": 35.4,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-06-20",
+      "weightKg": 75.5,
+      "bfmKg": 13.7,
+      "pbf": 18.1,
+      "smmKg": 35.5,
+      "bmi": 24.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-23",
+      "weightKg": 77.5,
+      "bfmKg": 14.7,
+      "pbf": 19.0,
+      "smmKg": 35.9,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-24",
+      "weightKg": 78.2,
+      "bfmKg": 14.2,
+      "pbf": 18.1,
+      "smmKg": 36.6,
+      "bmi": 25.1,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-06-25",
+      "weightKg": 76.5,
+      "bfmKg": 14.7,
+      "pbf": 19.2,
+      "smmKg": 35.5,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-06-29",
+      "weightKg": 78.5,
+      "bfmKg": 15.2,
+      "pbf": 19.3,
+      "smmKg": 36.2,
+      "bmi": 25.2,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-06-30",
+      "weightKg": 78.1,
+      "bfmKg": 15.2,
+      "pbf": 19.4,
+      "smmKg": 36.0,
+      "bmi": 25.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-07-01",
+      "weightKg": 77.7,
+      "bfmKg": 15.4,
+      "pbf": 19.9,
+      "smmKg": 35.6,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-07-02",
+      "weightKg": 77.6,
+      "bfmKg": 16.5,
+      "pbf": 21.2,
+      "smmKg": 35.0,
+      "bmi": 24.9,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-07-03",
+      "weightKg": 76.3,
+      "bfmKg": 15.2,
+      "pbf": 19.9,
+      "smmKg": 35.1,
+      "bmi": 24.5,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-07-04",
+      "weightKg": 76.0,
+      "bfmKg": 15.0,
+      "pbf": 19.7,
+      "smmKg": 35.2,
+      "bmi": 24.4,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-07-07",
+      "weightKg": 77.1,
+      "bfmKg": 15.7,
+      "pbf": 20.4,
+      "smmKg": 35.0,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-07-08",
+      "weightKg": 76.6,
+      "bfmKg": 15.2,
+      "pbf": 19.8,
+      "smmKg": 35.2,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-07-10",
+      "weightKg": 75.7,
+      "bfmKg": 14.4,
+      "pbf": 19.1,
+      "smmKg": 35.1,
+      "bmi": 24.3,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-07-13",
+      "weightKg": 77.1,
+      "bfmKg": 14.1,
+      "pbf": 18.3,
+      "smmKg": 36.0,
+      "bmi": 24.7,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-07-14",
+      "weightKg": 76.0,
+      "bfmKg": 15.1,
+      "pbf": 19.9,
+      "smmKg": 34.8,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-07-17",
+      "weightKg": 76.0,
+      "bfmKg": 12.7,
+      "pbf": 16.7,
+      "smmKg": 36.2,
+      "bmi": 24.4,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-07-20",
+      "weightKg": 75.7,
+      "bfmKg": 13.7,
+      "pbf": 18.0,
+      "smmKg": 35.5,
+      "bmi": 24.3,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-07-21",
+      "weightKg": 76.2,
+      "bfmKg": 12.5,
+      "pbf": 16.4,
+      "smmKg": 36.4,
+      "bmi": 24.5,
+      "whr": 0.84
+    },
+    {
+      "date": "2026-07-22",
+      "weightKg": 76.1,
+      "bfmKg": 14.4,
+      "pbf": 19.0,
+      "smmKg": 35.2,
+      "bmi": 24.4,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-07-23",
+      "weightKg": 75.8,
+      "bfmKg": 14.0,
+      "pbf": 18.5,
+      "smmKg": 35.4,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-07-24",
+      "weightKg": 76.5,
+      "bfmKg": 14.0,
+      "pbf": 18.3,
+      "smmKg": 35.7,
+      "bmi": 24.6,
+      "whr": 0.85
+    },
+    {
+      "date": "2026-07-27",
+      "weightKg": 77.8,
+      "bfmKg": 15.8,
+      "pbf": 20.2,
+      "smmKg": 35.6,
+      "bmi": 25.0,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-07-28",
+      "weightKg": 75.7,
+      "bfmKg": 13.0,
+      "pbf": 17.2,
+      "smmKg": 36.0,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-07-30",
+      "weightKg": 74.4,
+      "bfmKg": 13.5,
+      "pbf": 18.1,
+      "smmKg": 35.0,
+      "bmi": 23.9,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-08-03",
+      "weightKg": 75.1,
+      "bfmKg": 14.2,
+      "pbf": 18.9,
+      "smmKg": 35.0,
+      "bmi": 24.1,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-08-04",
+      "weightKg": 75.8,
+      "bfmKg": 13.7,
+      "pbf": 18.1,
+      "smmKg": 35.5,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-08-06",
+      "weightKg": 75.9,
+      "bfmKg": 15.5,
+      "pbf": 20.5,
+      "smmKg": 34.6,
+      "bmi": 24.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-08-07",
+      "weightKg": 76.0,
+      "bfmKg": 14.0,
+      "pbf": 18.4,
+      "smmKg": 35.5,
+      "bmi": 24.4,
+      "whr": 0.86
+    },
+    {
+      "date": "2026-08-10",
+      "weightKg": 76.1,
+      "bfmKg": 15.1,
+      "pbf": 19.8,
+      "smmKg": 34.8,
+      "bmi": 24.4,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-08-11",
+      "weightKg": 76.5,
+      "bfmKg": 14.7,
+      "pbf": 19.2,
+      "smmKg": 35.3,
+      "bmi": 24.6,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-08-12",
+      "weightKg": 76.8,
+      "bfmKg": 15.1,
+      "pbf": 19.7,
+      "smmKg": 35.3,
+      "bmi": 24.6,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-08-14",
+      "weightKg": 75.6,
+      "bfmKg": 13.6,
+      "pbf": 18.0,
+      "smmKg": 35.5,
+      "bmi": 24.3,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-08-21",
+      "weightKg": 75.1,
+      "bfmKg": 14.7,
+      "pbf": 19.5,
+      "smmKg": 34.8,
+      "bmi": 24.1,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-08-28",
+      "weightKg": 76.9,
+      "bfmKg": 15.7,
+      "pbf": 20.4,
+      "smmKg": 35.1,
+      "bmi": 24.7,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-09-02",
+      "weightKg": 77.0,
+      "bfmKg": 15.8,
+      "pbf": 20.5,
+      "smmKg": 35.0,
+      "bmi": 24.7,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-09-03",
+      "weightKg": 77.7,
+      "bfmKg": 15.6,
+      "pbf": 20.1,
+      "smmKg": 35.5,
+      "bmi": 24.9,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-09-04",
+      "weightKg": 78.0,
+      "bfmKg": 15.4,
+      "pbf": 19.7,
+      "smmKg": 35.8,
+      "bmi": 25.0,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-09-07",
+      "weightKg": 78.0,
+      "bfmKg": 15.8,
+      "pbf": 20.2,
+      "smmKg": 35.6,
+      "bmi": 25.0,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-09-09",
+      "weightKg": 77.7,
+      "bfmKg": 15.7,
+      "pbf": 20.2,
+      "smmKg": 35.7,
+      "bmi": 24.9,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-09-10",
+      "weightKg": 76.7,
+      "bfmKg": 16.0,
+      "pbf": 20.9,
+      "smmKg": 34.9,
+      "bmi": 24.6,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-09-11",
+      "weightKg": 76.4,
+      "bfmKg": 16.5,
+      "pbf": 21.7,
+      "smmKg": 34.4,
+      "bmi": 24.5,
+      "whr": 0.92
+    },
+    {
+      "date": "2026-09-12",
+      "weightKg": 76.4,
+      "bfmKg": 15.3,
+      "pbf": 20.1,
+      "smmKg": 35.1,
+      "bmi": 24.5,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-09-17",
+      "weightKg": 78.1,
+      "bfmKg": 14.2,
+      "pbf": 18.1,
+      "smmKg": 36.5,
+      "bmi": 25.1,
+      "whr": 0.87
+    },
+    {
+      "date": "2026-09-18",
+      "weightKg": 77.3,
+      "bfmKg": 15.3,
+      "pbf": 19.8,
+      "smmKg": 35.4,
+      "bmi": 24.8,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-09-22",
+      "weightKg": 77.1,
+      "bfmKg": 15.4,
+      "pbf": 19.9,
+      "smmKg": 35.3,
+      "bmi": 24.7,
+      "whr": 0.89
+    },
+    {
+      "date": "2026-10-01",
+      "weightKg": 77.5,
+      "bfmKg": 16.5,
+      "pbf": 21.2,
+      "smmKg": 35.1,
+      "bmi": 24.9,
+      "whr": 0.91
+    },
+    {
+      "date": "2026-10-05",
+      "weightKg": 78.6,
+      "bfmKg": 15.6,
+      "pbf": 19.9,
+      "smmKg": 35.9,
+      "bmi": 25.2,
+      "whr": 0.88
+    },
+    {
+      "date": "2026-10-07",
+      "weightKg": 78.7,
+      "bfmKg": 15.9,
+      "pbf": 20.2,
+      "smmKg": 36.0,
+      "bmi": 25.3,
+      "whr": 0.9
+    },
+    {
+      "date": "2026-10-08",
+      "weightKg": 78.4,
+      "bfmKg": 15.6,
+      "pbf": 19.9,
+      "smmKg": 35.9,
+      "bmi": 25.2,
+      "whr": 0.9
+    }
+  ],
+  "ok": {
+    "garmin": true,
+    "inbody": true
+  }
+}
