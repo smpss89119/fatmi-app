@@ -86,11 +86,11 @@ function renderToday(st) {
     </section>
     <p class="sec">本週節奏（點一下改訓練日）</p>
     <div class="week">${week}</div>
-    <p class="note">預設週二、週五。任意兩天都行，中間至少隔一天休息。目標每週 ≥ 2 次。</p>
+    <p class="note">預設週二、週五。任意兩天都行，中間至少隔一天休息。目標每週 ≥ 2 次。回台第一週重量抓上次七成；前晚睡不到 6 小時改做 25 分鐘快版。</p>
     <div class="card">
       <div class="stat"><span>本週已打卡</span><span class="${sessions >= 2 ? "ok" : "warn"}">${sessions} / 2 次</span></div>
       <div class="stat"><span>今天打卡</span><span>${logged ? "已完成喵" : "還沒"}</span></div>
-      <div class="stat"><span>減脂目標</span><span>2026/12/31 約 10kg</span></div>
+      <div class="stat"><span>減脂目標</span><span>12/31 前減脂 3–4kg、體脂 15–16%</span></div>
       <div class="stat"><span>剩下天數</span><span>${daysLeft} 天</span></div>
       <div class="stat"><span>熱量／蛋白</span><span>2000–2200 kcal · 140–170g</span></div>
     </div>
@@ -154,7 +154,7 @@ function renderEat(st) {
     <section class="card hero">
       <div class="k">約 2000–2200 kcal · 蛋白 140–170g</div>
       <div class="big">${train ? "訓練日吃法" : "休息日吃法"}</div>
-      <div class="lab">體重約 85kg／176cm。休息日晚餐碳水減半。</div>
+      <div class="lab">InBody 10/8：78.4kg／體脂 19.9%。休息日晚餐碳水減半。</div>
     </section>
     <div class="tog">
       <button type="button" data-meal="auto" class="${mode === "auto" ? "on" : ""}">跟課表</button>
@@ -220,8 +220,8 @@ function renderRules() {
     </section>
     <p class="sec">目標</p>
     <div class="card prose">
-      <div class="stat"><span>體位參考</span><span>約 85kg／176cm</span></div>
-      <div class="stat"><span>減脂</span><span>2026 年底約 10kg</span></div>
+      <div class="stat"><span>體位參考</span><span>78.4kg／體脂 19.9%／骨骼肌 35.9kg（InBody 10/8）</span></div>
+      <div class="stat"><span>減脂</span><span>年底前減 3–4kg 脂肪，保住肌肉</span></div>
       <div class="stat"><span>訓練</span><span>每週 ≥ 2 次</span></div>
       <div class="stat"><span>熱量</span><span>約 2000–2200 kcal</span></div>
       <div class="stat"><span>蛋白質</span><span>140–170g</span></div>
