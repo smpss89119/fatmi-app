@@ -240,19 +240,19 @@ const MEAL_DEFS = {
   },
   snack: {
     id: "snack",
-    label: "午後",
+    label: "16:00",
     train: { name: "16:00 兩份蛋白粉＋地瓜 150g", kcal: 470, protein: 42 },
     rest: { name: "乳清或無糖優格", kcal: 150, protein: 24 },
   },
   dinner: {
     id: "dinner",
-    label: "晚餐",
+    label: "18:30",
     train: { name: "18:30 雞胸 200g＋大份蔬菜＋半碗飯或地瓜", kcal: 455, protein: 52 },
     rest: { name: "手掌大蛋白質＋大份蔬菜＋碳水再減半", kcal: 500, protein: 45 },
   },
 };
 
-const MEAL_ORDER = ["breakfast", "lunch", "snack", "dinner"];
+const MEAL_ORDER = ["snack", "dinner", "eggs21"];
 
 const PALM_PROTEIN = 30;
 const PALM_KCAL = 160;
@@ -285,7 +285,7 @@ const SHOP_ITEMS = [
   { id: "eggs", group: "protein", name: "雞蛋 10 顆", hint: "備用", palms: 3 },
   { id: "whey", group: "protein", name: "蛋白粉 14 包", hint: "少於 6 包要補貨", palms: 9, whey: true },
   { id: "yam", group: "starch", name: "地瓜約 2kg", hint: "", fists: 13 },
-  { id: "rice", group: "starch", name: "糙米和白米", hint: "照常補貨", fists: 7 },
+  { id: "rice", group: "starch", name: "糙米和白米", hint: "照常補貨", fists: 7, frequent: true },
   { id: "sourdough", group: "starch", name: "酸種麵包 1 條", hint: "訓練日帶去公司", fists: 4 },
   { id: "veg-cabbage", group: "veg", name: "高麗菜", hint: "1 份", pick: true },
   { id: "veg-kongxin", group: "veg", name: "空心菜", hint: "1 份", pick: true },

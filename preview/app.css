@@ -160,3 +160,16 @@ nav#tabs button.on i{filter:none;opacity:1}
 .info-i{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-left:6px;border:0;border-radius:50%;background:rgba(255,255,255,.22);color:#fff;font-size:15px;font-weight:800;cursor:pointer;vertical-align:middle;line-height:1;padding:0}
 .who .nums{float:right;color:var(--o);font-weight:800;font-variant-numeric:tabular-nums}
 .portion-row>span{min-width:auto}
+
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(26,18,8,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.sheet-card{background:#fff;border-radius:20px 20px 12px 12px;padding:16px 18px 20px;width:100%;max-width:560px;max-height:80vh;overflow:auto;box-shadow:0 -8px 30px rgba(80,50,0,.18)}
+.sheet-text{white-space:pre-wrap;background:#FFF7ED;border-radius:14px;padding:12px;font:15px/1.5 ui-monospace,monospace;margin:10px 0;max-height:50vh;overflow:auto}
+.shop-bars{display:flex;flex-direction:column;gap:10px;margin:10px 0 14px}
+.shop-bar .lab{font-weight:800;margin-bottom:6px}
+.shop-bar .bar{height:10px;border-radius:99px;background:#F4E6D0;overflow:hidden}
+.shop-bar .bar i{display:block;height:100%;background:#C2410C;border-radius:99px}
+.shop-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.shop-add input,.shop-add select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;background:#fff;flex:1}
+.meal-row .row-acts{display:flex;gap:8px;margin-top:8px}
+.meal-row .row-acts .btn{flex:1}
+.item.freq{outline:1px dashed #C2410C}

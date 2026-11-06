@@ -10,7 +10,7 @@ const HIGH_STEPS = 15000;
 const REST_SEC = 90;
 
 let LIVE = { garmin: { daily: [], activities: [] }, inbody: [], exportedAt: null, ok: {} };
-let ui = { swap: null, bodyPart: null, showReason: false };
+let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null };
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -108,6 +108,8 @@ function state() {
     wheyPacks: s.wheyPacks != null ? Number(s.wheyPacks) : 14,
     shopHintCollapsed: !!s.shopHintCollapsed,
     hideSuggestReasons: !!s.hideSuggestReasons,
+    shopExtra: Array.isArray(s.shopExtra) ? s.shopExtra : [],
+    shopFrequent: s.shopFrequent || {},
   };
 }
 
@@ -260,8 +262,7 @@ function twoScoopMeal(st, d = now()) {
 }
 function dinnerFor(st, d = now()) {
   const shake = twoScoopMeal(st, d);
-  const alt = ((st.dinnerAlt || {})[todayKey(d)]) === "eggs21";
-  const grams = shake.hasPlant || alt ? 150 : 200;
+  const grams = shake.hasPlant ? 150 : 200;
   const chickenId = grams === 150 ? "chicken150" : "chicken200";
   const meal = composeSwapMeal(chickenId, "rice150");
   meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
@@ -278,8 +279,8 @@ function wheyMeal(st) {
   return twoScoopMeal(st);
 }
 function mealLabel(id, trainDay, st) {
-  if (id === "snack" && trainDay) return "16:00";
-  if (id === "dinner" && trainDay) return `18:30 雞胸 ${(st ? dinnerFor(st).chickenG : 200)}g`;
+  if (id === "snack") return "16:00";
+  if (id === "dinner") return "18:30";
   if (id === "eggs21") return "21:00";
   return (MEAL_DEFS[id] && MEAL_DEFS[id].label) || id;
 }
@@ -376,27 +377,20 @@ function computeKcalAdjust(st, d = now()) {
   return { adj: 0, note: null };
 }
 function kcalInfo(st, d = now()) {
-  const trainLike = isTrainDay(st, d) || isHighStep(d);
+  const trainLike = isTrainDay(st, d);
   const y = dailyOn(todayKey(addDays(d, -1)));
   const adj = computeKcalAdjust(st, d);
-  let target;
-  let source;
-  if (y && y.kcal) {
-    target = Math.max(KCAL_FLOOR, Math.round(Number(y.kcal) - 450));
-    source = `昨天消耗 ${Math.round(y.kcal)} kcal − 450`;
-  } else {
-    target = trainLike ? 2150 : 1950;
-    source = trainLike ? "還沒有昨天的消耗，訓練日或步數多先抓 2100–2200" : "還沒有昨天的消耗，工作日先抓 1900–2000";
-  }
+  let target = trainLike ? 2150 : 1950;
   if (adj.adj) target = Math.max(KCAL_FLOOR, target + adj.adj);
   const sleep = lastNightSleep(d);
+  const label = String(target);
   return {
     target,
-    source,
+    source: trainLike ? `訓練日 ${target}` : `休息日 ${target}`,
     adj,
     trainLike,
-    band: trainLike ? "2100–2200" : "1900–2000",
-    bandLabel: trainLike ? "訓練日或步數多 2100–2200 kcal" : "工作日 1900–2000 kcal",
+    band: label,
+    bandLabel: label,
     sleepLow: sleep != null && sleep < 6,
     yesterdayKcal: y && y.kcal != null ? Number(y.kcal) : null,
   };
@@ -414,22 +408,12 @@ function mealOf(def, trainLike) {
 function currentMeal(st, id, d = now()) {
   const logs = (st.mealLogs || {})[todayKey(d)] || {};
   if (logs[id]) return logs[id];
-  const trainLike = isTrainDay(st, d);
-  if (id === "snack" && trainLike) return { ...twoScoopMeal(st, d), eaten: false };
-  if (id === "dinner" && trainLike) return { ...dinnerFor(st, d), eaten: false };
-  if (id === "eggs21") {
-    if (((st.dinnerAlt || {})[todayKey(d)]) === "eggs21") {
-      return { name: "21:00 雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
-    }
-    return { name: "", kcal: 0, protein: 0, eaten: false, hidden: true };
-  }
-  const base = mealOf(MEAL_DEFS[id], trainLike);
-  return { ...base, id: "default", eaten: false };
+  return { ...suggestionOf(st, id, d), eaten: false };
 }
 function mealTotals(st, d = now()) {
   let kcal = 0;
   let protein = 0;
-  const ids = MEAL_ORDER.concat(["eggs21"]);
+  const ids = MEAL_ORDER.slice();
   for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
     if (m && m.eaten) {
@@ -480,15 +464,14 @@ function portionMacros(p, st, d = now()) {
   };
 }
 function suggestionOf(st, id, d = now()) {
-  const trainLike = isTrainDay(st, d);
-  if (id === "snack" && trainLike) return { ...twoScoopMeal(st, d), eaten: false };
-  if (id === "dinner" && trainLike) return { ...dinnerFor(st, d), eaten: false };
+  if (id === "snack") return { ...twoScoopMeal(st, d), eaten: false };
+  if (id === "dinner") return { ...dinnerFor(st, d), eaten: false };
   if (id === "eggs21") {
-    return { name: "21:00 雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
+    return { name: "雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
   }
   const def = MEAL_DEFS[id];
   if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
-  return { ...mealOf(def, trainLike), id: "default", eaten: false };
+  return { ...mealOf(def, isTrainDay(st, d)), id: "default", eaten: false };
 }
 function hasCustomPortions(m) {
   if (!m) return false;
@@ -542,16 +525,38 @@ function persistShopWeek(st) {
 function shopAcquired(shop, id) {
   return !!(shop.checked[id] || shop.have[id] || shop.hide[id]);
 }
-function shopDaysHint(st) {
+function shopAllItems(st) {
+  return (SHOP_ITEMS || []).concat((st && st.shopExtra) || []);
+}
+function isShopFrequent(st, item) {
+  const flag = ((st && st.shopFrequent) || {})[item.id];
+  if (flag === false) return false;
+  if (flag) return true;
+  return !!item.frequent;
+}
+function shopDaysStats(st) {
   const shop = readShop(st);
-  let palms = 0;
-  let fists = 0;
-  for (const item of (SHOP_ITEMS || [])) {
-    if (!shopAcquired(shop, item.id)) continue;
-    palms += Number(item.palms) || 0;
-    fists += Number(item.fists) || 0;
+  let planP = 0, planS = 0, gotP = 0, gotS = 0;
+  for (const item of shopAllItems(st)) {
+    const palms = Number(item.palms) || 0;
+    const fists = Number(item.fists) || 0;
+    planP += palms;
+    planS += fists;
+    if (shopAcquired(shop, item.id)) {
+      gotP += palms;
+      gotS += fists;
+    }
   }
-  return `這週蛋白質大概夠吃 ${Math.floor(palms / 2)} 天 · 澱粉大概夠吃 ${Math.floor(fists / 2)} 天`;
+  return {
+    proteinBought: Math.floor(gotP / 2),
+    proteinPlan: Math.floor(planP / 2),
+    starchBought: Math.floor(gotS / 2),
+    starchPlan: Math.floor(planS / 2),
+  };
+}
+function shopDaysHint(st) {
+  const s = shopDaysStats(st);
+  return `蛋白質夠吃 ${s.proteinBought}/${s.proteinPlan} 天 · 澱粉夠吃 ${s.starchBought}/${s.starchPlan} 天`;
 }
 
 function mealLineText(st, id) {
@@ -577,8 +582,8 @@ function shareCatsText(st) {
   const trainDay = isTrainDay(st, t);
   const kcal = kcalInfo(st, t);
   const totals = mealTotals(st, t);
-  const labels = { breakfast: "早餐", lunch: "午餐", snack: trainDay ? "16:00" : "午後", dinner: "晚餐", eggs21: "21:00" };
-  const mealIds = MEAL_ORDER.concat(((st.dinnerAlt || {})[day] === "eggs21") ? ["eggs21"] : []);
+  const labels = { snack: "16:00", dinner: "18:30", eggs21: "21:00" };
+  const mealIds = MEAL_ORDER.slice();
   const mealLines = mealIds.map((id) => `${labels[id] || id}：${mealLineText(st, id)}`).join("\n");
   const remainK = Math.round(kcal.target - totals.kcal);
   const remainP = Math.round(PROTEIN_TARGET - totals.protein);
@@ -664,6 +669,20 @@ async function copyShareText(st) {
 }
 function shareCatsBtn() {
   return `<button type="button" class="btn primary xl" data-share-cats data-testid="share-cats">傳給喵喵們</button>`;
+}
+function renderShareSheet() {
+  if (!ui.shareSheet) return "";
+  const copied = !!ui.shareSheet.copied;
+  return `<div class="sheet" data-testid="share-sheet">
+    <div class="sheet-card">
+      <div class="k">傳給喵喵們</div>
+      <pre class="sheet-text" data-testid="share-sheet-text">${esc(ui.shareSheet.text)}</pre>
+      <div class="acts">
+        <button type="button" class="btn primary xl" data-share-copy data-testid="share-copy">${copied ? "已複製" : "複製"}</button>
+        <button type="button" class="btn full" data-share-close data-testid="share-close">關閉</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function musclesFor(name) {
@@ -1026,8 +1045,9 @@ function renderSunday(st) {
 
 function scoopPicker(st, slot) {
   const ids = selectedScoops(st);
+  const label = (o) => o.id === "plant" ? "極致" : String(o.name || "").replace("樂維根 ", "").replace("無糖", "").trim();
   return `<div class="chips" data-scoop-row="${slot}">${WHEY_OPTIONS.map((o) =>
-    `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(o.name.replace("樂維根 ", ""))}</button>`
+    `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(label(o))}</button>`
   ).join("")}</div>`;
 }
 function proteinShortfall(st) {
@@ -1071,43 +1091,46 @@ function renderMealRow(st, id, trainDay) {
   const veg = !!logged.veg;
   const outType = logged.outType || "";
   const outSize = logged.outSize || "normal";
-  const alt = id === "dinner" && suggestionOf(st, "dinner").eggsAlt && !(((st.dinnerAlt || {})[todayKey()]) === "eggs21")
-    ? `<button type="button" class="btn" data-dinner-alt="eggs21">21:00 +蛋2（雞胸150g）</button>`
-    : "";
   const suggestLine = [sug.name || est.suggestName || "", sug.extraLine].filter(Boolean).join("＋");
-  return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}">
+  const more = ui.mealMore === id;
+  const portionPane = more ? `
+    <div class="portion-pane" data-testid="portion-${id}">
+      <div class="portion-row">
+        <span>🥩</span>
+        <div class="stepper">
+          <button type="button" data-palm="${id}" data-delta="-1" aria-label="少一掌">−</button>
+          <b data-testid="palm-${id}">${palms} 掌</b>
+          <button type="button" data-palm="${id}" data-delta="1" aria-label="加一掌">+</button>
+        </div>
+        <span>🍞</span>
+        <div class="stepper">
+          <button type="button" data-fist="${id}" data-delta="-1" aria-label="少一拳">−</button>
+          <b data-testid="fist-${id}">${fists} 拳</b>
+          <button type="button" data-fist="${id}" data-delta="1" aria-label="加一拳">+</button>
+        </div>
+      </div>
+      <button type="button" class="chip${veg ? " on" : ""}" data-veg="${id}" data-testid="veg-${id}">蔬菜半盤</button>
+      <button type="button" class="btn" data-whey2="${id}" data-testid="whey2-${id}">蛋白粉 2 匙</button>
+      <div class="out-row">
+        <span>外食</span>
+        ${(OUT_MEALS || []).map((o) => `<button type="button" class="chip${logged.mode === "out" && outType === o.id ? " on" : ""}" data-out-type="${id}" data-oid="${o.id}">${esc(o.name)}</button>`).join("")}
+      </div>
+      <div class="out-row">
+        <span>份量</span>
+        ${(OUT_SIZES || []).map((s) => `<button type="button" class="chip${outSize === s.id ? " on" : ""}" data-out-size="${id}" data-sid="${s.id}">${esc(s.name)}</button>`).join("")}
+      </div>
+      ${hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : ""}
+    </div>` : (hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : "");
+  return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
     <div class="who">${esc(mealLabel(id, trainDay, st))} <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span></div>
     <p class="suggest">建議：${esc(suggestLine)}</p>
-    <div class="portion-row">
-      <span>🥩</span>
-      <div class="stepper">
-        <button type="button" data-palm="${id}" data-delta="-1" aria-label="少一掌">−</button>
-        <b data-testid="palm-${id}">${palms} 掌</b>
-        <button type="button" data-palm="${id}" data-delta="1" aria-label="加一掌">+</button>
-      </div>
-      <span>🍞</span>
-      <div class="stepper">
-        <button type="button" data-fist="${id}" data-delta="-1" aria-label="少一拳">−</button>
-        <b data-testid="fist-${id}">${fists} 拳</b>
-        <button type="button" data-fist="${id}" data-delta="1" aria-label="加一拳">+</button>
-      </div>
-    </div>
-    <button type="button" class="chip${veg ? " on" : ""}" data-veg="${id}" data-testid="veg-${id}">蔬菜半盤</button>
-    <button type="button" class="btn" data-whey2="${id}" data-testid="whey2-${id}">蛋白粉 2 匙</button>
-    <div class="out-row">
-      <span>外食</span>
-      ${(OUT_MEALS || []).map((o) => `<button type="button" class="chip${logged.mode === "out" && outType === o.id ? " on" : ""}" data-out-type="${id}" data-oid="${o.id}">${esc(o.name)}</button>`).join("")}
-    </div>
-    <div class="out-row">
-      <span>份量</span>
-      ${(OUT_SIZES || []).map((s) => `<button type="button" class="chip${outSize === s.id ? " on" : ""}" data-out-size="${id}" data-sid="${s.id}">${esc(s.name)}</button>`).join("")}
-    </div>
-    ${hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : ""}
+    ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}` : ""}
     <div class="row-acts">
-      <button type="button" class="btn eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">${eaten ? "✓ 吃了" : "○ 還沒吃"}</button>
-      <button type="button" class="btn" data-eat-else="${id}">吃了別的</button>
+      <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
+      <button type="button" class="btn xl" data-eat-else="${id}">吃了別的</button>
     </div>
-    ${alt}
+    <button type="button" class="btn ghost short-btn" data-meal-more="${id}" data-testid="meal-more-${id}">${more ? "收起份量" : "份量"}</button>
+    ${portionPane}
   </div>`;
 }
 
@@ -1157,15 +1180,7 @@ function renderHome(st) {
   }
 
   const trainDay = isTrainDay(st);
-  const hour = t.getHours();
-  const shake = trainDay ? twoScoopMeal(st) : null;
-  const topPowder = trainDay && hour < 16
-    ? `<section class="card hero" data-testid="top-card" data-top="powder">
-        <div class="big">16:00 兩份蛋白粉＋地瓜 150g</div>
-        ${scoopPicker(st, 0)}${scoopPicker(st, 1)}
-      </section>`
-    : "";
-  const mealIds = MEAL_ORDER.concat(((st.dinnerAlt || {})[todayKey()] === "eggs21") ? ["eggs21"] : []);
+  const mealIds = MEAL_ORDER.slice();
   const meals = mealIds.map((id) => renderMealRow(st, id, trainDay)).join("");
 
   const chips = MAIN_PARTS.map((p) => {
@@ -1179,13 +1194,12 @@ function renderHome(st) {
     : "";
 
   return `
-    ${topPowder}
     ${trainCard}
     ${renderSuggestion(st, kcal)}
     <p class="sec">今天吃</p>
     <section class="card" data-testid="eat-card">
       <div class="rings">
-        ${ringEl(totals.kcal, kcal.target, `/ ${kcal.target}`, kcal.band, false)}
+        ${ringEl(totals.kcal, kcal.target, "kcal", String(kcal.target), false)}
         ${ringEl(totals.protein, PROTEIN_TARGET, "蛋白 g", "140–160", totals.protein >= PROTEIN_MIN)}
       </div>
       <p class="remain" data-testid="remain">${esc(remainText(st, totals, kcal))}</p>
@@ -1445,40 +1459,68 @@ function renderDone(st, session) {
 
 function renderShop(st) {
   const shop = persistShopWeek(st);
-  const visible = (SHOP_ITEMS || []).filter((it) => !shop.hide[it.id]);
-  const n = visible.filter((it) => shop.checked[it.id]).length;
+  const stats = shopDaysStats(st);
+  const visible = shopAllItems(st).filter((it) => !shop.hide[it.id] || isShopFrequent(st, it));
   const hint = shopDaysHint(st);
   const wheyWarn = shop.wheyPacks < 6
     ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 包，不到 6 包，該補貨了。</p>`
     : "";
+  const pPct = stats.proteinPlan ? Math.min(100, Math.round(100 * stats.proteinBought / stats.proteinPlan)) : 0;
+  const sPct = stats.starchPlan ? Math.min(100, Math.round(100 * stats.starchBought / stats.starchPlan)) : 0;
+  const bars = `<div class="shop-bars" data-testid="shop-bars">
+      <div class="shop-bar">
+        <div class="lab">蛋白質 <b data-testid="shop-protein-days">${stats.proteinBought}</b>/<span data-testid="shop-protein-plan">${stats.proteinPlan}</span> 天</div>
+        <div class="bar" role="progressbar" aria-valuenow="${pPct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pPct}%"></i></div>
+      </div>
+      <div class="shop-bar">
+        <div class="lab">澱粉 <b data-testid="shop-starch-days">${stats.starchBought}</b>/<span data-testid="shop-starch-plan">${stats.starchPlan}</span> 天</div>
+        <div class="bar" role="progressbar" aria-valuenow="${sPct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${sPct}%"></i></div>
+      </div>
+    </div>`;
   const groups = (SHOP_GROUPS || []).map((g) => {
     const items = visible.filter((it) => it.group === g.id);
     if (!items.length) return "";
-    const vegNote = g.id === "veg" ? `<p class="muted">本週選 4–5 種，各 1 份。已選 ${(SHOP_ITEMS || []).filter((it) => it.pick && shopAcquired(shop, it.id)).length} 種。</p>` : "";
+    const vegNote = g.id === "veg" ? `<p class="muted">本週選 4–5 種，各 1 份。已選 ${shopAllItems(st).filter((it) => it.pick && shopAcquired(shop, it.id)).length} 種。</p>` : "";
     return `<p class="sec">${esc(g.name)}</p>${vegNote}${items.map((it) => {
       const on = !!shop.checked[it.id];
       const have = !!shop.have[it.id];
+      const freq = isShopFrequent(st, it);
       const whey = it.whey ? `<div class="whey-stock">目前剩 <span data-testid="whey-packs">${shop.wheyPacks}</span> 包
         <span class="stepper">
           <button type="button" data-whey-pack="-1">−</button>
           <button type="button" data-whey-pack="1">+</button>
         </span></div>` : "";
-      return `<div class="item${on ? " on" : ""}${have ? " have" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
+      const del = it.custom ? `<button type="button" class="btn ghost short-btn" data-shop-del="${it.id}">刪</button>` : "";
+      return `<div class="item${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
         <span class="ck${on ? " on" : ""}">${on ? "✓" : ""}</span>
-        <span><b>${esc(it.name)}</b>${it.hint ? `<br><span class="muted">${esc(it.hint)}</span>` : ""}${have ? `<br><span class="have-tag">家裡有（下週隱藏）</span>` : ""}${whey}</span>
+        <span><b>${esc(it.name)}</b>${it.hint ? `<br><span class="muted">${esc(it.hint)}</span>` : ""}${have ? `<br><span class="have-tag">家裡有${freq ? "" : "（下週隱藏）"}</span>` : ""}${whey}</span>
+        <button type="button" class="chip${freq ? " on" : ""}" data-shop-frequent="${it.id}" data-testid="shop-frequent-${it.id}">常買</button>
+        ${del}
       </div>`;
     }).join("")}`;
   }).join("");
+  const add = `<div class="shop-add card" data-testid="shop-add">
+      <input type="text" data-shop-new-name placeholder="新增食材" aria-label="新增食材">
+      <select data-shop-new-group aria-label="分類">
+        <option value="protein">蛋白質</option>
+        <option value="starch">澱粉</option>
+        <option value="veg">蔬菜</option>
+      </select>
+      <input type="number" data-shop-new-qty value="2" min="0" aria-label="掌或拳">
+      <button type="button" class="btn primary" data-shop-add>新增</button>
+    </div>`;
   return `<section class="card hero">
       <div class="k">每週補貨</div>
       <div class="big">採買清單</div>
-      <div class="lab">點選＝已買 · 長按＝家裡有</div>
+      <div class="lab">點選＝已買 · 長按＝家裡有 · 常買會記住</div>
     </section>
     <button type="button" class="shop-hint${shop.hintCollapsed ? " collapsed" : ""}" data-toggle-hint data-testid="shop-hint">${shop.hintCollapsed ? "本週存量提示" : esc(hint)}</button>
+    ${bars}
     ${wheyWarn}
     <div class="acts"><button type="button" class="btn" data-clear-shop>清除勾選</button></div>
     ${groups}
-    <p class="muted">這裡只列新鮮與家常食材。長按項目可標示家裡有。</p>
+    ${add}
+    <p class="muted">長按＝家裡有。常買的項目每週都會留下。</p>
     ${shareCatsBtn()}`;
 }
 
@@ -1707,6 +1749,7 @@ function render() {
   else if (st.tab === "workout") main.innerHTML = renderWorkout(st);
   else if (st.tab === "body") main.innerHTML = renderBody(st);
   else main.innerHTML = renderHome(st);
+  if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
 }
 
 function tick() {
@@ -1748,7 +1791,27 @@ document.getElementById("main").addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("[data-share-cats]")) {
-    copyShareText(st);
+    ui.shareSheet = { text: shareCatsText(st), copied: false };
+    render();
+    return;
+  }
+  if (e.target.closest("[data-share-copy]")) {
+    copyShareText(st).then(() => {
+      if (ui.shareSheet) ui.shareSheet.copied = true;
+      render();
+    });
+    return;
+  }
+  if (e.target.closest("[data-share-close]")) {
+    ui.shareSheet = null;
+    render();
+    return;
+  }
+  const mealMore = e.target.closest("[data-meal-more]");
+  if (mealMore) {
+    const id = mealMore.dataset.mealMore;
+    ui.mealMore = ui.mealMore === id ? null : id;
+    render();
     return;
   }
   const palm = e.target.closest("[data-palm]");
@@ -1821,8 +1884,44 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const shopFreq = e.target.closest("[data-shop-frequent]");
+  if (shopFreq) {
+    const id = shopFreq.dataset.shopFrequent;
+    const next = { ...(st.shopFrequent || {}) };
+    next[id] = !isShopFrequent(st, shopAllItems(st).find((it) => it.id === id) || { id, frequent: false });
+    save({ shopFrequent: next });
+    render();
+    return;
+  }
+  const shopDel = e.target.closest("[data-shop-del]");
+  if (shopDel) {
+    const id = shopDel.dataset.shopDel;
+    save({ shopExtra: (st.shopExtra || []).filter((it) => it.id !== id) });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-shop-add]")) {
+    const name = (document.querySelector("[data-shop-new-name]") || {}).value;
+    const group = (document.querySelector("[data-shop-new-group]") || {}).value || "protein";
+    const qty = Math.max(0, Number((document.querySelector("[data-shop-new-qty]") || {}).value) || 0);
+    const label = String(name || "").trim();
+    if (label) {
+      const item = {
+        id: "x-" + Date.now(),
+        group,
+        name: label,
+        hint: "自訂",
+        custom: true,
+        palms: group === "protein" ? qty : 0,
+        fists: group === "starch" ? qty : 0,
+      };
+      save({ shopExtra: (st.shopExtra || []).concat([item]), shopFrequent: { ...(st.shopFrequent || {}), [item.id]: true } });
+    }
+    render();
+    return;
+  }
   const shopItem = e.target.closest("[data-shop]");
-  if (shopItem && !e.target.closest("[data-whey-pack]")) {
+  if (shopItem && !e.target.closest("[data-whey-pack]") && !e.target.closest("[data-shop-frequent]") && !e.target.closest("[data-shop-del]")) {
     if (window.__shopHaveLock) { window.__shopHaveLock = false; return; }
     const shop = persistShopWeek(st);
     const id = shopItem.dataset.shop;
@@ -1853,8 +1952,8 @@ document.getElementById("main").addEventListener("click", (e) => {
     if (meals[id] && meals[id].eaten) {
       meals[id] = { ...meals[id], eaten: false };
     } else {
-      const cur = currentMeal(st, id);
-      meals[id] = { ...cur, eaten: true };
+      const est = mealEstimate(st, id);
+      meals[id] = { ...(meals[id] || {}), ...est, eaten: true };
     }
     save({ mealLogs: { ...st.mealLogs, [day]: meals } });
     render();
@@ -2060,7 +2159,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
   main.addEventListener("pointerdown", (e) => {
     const item = e.target.closest("[data-shop]");
-    if (!item || e.target.closest("[data-whey-pack]")) return;
+    if (!item || e.target.closest("[data-whey-pack],[data-shop-frequent],[data-shop-del],[data-shop-add],input,select,button")) return;
     fired = false;
     timer = setTimeout(() => {
       fired = true;
