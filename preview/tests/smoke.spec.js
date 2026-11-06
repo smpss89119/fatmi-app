@@ -317,7 +317,130 @@ test.describe("FITMI", () => {
     const text = page.locator("[data-testid=share-sheet-text]");
     await expect(text).toContainText("今天訓練");
     await expect(text).toContainText("腿推");
-    await expect(text).toContainText("80 kg");
+    await expect(text).toContainText("80kg×");
     await expect(text).toContainText("下背：2");
+  });
+});
+
+test.describe("FITMI2", () => {
+  test("1) chest counts stay 3 when log and session overlap", async ({ page }) => {
+    const sets = [{ done: true }, { done: true }, { done: true }];
+    await open(page, { now: TUE_10, sleep: "8" }, {
+      logs: { "2026-11-10": { workoutId: "gymA", finishedAt: 1, moves: { 胸推: sets } } },
+      session: { date: "2026-11-10", workoutId: "gymA", phase: "done", moves: { 胸推: sets } },
+    });
+    await expect(page.locator("[data-testid=week-chip-chest]")).toHaveText("胸 3 組");
+    await page.locator(".body-svg [data-part=chest]").first().click();
+    const tip = page.locator("[data-testid=body-tip]");
+    await expect(tip).toContainText("本週 3 組");
+    await expect(tip).toContainText("來自");
+    await expect(tip).toContainText("胸推");
+    await expect(tip).not.toContainText("本週 6 組");
+  });
+
+  test("2+3) export is 腿推 60kg×10×3 and workout comes first", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, {
+      logs: {
+        "2026-11-10": {
+          workoutId: "gymA",
+          backScore: 2,
+          moves: {
+            腿推: [
+              { done: true, weight: 60, reps: 10 },
+              { done: true, weight: 60, reps: 10 },
+              { done: true, weight: 60, reps: 10 },
+            ],
+          },
+        },
+      },
+    });
+    await page.locator("[data-testid=share-cats]").click();
+    const text = await page.locator("[data-testid=share-sheet-text]").innerText();
+    expect(text).toContain("腿推 60kg×10×3");
+    expect(text.indexOf("今天訓練")).toBeGreaterThanOrEqual(0);
+    expect(text.indexOf("今天訓練")).toBeLessThan(text.indexOf("今天吃"));
+  });
+
+  test("4) back score >= 3 swaps row and press, not only squat", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-10", {
+      logs: {
+        "2026-11-06": {
+          workoutId: "gymA",
+          backScore: 3,
+          finishedAt: "2026-11-06T11:00:00+07:00",
+          moves: { 腿推: [{ done: true }] },
+        },
+      },
+    }));
+    await page.locator("[data-start]").click();
+    const steps = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).session.steps.map((s) => s.name));
+    expect(steps).toContain("胸靠划船");
+    expect(steps).toContain("坐姿有靠背肩推");
+    expect(steps).toContain("地板臥推");
+    expect(steps).not.toContain("坐姿划船");
+    expect(steps).not.toContain("坐姿啞鈴肩推");
+  });
+
+  test("5) 腿推 cue is 下背別離開椅背", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-10", {
+      logs: {
+        "2026-11-06": {
+          workoutId: "gymA",
+          finishedAt: "2026-11-06T11:00:00+07:00",
+          backScore: 1,
+          moves: { 腿推: [{ done: true, weight: 80, reps: 12 }] },
+        },
+      },
+    }));
+    await page.locator("[data-start]").click();
+    await expect(page.locator(".wo-name")).toContainText("腿推");
+    await expect(page.locator("[data-testid=wo-cue]")).toHaveText("下背別離開椅背");
+  });
+
+  test("6) swap suggestions show right after scoring 3+", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, {
+      session: {
+        date: "2026-11-10",
+        workoutId: "gymA",
+        phase: "back",
+        steps: [],
+        moves: { 腿推: [{ done: true, weight: 60, reps: 10 }] },
+        backScore: null,
+      },
+    });
+    await page.evaluate(() => { location.hash = "workout"; });
+    await page.waitForSelector("[data-back='3']");
+    await page.locator("[data-back='3']").click();
+    await expect(page.locator("[data-testid=back-score]")).toContainText("下背 3 分");
+    const swaps = page.locator("[data-testid=back-swaps]");
+    await expect(swaps).toBeVisible();
+    await expect(swaps).toContainText("下次換動作");
+    await expect(swaps).toContainText("胸靠划船");
+    await expect(swaps).toContainText("坐姿有靠背肩推");
+    await expect(page.locator("body")).not.toContainText("復原");
+  });
+
+  test("7) pantry 雞胸 600g does not duplicate qty or inflate days", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" });
+    await page.locator("[data-tab=shop]").click();
+    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("14");
+    await page.locator("[data-testid=shop-plus]").click();
+    await page.locator("[data-shop-new-name]").fill("雞胸");
+    await page.locator("[data-shop-new-amount]").fill("600g");
+    const cats = page.locator("[data-testid=shop-cats]");
+    if (await cats.isVisible()) await page.locator("[data-shop-cat=protein]").click();
+    await page.locator("[data-shop-add]").click();
+    const chip = page.locator("[data-testid=shop-chips]");
+    await expect(chip).toContainText("雞胸 600g");
+    await expect(chip).not.toContainText("600g600g");
+    const chipText = await chip.innerText();
+    expect(chipText.split("600g").length - 1).toBe(1);
+    const row = page.locator(".item", { hasText: "雞胸 600g" }).first();
+    await expect(row).toBeVisible();
+    const rowText = await row.innerText();
+    expect(rowText).not.toContain("600g600g");
+    expect((rowText.match(/600g/g) || []).length).toBe(1);
+    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("14");
+    await expect(page.locator("[data-testid=shop-bars]")).not.toContainText("314");
   });
 });

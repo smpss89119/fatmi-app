@@ -586,7 +586,27 @@ function shopDaysStats(st) {
 }
 function shopDaysHint(st) {
   const s = shopDaysStats(st);
-  return `蛋白質夠吃 ${s.proteinBought}/${s.proteinPlan} 天 · 澱粉夠吃 ${s.starchBought}/${s.starchPlan} 天`;
+  return `蛋白質夠吃 ${Number(s.proteinBought)}/${Number(s.proteinPlan)} 天 · 澱粉夠吃 ${Number(s.starchBought)}/${Number(s.starchPlan)} 天`;
+}
+function parseShopQty(amount) {
+  const a = String(amount || "").trim();
+  if (!a) return 0;
+  if (/^\d+(\.\d+)?$/.test(a)) return Number(a);
+  return 0;
+}
+function shopDisplayName(label, amount) {
+  const name = String(label || "").trim();
+  const amt = String(amount || "").trim();
+  if (!amt) return name;
+  if (name.includes(amt)) return name;
+  return `${name} ${amt}`.trim();
+}
+function shopItemHint(it) {
+  const hint = String((it && it.hint) || "");
+  const name = String((it && it.name) || "");
+  if (!hint || hint === "自訂") return "";
+  if (name.includes(hint)) return "";
+  return hint;
 }
 
 function mealLineText(st, id) {
@@ -599,11 +619,20 @@ function mealLineText(st, id) {
   return `${mark} 還沒吃（建議：${est.suggestName || est.name}）`;
 }
 function formatSetLine(sets) {
-  const done = (sets || []).filter((s) => s.done);
+  const done = (sets || []).filter((x) => x.done);
   if (!done.length) return "尚未記錄";
-  return done.map((s) => {
-    if (s.weight != null && s.weight !== "") return `${s.weight} kg × ${s.reps}`;
-    return `${s.reps} 下`;
+  const groups = [];
+  for (const x of done) {
+    const w = (x.weight != null && x.weight !== "") ? Number(x.weight) : null;
+    const r = x.reps;
+    const key = `${w}::${r}`;
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) last.n += 1;
+    else groups.push({ key, w, r, n: 1 });
+  }
+  return groups.map((g) => {
+    if (g.w != null && !Number.isNaN(g.w)) return `${g.w}kg×${g.r}×${g.n}`;
+    return `${g.r}下×${g.n}`;
   }).join("、");
 }
 function shareCatsText(st) {
@@ -653,32 +682,45 @@ function shareCatsText(st) {
     for (const name of names) {
       if (seen.has(name)) continue;
       seen.add(name);
-      lines.push(`${name}：${formatSetLine(moves[name])}`);
+      lines.push(`${name} ${formatSetLine(moves[name])}`);
     }
     for (const name of Object.keys(moves)) {
       if (seen.has(name)) continue;
-      lines.push(`${name}：${formatSetLine(moves[name])}`);
+      lines.push(`${name} ${formatSetLine(moves[name])}`);
     }
     const score = src.backScore != null ? src.backScore : (session && session.backScore);
     const scoreLine = score != null ? `\n下背：${score} 分` : "";
     trainBlock = `課表：${title}\n${lines.join("\n") || "還沒有動作紀錄"}${scoreLine}`;
   }
 
-  return `【${t.getMonth() + 1}/${t.getDate()} 週${DOW[t.getDay()]}】
-
-■ 今天吃
+  const header = `【${t.getMonth() + 1}/${t.getDate()} 週${DOW[t.getDay()]}】`;
+  const eatSection = `■ 今天吃
 ${mealLines}
 合計：${Math.round(totals.kcal)} kcal／蛋白 ${Math.round(totals.protein)} g（目標 ${kcal.band} kcal，蛋白 140–160 g）
-${remain}
-
-■ 採買／家裡
+${remain}`;
+  const shopSection = `■ 採買／家裡
 ${shopLines}
 蔬菜已選 ${vegN} 種（建議 4–5 種）
 蛋白粉剩 ${shop.wheyPacks} 包${shop.wheyPacks < 6 ? "（不到 6 包，該補貨）" : ""}
-${shopDaysHint(st)}
-
-■ 今天訓練
+${shopDaysHint(st)}`;
+  const trainSection = `■ 今天訓練
 ${trainBlock}`;
+  if (trainDay || src) {
+    return `${header}
+
+${trainSection}
+
+${eatSection}
+
+${shopSection}`;
+  }
+  return `${header}
+
+${eatSection}
+
+${shopSection}
+
+${trainSection}`;
 }
 async function copyShareText(st) {
   const text = shareCatsText(st);
@@ -745,20 +787,56 @@ function lastBackScore(st) {
   }
   return 0;
 }
+function lookSafer(name, video) {
+  const raw = String(name || "").replace(/（選做）/g, "").trim();
+  const list = (typeof BACK_SAFER !== "undefined" && BACK_SAFER) ? BACK_SAFER : [];
+  for (const s of list) {
+    if (s.test.test(raw) && raw !== s.name) {
+      return { name: s.name, video: s.video || video, swapped: true };
+    }
+  }
+  return null;
+}
 function resolveName(step, backScore) {
   const raw = String(step.name || "").replace(/（選做）/g, "").trim();
-  const pick = (name, video, swapped) => ({ name, video, swapped: !!swapped });
-  if (!raw.includes("或")) {
-    if (backScore >= 3 && /深蹲/.test(raw)) return pick("腿推", "legpress", true);
-    return pick(raw, step.video, false);
+  const pick = (name, video, swapped) => ({ name, video: video || step.video, swapped: !!swapped });
+  if (Number(backScore) >= 3) {
+    if (raw.includes("或")) {
+      const parts = raw.split("或").map((x) => x.trim()).filter(Boolean);
+      for (const part of parts) {
+        if (!lookSafer(part, step.video)) return pick(part, step.video, part !== parts[0]);
+      }
+      const safer = lookSafer(parts[0], step.video);
+      if (safer) return pick(safer.name, safer.video, true);
+    } else {
+      const safer = lookSafer(raw, step.video);
+      if (safer) return pick(safer.name, safer.video, true);
+    }
   }
-  const parts = raw.split("或").map((s) => s.trim());
-  if (backScore >= 3) {
-    const lp = parts.find((p) => p.includes("腿推"));
-    if (lp) return pick(lp, "legpress", parts[0] !== lp);
-    if (parts.some((p) => /深蹲/.test(p))) return pick("腿推", "legpress", true);
+  if (raw.includes("或")) {
+    const parts = raw.split("或").map((x) => x.trim()).filter(Boolean);
+    return pick(parts[0] || raw, step.video, false);
   }
-  return pick(parts[0], step.video, false);
+  return pick(raw, step.video, false);
+}
+function upcomingBackSwaps(workoutId, score) {
+  if (!(Number(score) >= 3)) return [];
+  const w = (typeof WORKOUTS !== "undefined" && workoutId) ? WORKOUTS[workoutId] : null;
+  if (!w) return [];
+  const hints = [];
+  const seen = new Set();
+  for (const step of w.steps || []) {
+    const cur = resolveName(step, 0);
+    const nxt = resolveName(step, score);
+    if (nxt.swapped && nxt.name !== cur.name) {
+      const key = `${cur.name}→${nxt.name}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        hints.push(key);
+      }
+    }
+  }
+  return hints;
 }
 function lastStrengthBefore(st, d = now()) {
   const today = todayKey(d);
@@ -844,13 +922,17 @@ function weekPartSources(st, d = now(), opts = {}) {
       }
     }
   }
+  const sessionDate = (opts.includeSession && st.session && st.session.date) ? st.session.date : null;
   for (let i = 0; i < 7; i++) {
     const key = todayKey(addDays(mon, i));
     if (opts.excludeToday && key === today) continue;
+    if (sessionDate && key === sessionDate) {
+      addMoves(st.session.moves);
+      continue;
+    }
     const log = (st.logs || {})[key];
     if (log) addMoves(log.moves);
   }
-  if (opts.includeSession && st.session && st.session.date === today) addMoves(st.session.moves);
   const lists = {};
   for (const [k, set] of Object.entries(sources)) lists[k] = [...set];
   return { counts, sources: lists };
@@ -985,18 +1067,6 @@ function bodyMap(priList, secList, weekCounts, sourceMap) {
   const detail = weekPartSources(state(), now(), { includeSession: true });
   const week = detail.counts;
   const sources = detail.sources;
-  if (weekCounts && typeof weekCounts === "object") {
-    for (const [k, v] of Object.entries(weekCounts)) {
-      if ((Number(v) || 0) > (Number(week[k]) || 0)) week[k] = v;
-    }
-  }
-  if (sourceMap) {
-    for (const [k, list] of Object.entries(sourceMap)) {
-      const extra = Array.isArray(list) ? list : [];
-      const cur = sources[k] || [];
-      sources[k] = [...new Set(cur.concat(extra))];
-    }
-  }
   const selected = ui.bodyPart || null;
   const svg = (typeof bodySvgMarkup === "function")
     ? bodySvgMarkup((id) => partClass(id, pri, sec, week, selected))
@@ -1016,10 +1086,12 @@ function yt(key) {
   return `<a class="yt" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">▶ ${esc(v.label)}</a>`;
 }
 function cueFor(name) {
-  if (/腿推/.test(name)) return "腰靠穩在椅背上，不要用腰發力。";
+  if (/腿推/.test(name)) return "下背別離開椅背";
   if (/深蹲/.test(name)) return "不要蹲太深，胸口打直，下背保持中立。";
+  if (/胸靠划船|胸部支撐/.test(name)) return "胸口貼穩，不要用腰拉。";
   if (/臀橋|髖推|臀推/.test(name)) return "用臀部發力，不要靠腰撐起來。";
-  if (/胸推|臥推|伏地/.test(name)) return "肩胛收穩，腰別過度拱起。";
+  if (/地板臥推|胸推|臥推|伏地/.test(name)) return "肩胛收穩，腰別過度拱起。";
+  if (/有靠背肩推/.test(name)) return "背靠穩椅背，不要後仰或聳肩。";
   if (/肩推/.test(name)) return "核心收緊，不要聳肩或後仰。";
   if (/划船/.test(name)) return "保持坐姿，不要彎腰拉。";
   if (/下拉/.test(name)) return "胸口上挺，不要晃腰借力。";
@@ -1258,7 +1330,7 @@ function renderHome(st) {
 
   const chips = MAIN_PARTS.map((p) => {
     const n = week[p] || 0;
-    return `<span class="chip${n < 6 ? " low" : ""}">${esc(PARTS[p])} ${n} 組</span>`;
+    return `<span class="chip${n < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${n} 組</span>`;
   }).join("");
 
   const gAttach = todayLog && (todayLog.garmin || matchGarmin(todayKey()));
@@ -1479,7 +1551,7 @@ function renderWorkout(st) {
       <button type="button" class="btn" data-leave>先離開</button>
       <div class="wo-prog">${session.i + 1} / ${session.steps.length} · 第 ${setNo} / ${load.sets} 組</div>
     </div>
-    <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">改腿推</span>' : ""}${session.returning ? '<span class="chip" data-testid="buffer-week">緩衝週</span>' : ""}</div>
+    <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">換動作</span>' : ""}${session.returning ? '<span class="chip" data-testid="buffer-week">緩衝週</span>' : ""}</div>
     <div data-testid="wo-figure">${bodyMap((musclesFor(step.name).primary), (musclesFor(step.name).secondary), weekSetCounts(st, now(), { includeSession: true }))}</div>
     <p class="muted">${esc(step.dose)}${load.perSide ? "（單側次數）" : ""} · 目標 ${load.target} 下${load.hist && load.hist.reps ? ` · 上次 ${load.hist.reps} 下` : ""}</p>
     <p class="wo-cue" data-testid="wo-cue">${esc(cueFor(step.name))}</p>
@@ -1511,19 +1583,24 @@ function renderBack(session) {
   return `<section class="card hero"><div class="big">下背感覺？</div>
     <div class="lab">0 沒感覺，10 很不適。點一下就好。</div></section>
     <div class="back-grid">${btns}</div>
-    <p class="muted">3 分以上，下次深蹲會自動改成腿推。</p>`;
+    <p class="muted">3 分以上，下次改成較安全的動作。</p>`;
 }
 
 function renderDone(st, session) {
-  const week = weekSetCounts({ ...st, logs: { ...st.logs, [session.date]: { moves: session.moves } } }, now());
+  const week = weekSetCounts(st, now(), { includeSession: true });
   const parts = todayPartsFromMoves(session.moves);
   const g = session.garmin || matchGarmin(session.date);
-  const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
+  const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
+  const swaps = upcomingBackSwaps(session.workoutId, session.backScore);
+  const swapLine = swaps.length
+    ? `<p class="note" data-testid="back-swaps">下次換動作：${esc(swaps.join("、"))}</p>`
+    : "";
   return `<section class="card hero">
       <div class="k">練完了</div>
       <div class="big">今天部位</div>
-      <div class="lab">下背 ${session.backScore} 分${session.backScore >= 3 ? " · 下次深蹲改腿推" : ""}</div>
+      <div class="lab" data-testid="back-score">下背 ${session.backScore} 分</div>
     </section>
+    ${swapLine}
     ${bodyMap(parts.pri, parts.sec, week)}
     <div class="chips">${chips}</div>
     ${g ? `<p class="muted">Garmin：${g.durationMin != null ? g.durationMin + " 分" : ""}${g.avgHR != null ? " · 平均心率 " + Math.round(g.avgHR) : ""}${g.kcal != null ? " · " + Math.round(g.kcal) + " kcal" : ""}</p>` : `<p class="muted">今天的 Garmin 紀錄之後同步，會自動對上這次訓練的心率和時間。</p>`}
@@ -1566,7 +1643,7 @@ function renderShop(st) {
       const del = it.custom ? `<button type="button" class="btn ghost short-btn" data-shop-del="${it.id}">刪</button>` : "";
       return `<div class="item${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
         <span class="ck${on ? " on" : ""}">${on ? "✓" : ""}</span>
-        <span><b>${esc(it.name)}</b>${it.hint ? `<br><span class="muted">${esc(it.hint)}</span>` : ""}${have ? `<br><span class="have-tag">家裡有${freq ? "" : "（下週隱藏）"}</span>` : ""}${whey}</span>
+        <span><b>${esc(it.name)}</b>${shopItemHint(it) ? `<br><span class="muted">${esc(shopItemHint(it))}</span>` : ""}${have ? `<br><span class="have-tag">家裡有${freq ? "" : "（下週隱藏）"}</span>` : ""}${whey}</span>
         <button type="button" class="chip${freq ? " on" : ""}" data-shop-frequent="${it.id}" data-testid="shop-frequent-${it.id}">常買</button>
         ${del}
       </div>`;
@@ -1640,7 +1717,7 @@ function renderRules(st) {
       <p>訓練日建議 16:00 喝兩份樂維根（芝麻／豆漿／杏仁各約 20 g 蛋白，極致約 25 g）加地瓜。一份極致則 18:30 雞胸 150g；兩份 20 g 則雞胸 200g 或 21:00 加蛋 2 顆。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
-      <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次深蹲改腿推。</p>
+      <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
       <p>換餐時蛋白質可互選：雞胸 200g、蝦仁 150g、吳郭魚排 1 片、雞蛋 3 顆。澱粉可互選：飯 150g、地瓜 150g、酸種麵包 2 片。</p>
     </div>
     <p class="sec">下背：少做</p>
@@ -1682,7 +1759,8 @@ function buildSteps(st, workout) {
   });
   if (now().getDay() === 5) {
     for (const ex of fridayExtras(st, steps, now())) {
-      steps.push({ name: ex.name, dose: ex.dose, video: ex.video, extra: true, extraFor: ex.extraFor, swapped: false });
+      const r = resolveName(ex, back);
+      steps.push({ name: r.name, dose: ex.dose, video: r.video || ex.video, extra: true, extraFor: ex.extraFor, swapped: r.swapped });
     }
   }
   return steps;
@@ -2016,17 +2094,17 @@ document.getElementById("main").addEventListener("click", (e) => {
     const known = matchShopItem(st, label);
     const selGroup = (document.querySelector("[data-shop-new-group]") || {}).value;
     const group = known ? known.group : (ui.shopCat || selGroup || "protein");
-    const qty = Math.max(0, Number(String(amount).replace(/[^\d.]/g, "")) || 0);
+    const qty = parseShopQty(amount);
     if (label) {
       const item = {
         id: "x-" + Date.now(),
         group,
-        name: amount ? `${label} ${amount}` : label,
-        hint: amount || "自訂",
+        name: shopDisplayName(label, amount),
+        hint: "",
         custom: true,
         amount,
-        palms: group === "protein" ? (qty || 2) : 0,
-        fists: group === "starch" ? (qty || 2) : 0,
+        palms: group === "protein" ? qty : 0,
+        fists: group === "starch" ? qty : 0,
       };
       save({ shopExtra: (st.shopExtra || []).concat([item]), shopFrequent: { ...(st.shopFrequent || {}), [item.id]: true } });
       ui.shopDraftName = "";

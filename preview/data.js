@@ -159,12 +159,22 @@ const MOVE_MUSCLES = [
   { keys: ["高腳杯深蹲", "深蹲"], primary: ["quads", "glutes"], secondary: ["core"] },
   { keys: ["臀橋", "臀推", "髖推"], primary: ["glutes"], secondary: ["hams"] },
   { keys: ["胸推", "地板臥推", "臥推", "伏地挺身", "跪姿伏地"], primary: ["chest"], secondary: ["tris", "frontDelts"] },
-  { keys: ["坐姿啞鈴肩推", "肩推"], primary: ["delts"], secondary: ["tris"] },
-  { keys: ["坐姿划船", "單臂划船", "單手划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
+  { keys: ["坐姿有靠背肩推", "坐姿啞鈴肩推", "肩推"], primary: ["delts"], secondary: ["tris"] },
+  { keys: ["胸靠划船", "胸部支撐划船", "坐姿划船", "單臂划船", "單手划船", "划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
   { keys: ["下拉", "滑輪下拉"], primary: ["lats"], secondary: ["bis"] },
   { keys: ["面拉"], primary: ["rearDelts", "upperback"], secondary: ["rotator"] },
   { keys: ["死蟲"], primary: ["core"], secondary: ["lowback"] },
   { keys: ["鳥狗"], primary: ["core"], secondary: ["lowback"] },
+];
+
+const BACK_SAFER = [
+  { test: /深蹲/, name: "腿推", video: "legpress" },
+  { test: /硬舉|早安/, name: "臀橋", video: "bridge" },
+  { test: /單臂划船|單手划船|彎腰划船/, name: "胸靠划船", video: "seatedrow" },
+  { test: /划船/, name: "胸靠划船", video: "seatedrow" },
+  { test: /肩推/, name: "坐姿有靠背肩推", video: "press" },
+  { test: /髖推|臀推/, name: "臀橋", video: "bridge" },
+  { test: /胸推|臥推/, name: "地板臥推", video: "floor" },
 ];
 
 const EXTRA_FOR_PART = {
