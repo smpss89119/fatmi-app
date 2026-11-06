@@ -1,4 +1,4 @@
-const C = "fatcat-2-20261107";
+const C = "fatcat-2-20261107e";
 const F = [
   "./",
   "index.html",
@@ -6,6 +6,7 @@ const F = [
   "app.css",
   "data.js",
   "data.json",
+  "version.json",
   "manifest.webmanifest",
   "icon-180.png",
   "icon-512.png",
@@ -21,12 +22,18 @@ self.addEventListener("activate", (e) => {
       .then(() => self.clients.claim())
   );
 });
+self.addEventListener("message", (e) => {
+  const data = e.data;
+  if (data === "SKIP_WAITING" || (data && data.type === "SKIP_WAITING")) self.skipWaiting();
+});
 self.addEventListener("fetch", (e) => {
   const u = new URL(e.request.url);
   if (u.origin !== location.origin) return;
-  if (u.pathname.endsWith("data.json")) {
+  const path = u.pathname;
+  const netFirst = path.endsWith("data.json") || path.endsWith("version.json");
+  if (netFirst) {
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: "no-store" })
         .then((r) => {
           const copy = r.clone();
           caches.open(C).then((c) => c.put(e.request, copy));

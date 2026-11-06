@@ -111,3 +111,9 @@ nav#tabs button.on i{filter:none;opacity:1}
 .swap-list button.on{background:var(--o);color:#fff}
 .swap-list button.on small{color:rgba(255,255,255,.9)}
 .est{font-size:14px;color:var(--mut);font-weight:700;margin:6px 0}
+
+.toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:#1A1208;color:#fff;padding:10px 16px;border-radius:999px;font-weight:800;z-index:40;max-width:90%;text-align:center}
+.toast[hidden]{display:none!important}
+#ptr{position:fixed;top:calc(var(--st) + 52px);left:0;right:0;text-align:center;font-weight:800;color:var(--od);z-index:30;pointer-events:none;opacity:0;transition:opacity .2s}
+#ptr.on{opacity:1}
+.ring.ok b{color:#166534}

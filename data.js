@@ -107,7 +107,7 @@ const GROCERY = [
   { id: "veg", name: "冷凍蔬菜", hint: "大量蔬菜、少油" },
   { id: "carb", name: "白米或地瓜", hint: "訓練日半碗～大半碗；休息日減半" },
   { id: "banana", name: "香蕉", hint: "練前 1–2 小時可加半根" },
-  { id: "whey", name: "樂維根無糖蛋白粉", hint: "1 scoop 40 g，練前 16:00；估計每 scoop 約 22 g 蛋白、185 kcal" },
+  { id: "whey", name: "樂維根蛋白粉", hint: "16:00 兩份：無糖芝麻／豆漿／杏仁各約 20 g 蛋白，極致約 25 g" },
   { id: "tea", name: "無糖茶／黑咖啡", hint: "飲料改無糖" },
 ];
 
@@ -175,11 +175,30 @@ const EXTRA_FOR_PART = {
 
 const NO_WEIGHT = /死蟲|鳥狗|伏地|跪姿伏地/;
 
+const WHEY_OPTIONS = [
+  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 170 },
+  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 20, kcal: 170 },
+  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 20, kcal: 170 },
+  { id: "plant", name: "樂維根 極致植物優蛋白 無添加", scoopG: 40, protein: 25, kcal: null },
+];
+
 const PROTEIN_SWAPS = [
   { id: "chicken200", name: "雞胸 200g", kcal: 220, protein: 46 },
+  { id: "chicken150", name: "雞胸 150g", kcal: 165, protein: 35 },
   { id: "shrimp150", name: "蝦仁 150g", kcal: 150, protein: 32 },
   { id: "tilapia", name: "吳郭魚排 1 片", kcal: 150, protein: 30 },
   { id: "eggs3", name: "雞蛋 3 顆", kcal: 210, protein: 19 },
+  { id: "eggs2", name: "雞蛋 2 顆", kcal: 140, protein: 12 },
+];
+
+const BENTO_ELSE = [
+  { id: "leg-half", name: "雞腿便當去皮飯減半", kcal: 620, protein: 42, advice: "這一餐熱量偏高，下一餐青菜加大、澱粉少一點。" },
+  { id: "breast-bento", name: "雞胸便當少油飯半碗", kcal: 580, protein: 45, advice: "蛋白質不錯，下一餐補蔬菜就好。" },
+  { id: "fish-fresh", name: "鮮魚排便當＋青菜", kcal: 600, protein: 38, advice: "蛋白質稍少，下一餐把雞胸或蛋吃滿。" },
+  { id: "pork-swap", name: "排骨改去皮雞肉＋半碗飯", kcal: 650, protein: 40, advice: "下一餐少油、青菜加大。" },
+  { id: "beef-half", name: "牛肉便當去油飯減半", kcal: 680, protein: 40, advice: "熱量偏高，下一餐以蔬菜和精瘦蛋白為主。" },
+  { id: "home-yam", name: "雞胸＋地瓜＋青菜", kcal: 390, protein: 48, advice: "這一餐很標準，下一餐照計劃吃即可。" },
+  { id: "eggs-bread", name: "雞蛋 3 顆＋酸種麵包 2 片", kcal: 380, protein: 25, advice: "蛋白質不夠，下一餐把雞胸或蛋白粉吃滿。" },
 ];
 
 const STARCH_SWAPS = [
@@ -206,7 +225,7 @@ const MEAL_DEFS = {
   breakfast: {
     id: "breakfast",
     label: "早餐",
-    base: { name: "蛋 2 顆＋無糖優格 200g＋燕麥 40g", kcal: 430, protein: 36 },
+    base: { name: "蛋 2 顆＋無糖優格 200g＋燕麥 40g", kcal: 450, protein: 56 },
   },
   lunch: {
     id: "lunch",
@@ -217,13 +236,13 @@ const MEAL_DEFS = {
   snack: {
     id: "snack",
     label: "午後",
-    train: { name: "樂維根無糖蛋白粉 1 scoop（40 g）", kcal: 185, protein: 22 },
+    train: { name: "16:00 兩份蛋白粉＋地瓜 150g", kcal: 470, protein: 42 },
     rest: { name: "乳清或無糖優格", kcal: 150, protein: 24 },
   },
   dinner: {
     id: "dinner",
     label: "晚餐",
-    train: { name: "雞胸 200g＋大份蔬菜＋半碗飯或地瓜", kcal: 650, protein: 52 },
+    train: { name: "18:30 雞胸 200g＋大份蔬菜＋半碗飯或地瓜", kcal: 455, protein: 52 },
     rest: { name: "手掌大蛋白質＋大份蔬菜＋碳水再減半", kcal: 500, protein: 45 },
   },
 };

@@ -30,7 +30,38 @@ function save(patch) {
   localStorage.setItem(STORE, JSON.stringify(s));
   return s;
 }
-function todayKey(d = new Date()) {
+function debugParams() {
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get("debug") !== "1" && q.get("test") !== "1") return {};
+    const out = {};
+    if (q.get("now")) {
+      const n = new Date(q.get("now"));
+      if (!Number.isNaN(+n)) out.now = n;
+    }
+    if (q.has("sleep")) out.sleep = Number(q.get("sleep"));
+    if (q.has("rhr")) out.rhr = Number(q.get("rhr"));
+    if (q.has("rhrAvg")) out.rhrAvg = Number(q.get("rhrAvg"));
+    if (q.has("rest")) out.rest = Number(q.get("rest"));
+    return out;
+  } catch {
+    return {};
+  }
+}
+function now() {
+  return debugParams().now || new Date();
+}
+function restMs() {
+  const s = debugParams().rest;
+  return ((s != null && !Number.isNaN(s)) ? s : REST_SEC) * 1000;
+}
+function sleepText(sleep) {
+  if (sleep == null || Number.isNaN(Number(sleep))) return "";
+  const n = Number(sleep);
+  const label = Number.isInteger(n) ? String(n) : String(n);
+  return `昨晚睡 ${label} 小時`;
+}
+function todayKey(d = now()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 function parseISO(s) {
@@ -66,6 +97,9 @@ function state() {
     returnUntil: s.returnUntil || null,
     fasted: s.fasted || {},
     wheyEst: s.wheyEst || {},
+    scoopPick: s.scoopPick || {},
+    dinnerAlt: s.dinnerAlt || {},
+    lastAdvice: s.lastAdvice || "",
   };
 }
 
@@ -77,15 +111,21 @@ function dailyMap() {
 function dailyOn(date) {
   return dailyMap()[date] || null;
 }
-function lastNightSleep(d = new Date()) {
+function lastNightSleep(d = now()) {
+  const dbg = debugParams();
+  if (dbg.sleep != null && !Number.isNaN(dbg.sleep)) return dbg.sleep;
   const row = dailyOn(todayKey(d));
   return row && row.sleepHours != null ? Number(row.sleepHours) : null;
 }
-function rhrOn(d = new Date()) {
+function rhrOn(d = now()) {
+  const dbg = debugParams();
+  if (dbg.rhr != null && !Number.isNaN(dbg.rhr)) return dbg.rhr;
   const row = dailyOn(todayKey(d));
   return row && row.restingHR != null ? Number(row.restingHR) : null;
 }
-function rhrAvg7(d = new Date()) {
+function rhrAvg7(d = now()) {
+  const dbg = debugParams();
+  if (dbg.rhrAvg != null && !Number.isNaN(dbg.rhrAvg)) return dbg.rhrAvg;
   const vals = [];
   for (let i = 1; i <= 7; i++) {
     const row = dailyOn(todayKey(addDays(d, -i)));
@@ -94,26 +134,26 @@ function rhrAvg7(d = new Date()) {
   if (!vals.length) return null;
   return vals.reduce((a, b) => a + b, 0) / vals.length;
 }
-function isTrainDay(st, d = new Date()) {
+function isTrainDay(st, d = now()) {
   return (st.trainDays || DEFAULT_DAYS).includes(d.getDay());
 }
-function pickScheduled(st, d = new Date()) {
+function pickScheduled(st, d = now()) {
   const days = (st.trainDays || DEFAULT_DAYS).slice().sort((a, b) => a - b);
   const pos = days.indexOf(d.getDay());
   if (pos <= 0) return "gymA";
   return pos % 2 === 0 ? "gymA" : "gymB";
 }
-function yesterdaySteps(d = new Date()) {
+function yesterdaySteps(d = now()) {
   const row = dailyOn(todayKey(addDays(d, -1))) || dailyOn(todayKey(d));
   return row && row.steps != null ? Number(row.steps) : 0;
 }
-function isHighStep(d = new Date()) {
+function isHighStep(d = now()) {
   const today = dailyOn(todayKey(d));
   const yday = dailyOn(todayKey(addDays(d, -1)));
   const steps = Math.max(today && today.steps != null ? today.steps : 0, yday && yday.steps != null ? yday.steps : 0);
   return steps >= HIGH_STEPS;
 }
-function shouldQuick(d = new Date()) {
+function shouldQuick(d = now()) {
   const sleep = lastNightSleep(d);
   const rhr = rhrOn(d);
   const avg = rhrAvg7(d);
@@ -121,51 +161,93 @@ function shouldQuick(d = new Date()) {
   let quick = false;
   if (sleep != null && sleep < 6) {
     quick = true;
-    reasons.push(`昨晚睡 ${sleep} 小時`);
+    reasons.push(sleepText(sleep));
   }
   if (rhr != null && avg != null && rhr >= avg + 5) {
     quick = true;
     reasons.push(`靜止心率 ${Math.round(rhr)}，比 7 日平均高 ${Math.round(rhr - avg)} 下`);
   }
   if (!reasons.length) {
-    if (sleep != null) reasons.push(`昨晚睡 ${sleep} 小時，心率正常`);
+    if (sleep != null) reasons.push(`${sleepText(sleep)}，心率正常`);
     else reasons.push("還沒有昨晚的睡眠資料，先照課表");
   }
   return { quick, reasons, sleep, rhr, avg };
 }
-function markedFasted(st, d = new Date()) {
+function markedFasted(st, d = now()) {
   return !!(st.fasted || {})[todayKey(d)];
 }
-function hasPreWorkoutMeal(st, d = new Date()) {
+function hasPreWorkoutMeal(st, d = now()) {
   const meals = (st.mealLogs || {})[todayKey(d)] || {};
   return ["breakfast", "lunch", "snack"].some((id) => meals[id] && meals[id].eaten);
 }
-function wheySettings(st) {
-  const w = st.wheyEst || {};
+function resolveWhey(st, id) {
+  const base = (typeof WHEY_OPTIONS !== "undefined" ? WHEY_OPTIONS : []).find((x) => x.id === id) || (WHEY_OPTIONS && WHEY_OPTIONS[0]);
+  if (!base) return { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 170 };
+  const ov = ((st.wheyEst || {}).byId || {})[base.id] || {};
   return {
-    scoopG: w.scoopG != null ? Number(w.scoopG) : 40,
-    protein: w.protein != null ? Number(w.protein) : 22,
-    kcal: w.kcal != null ? Number(w.kcal) : 185,
+    id: base.id,
+    name: base.name,
+    scoopG: ov.scoopG != null ? Number(ov.scoopG) : base.scoopG,
+    protein: ov.protein != null ? Number(ov.protein) : base.protein,
+    kcal: ov.kcal !== undefined ? ov.kcal : base.kcal,
   };
 }
-function wheyMeal(st, scoops) {
-  const w = wheySettings(st);
-  const n = scoops != null ? Number(scoops) : 1;
+function selectedScoops(st, d = now()) {
+  const day = todayKey(d);
+  const logged = ((st.mealLogs || {})[day] || {}).snack;
+  if (logged && Array.isArray(logged.scoopIds) && logged.scoopIds.length === 2) return logged.scoopIds.slice();
+  if ((st.scoopPick || {})[day]) return (st.scoopPick[day] || []).slice();
+  return ["sesame", "soymilk"];
+}
+function twoScoopMeal(st, d = now()) {
+  const ids = selectedScoops(st, d);
+  const a = resolveWhey(st, ids[0] || "sesame");
+  const b = resolveWhey(st, ids[1] || "soymilk");
+  const yamKcal = 130;
+  const yamP = 2;
+  const kcalUnknown = a.kcal == null || b.kcal == null;
+  const kcal = (Number(a.kcal) || 0) + (Number(b.kcal) || 0) + yamKcal;
+  const protein = Number(a.protein) + Number(b.protein) + yamP;
+  const hasPlant = a.id === "plant" || b.id === "plant";
   return {
-    id: "loveigen",
-    name: `樂維根無糖蛋白粉 ${n} scoop（${w.scoopG * n} g）`,
-    kcal: Math.round(w.kcal * n),
-    protein: Math.round(w.protein * n * 10) / 10,
-    scoops: n,
+    id: "loveigen2",
+    name: `${a.name}＋${b.name}`,
+    extraLine: "地瓜 150g",
+    kcal,
+    protein,
+    scoopIds: [a.id, b.id],
     estimate: true,
+    hasPlant,
+    chickenG: hasPlant ? 150 : 200,
+    kcalUnknown,
   };
 }
-function mealLabel(id, trainDay) {
-  if (id === "snack" && trainDay) return "下午 4 點（練前）";
-  if (id === "dinner" && trainDay) return "練後晚餐";
+function dinnerFor(st, d = now()) {
+  const shake = twoScoopMeal(st, d);
+  const alt = ((st.dinnerAlt || {})[todayKey(d)]) === "eggs21";
+  const grams = shake.hasPlant || alt ? 150 : 200;
+  const chickenId = grams === 150 ? "chicken150" : "chicken200";
+  const meal = composeSwapMeal(chickenId, "rice150");
+  meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
+  meal.chickenG = grams;
+  meal.eggsAlt = !shake.hasPlant;
+  return meal;
+}
+function wheySettings(st) {
+  const id = ((st.wheyEst || {}).editId) || selectedScoops(st)[0] || "sesame";
+  const w = resolveWhey(st, id);
+  return { scoopG: w.scoopG, protein: w.protein, kcal: w.kcal == null ? 170 : w.kcal, id: w.id };
+}
+function wheyMeal(st) {
+  return twoScoopMeal(st);
+}
+function mealLabel(id, trainDay, st) {
+  if (id === "snack" && trainDay) return "16:00";
+  if (id === "dinner" && trainDay) return `18:30 雞胸 ${(st ? dinnerFor(st).chickenG : 200)}g`;
+  if (id === "eggs21") return "21:00";
   return (MEAL_DEFS[id] && MEAL_DEFS[id].label) || id;
 }
-function todayPlan(st, d = new Date()) {
+function todayPlan(st, d = now()) {
   const train = isTrainDay(st, d);
   const scheduled = pickScheduled(st, d);
   const chk = shouldQuick(d);
@@ -199,7 +281,7 @@ function lastInbody() {
   if (list.length) return list[list.length - 1];
   return { date: "2026-10-08", weightKg: 78.4, bfmKg: 15.6, pbf: 19.9, smmKg: 35.9, bmi: 25.2, whr: 0.9 };
 }
-function weight7avg(d = new Date()) {
+function weight7avg(d = now()) {
   const vals = [];
   for (let i = 0; i < 7; i++) {
     const row = dailyOn(todayKey(addDays(d, -i)));
@@ -217,7 +299,7 @@ function weight7avg(d = new Date()) {
   const last = lastInbody();
   return { value: last.weightKg, source: `近一次 ${fmtMD(last.date)}`, stale: true, date: last.date };
 }
-function computeKcalAdjust(d = new Date()) {
+function computeKcalAdjust(d = now()) {
   const scans = LIVE.inbody || [];
   if (scans.length < 2) return { adj: 0, note: null };
   const last = scans[scans.length - 1];
@@ -245,7 +327,7 @@ function computeKcalAdjust(d = new Date()) {
   }
   return { adj: 0, note: null };
 }
-function kcalInfo(st, d = new Date()) {
+function kcalInfo(st, d = now()) {
   const trainLike = isTrainDay(st, d) || isHighStep(d);
   const y = dailyOn(todayKey(addDays(d, -1)));
   const adj = computeKcalAdjust(d);
@@ -272,7 +354,7 @@ function kcalInfo(st, d = new Date()) {
   };
 }
 
-function weekRange(d = new Date()) {
+function weekRange(d = now()) {
   const mondayOffset = d.getDay() === 0 ? -6 : 1 - d.getDay();
   const mon = addDays(d, mondayOffset);
   return { mon, sun: addDays(mon, 6) };
@@ -281,18 +363,26 @@ function mealOf(def, trainLike) {
   if (def.base) return { ...def.base };
   return trainLike ? { ...def.train } : { ...def.rest };
 }
-function currentMeal(st, id, d = new Date()) {
+function currentMeal(st, id, d = now()) {
   const logs = (st.mealLogs || {})[todayKey(d)] || {};
   if (logs[id]) return logs[id];
   const trainLike = isTrainDay(st, d);
-  if (id === "snack" && trainLike) return { ...wheyMeal(st, 1), eaten: false };
+  if (id === "snack" && trainLike) return { ...twoScoopMeal(st, d), eaten: false };
+  if (id === "dinner" && trainLike) return { ...dinnerFor(st, d), eaten: false };
+  if (id === "eggs21") {
+    if (((st.dinnerAlt || {})[todayKey(d)]) === "eggs21") {
+      return { name: "21:00 雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
+    }
+    return { name: "", kcal: 0, protein: 0, eaten: false, hidden: true };
+  }
   const base = mealOf(MEAL_DEFS[id], trainLike);
   return { ...base, id: "default", eaten: false };
 }
-function mealTotals(st, d = new Date()) {
+function mealTotals(st, d = now()) {
   let kcal = 0;
   let protein = 0;
-  for (const id of MEAL_ORDER) {
+  const ids = MEAL_ORDER.concat(["eggs21"]);
+  for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
     if (m && m.eaten) {
       kcal += Number(m.kcal) || 0;
@@ -347,7 +437,7 @@ function resolveName(step, backScore) {
   }
   return pick(parts[0], step.video, false);
 }
-function lastStrengthBefore(st, d = new Date()) {
+function lastStrengthBefore(st, d = now()) {
   const today = todayKey(d);
   const dates = [];
   for (const a of LIVE.garmin.activities || []) {
@@ -361,7 +451,7 @@ function lastStrengthBefore(st, d = new Date()) {
   dates.sort();
   return dates.length ? dates[dates.length - 1] : null;
 }
-function isReturnWeek(st, d = new Date()) {
+function isReturnWeek(st, d = now()) {
   const today = todayKey(d);
   if (st.returnUntil && today <= st.returnUntil) return true;
   if (st.returnUntil && today > st.returnUntil) return false;
@@ -411,7 +501,7 @@ function countPlanned(steps) {
   }
   return counts;
 }
-function weekSetCounts(st, d = new Date(), opts = {}) {
+function weekSetCounts(st, d = now(), opts = {}) {
   const { mon } = weekRange(d);
   const today = todayKey(d);
   const counts = {};
@@ -429,7 +519,7 @@ function weekSetCounts(st, d = new Date(), opts = {}) {
   }
   return counts;
 }
-function fridayExtras(st, baseSteps, d = new Date()) {
+function fridayExtras(st, baseSteps, d = now()) {
   if (d.getDay() !== 5) return [];
   const week = weekSetCounts(st, d, { excludeToday: true });
   const planned = countPlanned(baseSteps);
@@ -475,15 +565,16 @@ function lineChart(values, color, w, h, cls) {
     <polyline fill="none" stroke="${color}" stroke-width="2.6" stroke-linejoin="round" points="${pts}"/>${dots}
   </svg>`;
 }
-function ringEl(value, max, top, sub) {
+function ringEl(value, max, top, sub, ok) {
   const r = 52;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, max ? value / max : 0));
   const dash = c * pct;
-  return `<div class="ring" role="img" aria-label="${esc(top)} ${esc(sub)}">
+  const color = ok ? "#166534" : "#C2410C";
+  return `<div class="ring${ok ? " ok" : ""}" role="img" aria-label="${esc(top)} ${esc(sub)}" data-ok="${ok ? "1" : "0"}">
     <svg viewBox="0 0 122 122">
       <circle cx="61" cy="61" r="${r}" fill="none" stroke="#F4E6D0" stroke-width="10"/>
-      <circle cx="61" cy="61" r="${r}" fill="none" stroke="#C2410C" stroke-width="10" stroke-linecap="round"
+      <circle cx="61" cy="61" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
         stroke-dasharray="${dash.toFixed(1)} ${c.toFixed(1)}"/>
     </svg>
     <div class="n"><b>${Math.round(value)}</b><span>${esc(top)}</span><span>${esc(sub)}</span></div>
@@ -600,7 +691,7 @@ function dueNotifs(st) {
   if (left <= 0) return [];
   const out = [];
   const totals = mealTotals(st);
-  const hour = new Date().getHours();
+  const hour = now().getHours();
   if (hour >= 16 && totals.protein < PROTEIN_TARGET * 0.5 && !shown.includes("protein")) {
     out.push({ id: "protein", text: "下午蛋白還不到一半，補一罐乳清或無糖優格。" });
   }
@@ -622,13 +713,13 @@ function renderBanners(st) {
 }
 
 function renderSunday(st) {
-  if (new Date().getDay() !== 0) return "";
+  if (now().getDay() !== 0) return "";
   const { mon } = weekRange();
   let proteinDays = 0;
   let loggedDays = 0;
   for (let i = 0; i < 7; i++) {
     const d = addDays(mon, i);
-    if (d > new Date()) break;
+    if (d > now()) break;
     const t = mealTotals(st, d);
     if (t.protein || t.kcal) loggedDays += 1;
     if (t.protein >= PROTEIN_MIN) proteinDays += 1;
@@ -645,26 +736,44 @@ function renderSunday(st) {
   </section>`;
 }
 
+function scoopPicker(st, slot) {
+  const ids = selectedScoops(st);
+  return `<div class="chips" data-scoop-row="${slot}">${WHEY_OPTIONS.map((o) =>
+    `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(o.name.replace("樂維根 ", ""))}</button>`
+  ).join("")}</div>`;
+}
+function proteinShortfall(st) {
+  const t = now();
+  if (!isTrainDay(st, t) || t.getHours() >= 21) return null;
+  const logs = (st.mealLogs || {})[todayKey(t)] || {};
+  const snackOk = !!(logs.snack && logs.snack.eaten);
+  const others = ["breakfast", "lunch", "dinner", "eggs21"].some((id) => logs[id] && logs[id].eaten);
+  if (snackOk && !others && mealTotals(st).protein < PROTEIN_MIN) {
+    return "16:00 的蛋白粉已記，但今天蛋白質還不夠，21:00 前要把雞胸或蛋補上。";
+  }
+  return null;
+}
 function renderHome(st) {
-  const now = new Date();
+  const t = now();
   const plan = todayPlan(st);
   const kcal = kcalInfo(st);
   const totals = mealTotals(st);
   const last = lastInbody();
   const w7 = weight7avg();
-  const daysLeft = Math.max(0, Math.ceil((GOAL - now) / 86400000));
+  const daysLeft = Math.max(0, Math.ceil((GOAL - t) / 86400000));
   const scans = (LIVE.inbody || []).slice(-16);
   const wt = scans.map((s) => s.weightKg);
   const pbf = scans.map((s) => s.pbf);
   const smm = scans.map((s) => s.smmKg);
-  const week = weekSetCounts(st, now, { includeSession: true });
+  const week = weekSetCounts(st, t, { includeSession: true });
   const todayLog = (st.logs || {})[todayKey()];
   const parts = todayLog ? todayPartsFromMoves(todayLog.moves) : { pri: [], sec: [] };
   const session = st.session && st.session.date === todayKey() && st.session.phase !== "done" ? st.session : null;
+  const returning = isReturnWeek(st);
 
   let trainCard;
   if (!plan.train) {
-    trainCard = `<div class="rest-line">休息日，走走路就好<small>${esc(plan.reason)}</small></div>`;
+    trainCard = `<div class="rest-line" data-testid="rest-line">休息日，走走路就好<small>${esc(plan.reason)}</small></div>`;
   } else {
     const w = plan.workout;
     const primary = session
@@ -677,29 +786,51 @@ function renderHome(st) {
         : "";
     const fastedOn = markedFasted(st);
     const fastedBtn = `<button type="button" class="btn full" data-fasted="${fastedOn ? "off" : "on"}">${fastedOn ? "取消空腹" : "今天空腹練"}</button>`;
-    trainCard = `<section class="card hero">
-      <div class="k">${now.getMonth() + 1}/${now.getDate()}（週${DOW[now.getDay()]}）· ${esc(w.where)} · ${esc(w.time)}</div>
+    trainCard = `<section class="card hero" data-testid="train-card">
+      <div class="k">${t.getMonth() + 1}/${t.getDate()}（週${DOW[t.getDay()]}）· ${esc(w.where)} · ${esc(w.time)}${returning ? ' · <span data-testid="buffer-week">緩衝週</span>' : ""}</div>
       <div class="big">今天：${esc(w.name)}</div>
-      <p class="reason">${esc(plan.reason)}</p>
+      <p class="reason" data-testid="reason">${esc(plan.reason)}</p>
       <div class="acts">${primary}</div>
       <div class="acts">${fastedBtn}${ov}</div>
     </section>`;
   }
 
   const trainDay = isTrainDay(st);
-  const meals = MEAL_ORDER.map((id) => {
+  const hour = t.getHours();
+  const shake = trainDay ? twoScoopMeal(st) : null;
+  const topPowder = trainDay && hour < 16
+    ? `<section class="card hero" data-testid="top-card" data-top="powder">
+        <div class="k">訓練日</div>
+        <div class="big">16:00 兩份蛋白粉</div>
+        <p class="reason">選兩個口味，配地瓜 150g</p>
+        <p class="sec">第一份</p>${scoopPicker(st, 0)}
+        <p class="sec">第二份</p>${scoopPicker(st, 1)}
+        <p class="note">地瓜 150g</p>
+      </section>`
+    : "";
+  const mealIds = MEAL_ORDER.concat(((st.dinnerAlt || {})[todayKey()] === "eggs21") ? ["eggs21"] : []);
+  const meals = mealIds.map((id) => {
     const m = currentMeal(st, id);
+    if (m.hidden) return "";
     const est = m.estimate ? " · 估計值，可改" : "";
-    return `<div class="meal-row${m.eaten ? " eaten" : ""}">
-      <div class="who">${esc(mealLabel(id, trainDay))}</div>
+    const extra = m.extraLine ? `<div class="meta">${esc(m.extraLine)}</div>` : "";
+    const alt = id === "dinner" && m.eggsAlt
+      ? `<button type="button" class="btn full" data-dinner-alt="eggs21">或 21:00 再加蛋 2 顆（雞胸改 150g）</button>`
+      : "";
+    return `<div class="meal-row${m.eaten ? " eaten" : ""}" data-testid="meal-${id}">
+      <div class="who">${esc(mealLabel(id, trainDay, st))}</div>
       <h3>${esc(m.name)}</h3>
-      <div class="meta">${Math.round(m.kcal)} kcal · 蛋白 ${Math.round(m.protein)} g${est}</div>
+      ${extra}
+      <div class="meta">${Math.round(m.kcal || 0)} kcal · 蛋白 ${Math.round(m.protein || 0)} g${est}</div>
       <div class="row-acts">
-        <button type="button" class="btn ${m.eaten ? "" : "primary"}" data-eat="${id}">${m.eaten ? "取消記錄" : "照吃了"}</button>
+        <button type="button" class="btn ${m.eaten ? "" : "primary"}" data-eat="${id}">${m.eaten ? "復原" : "照吃了"}</button>
         <button type="button" class="btn" data-swap="${id}">換一個</button>
+        <button type="button" class="btn" data-eat-else="${id}">吃了別的</button>
       </div>
+      ${alt}
     </div>`;
   }).join("");
+  const shortfall = proteinShortfall(st);
 
   const chips = MAIN_PARTS.map((p) => {
     const n = week[p] || 0;
@@ -713,16 +844,19 @@ function renderHome(st) {
 
   return `
     ${renderBanners(st)}
+    ${topPowder}
     ${trainCard}
     <p class="sec">今天吃</p>
-    <section class="card">
+    <section class="card" data-testid="eat-card">
       <div class="rings">
-        ${ringEl(totals.kcal, kcal.target, `/ ${kcal.target} kcal`, kcal.bandLabel)}
-        ${ringEl(totals.protein, PROTEIN_TARGET, "蛋白 g", "目標 140–160 g")}
+        ${ringEl(totals.kcal, kcal.target, `/ ${kcal.target} kcal`, kcal.bandLabel, false)}
+        ${ringEl(totals.protein, PROTEIN_TARGET, "蛋白 g", "目標 140–160 g", totals.protein >= PROTEIN_MIN)}
       </div>
       <p class="muted">${esc(kcal.source)}${kcal.adj.adj ? ` · ${esc(kcal.adj.note)}` : ""}</p>
-      ${kcal.sleepLow ? `<p class="note">昨晚睡不夠，蛋白質還是要吃滿，不用再少吃。熱量不另外往下砍。</p>` : ""}
-      ${trainDay ? `<p class="note">訓練日節奏：16:00 先喝樂維根無糖蛋白粉，大約 18:30–19:00 再練，練完晚餐吃雞胸 200g。</p>` : ""}
+      ${kcal.sleepLow ? `<p class="note" data-testid="protein-reminder">昨晚睡不夠，蛋白質還是要吃滿，不用再少吃。熱量不另外往下砍。</p>` : ""}
+      ${trainDay ? `<p class="note">訓練日節奏：16:00 兩份蛋白粉＋地瓜，大約 18:30–19:00 再練，練完吃雞胸 ${shake ? shake.chickenG : 200}g。</p>` : ""}
+      ${shortfall ? `<p class="note warn" data-testid="shortfall">${esc(shortfall)}</p>` : ""}
+      ${st.lastAdvice ? `<p class="note" data-testid="next-advice">${esc(st.lastAdvice)}</p>` : ""}
       ${meals}
     </section>
     <p class="sec">身體趨勢</p>
@@ -757,62 +891,57 @@ function openSwap(st, mealId) {
   const wheyDefault = mealId === "snack" && trainDay;
   ui.swap = {
     meal: mealId,
-    mode: cur.id === "loveigen" || (!cur.proteinId && wheyDefault) ? "whey" : "groups",
-    proteinId: cur.proteinId || "chicken200",
+    mode: cur.id === "loveigen2" || cur.id === "loveigen" || wheyDefault ? "whey" : "groups",
+    proteinId: cur.proteinId || (trainDay ? (twoScoopMeal(st).chickenG === 150 ? "chicken150" : "chicken200") : "chicken200"),
     starchId: cur.starchId || "rice150",
-    scoops: cur.scoops || 1,
     editEst: false,
+    elseMode: false,
   };
 }
+function renderElse(st) {
+  const id = ui.elseMeal;
+  if (!id) return renderHome(st);
+  const items = (typeof BENTO_ELSE !== "undefined" ? BENTO_ELSE : []).filter((x) => !/罐頭/.test(x.name));
+  return `<button type="button" class="btn" data-go="today">← 回到今天</button>
+    <h2 class="sheet-title">吃了別的</h2>
+    <p class="note">便當估算熱量與蛋白質，選完會給下一餐建議。沒有罐頭食品。</p>
+    <div class="swap-list" data-testid="else-list">
+      ${items.map((it) => `<button type="button" data-else-pick="${esc(it.id)}">
+        ${esc(it.name)}<small>${it.kcal} kcal · 蛋白 ${it.protein} g</small>
+      </button>`).join("")}
+    </div>`;
+}
 function renderSwap(st) {
+  if (ui.elseMeal) return renderElse(st);
   const sw = ui.swap;
   if (!sw || !sw.meal) return renderHome(st);
-  const def = MEAL_DEFS[sw.meal];
-  if (!def) return renderHome(st);
+  const def = MEAL_DEFS[sw.meal] || { label: sw.meal };
   const trainDay = isTrainDay(st);
-  const w = wheySettings(st);
+  const shake = twoScoopMeal(st);
   const composed = composeSwapMeal(sw.proteinId, sw.starchId);
-  const shake = wheyMeal(st, sw.scoops);
   const preview = sw.mode === "whey" ? shake : composed;
-  const protBtns = PROTEIN_SWAPS.map((it) => `<button type="button" class="${sw.mode === "groups" && sw.proteinId === it.id ? "on" : ""}" data-pick-p="${esc(it.id)}">
+  const pantryP = PROTEIN_SWAPS.filter((it) => !/罐頭/.test(it.name));
+  const protBtns = pantryP.map((it) => `<button type="button" class="${sw.mode === "groups" && sw.proteinId === it.id ? "on" : ""}" data-pick-p="${esc(it.id)}">
       ${esc(it.name)}<small>${it.kcal} kcal · 蛋白 ${it.protein} g</small>
     </button>`).join("");
   const starchBtns = STARCH_SWAPS.map((it) => `<button type="button" class="${sw.mode === "groups" && sw.starchId === it.id ? "on" : ""}" data-pick-s="${esc(it.id)}">
       ${esc(it.name)}<small>${it.kcal} kcal · 蛋白 ${it.protein} g</small>
     </button>`).join("");
-  const est = sw.editEst
-    ? `<div class="card">
-        <p class="est">每 scoop 估計值（可改）</p>
-        <div class="load"><div><div class="muted">熱量</div><div class="num" style="font-size:28px">${w.kcal}</div></div>
-          <div class="stepper"><button type="button" data-est="kcal" data-edelta="-5">−</button>
-          <button type="button" data-est="kcal" data-edelta="5">+</button></div></div>
-        <div class="load"><div><div class="muted">蛋白 g</div><div class="num" style="font-size:28px">${w.protein}</div></div>
-          <div class="stepper"><button type="button" data-est="protein" data-edelta="-1">−</button>
-          <button type="button" data-est="protein" data-edelta="1">+</button></div></div>
-        <p class="muted">一 scoop 以 ${w.scoopG} g 計。</p>
-      </div>`
-    : `<button type="button" class="btn full" data-edit-est>改估計值</button>`;
   return `<button type="button" class="btn" data-go="today">← 回到今天</button>
-    <h2 class="sheet-title">換${esc(mealLabel(sw.meal, trainDay))}</h2>
-    <p class="sec">蛋白粉</p>
-    <div class="swap-list">
-      <button type="button" class="${sw.mode === "whey" ? "on" : ""}" data-mode-whey>
-        ${esc(shake.name)}<small>約 ${shake.kcal} kcal · 蛋白 ${shake.protein} g（估計值）</small>
-      </button>
-    </div>
-    ${sw.mode === "whey" ? `<div class="load"><div class="muted">${sw.scoops} scoop</div>
-      <div class="stepper">
-        <button type="button" data-scoop="-1">−</button>
-        <button type="button" data-scoop="1">+</button>
-      </div></div>${est}` : ""}
-    <p class="sec">蛋白質（可互換）</p>
+    <h2 class="sheet-title">換${esc(mealLabel(sw.meal, trainDay, st))}</h2>
+    <p class="sec">16:00 兩份蛋白粉</p>
+    <p class="muted">第一份</p>${scoopPicker(st, 0)}
+    <p class="muted">第二份</p>${scoopPicker(st, 1)}
+    <p class="note">地瓜 150g</p>
+    <p class="sec">蛋白質（可互換，僅家常食材）</p>
     <div class="swap-list">${protBtns}</div>
     <p class="sec">澱粉（可互換）</p>
     <div class="swap-list">${starchBtns}</div>
     <section class="card">
       <div class="who">預覽</div>
       <h3>${esc(preview.name)}</h3>
-      <p class="meta">${Math.round(preview.kcal)} kcal · 蛋白 ${Math.round(preview.protein)} g${preview.estimate ? "（估計值）" : ""}</p>
+      ${preview.extraLine ? `<p class="meta">${esc(preview.extraLine)}</p>` : ""}
+      <p class="meta">${Math.round(preview.kcal || 0)} kcal · 蛋白 ${Math.round(preview.protein || 0)} g${preview.estimate ? "（估計值）" : ""}</p>
     </section>
     <button type="button" class="btn primary xl" data-apply-swap>照這個吃</button>`;
 }
@@ -930,25 +1059,28 @@ function renderWorkout(st) {
       <button type="button" class="btn" data-leave>先離開</button>
       <div class="wo-prog">${session.i + 1} / ${session.steps.length} · 第 ${setNo} / ${load.sets} 組</div>
     </div>
-    <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">改腿推</span>' : ""}</div>
+    <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">改腿推</span>' : ""}${session.returning ? '<span class="chip" data-testid="buffer-week">緩衝週</span>' : ""}</div>
+    <div data-testid="wo-figure">${bodyMap((musclesFor(step.name).primary), (musclesFor(step.name).secondary), {})}</div>
     <p class="muted">${esc(step.dose)}${load.perSide ? "（單側次數）" : ""} · 目標 ${load.target} 下${load.hist && load.hist.reps ? ` · 上次 ${load.hist.reps} 下` : ""}</p>
-    <p class="wo-cue">${esc(cueFor(step.name))}</p>
+    <p class="wo-cue" data-testid="wo-cue">${esc(cueFor(step.name))}</p>
     ${yt(step.video)}
     ${weightBlock}
     ${note ? `<p class="note">${esc(note)}</p>` : ""}
     <button type="button" class="btn primary xl" data-complete>完成</button>
     <div class="acts"><button type="button" class="btn full danger" data-short>少做了</button></div>
+    ${((session.undoStack || []).length) ? `<div class="acts"><button type="button" class="btn full" data-undo-set data-testid="btn-undo">復原</button></div>` : ""}
     <p class="muted">左滑下一個動作，右滑回上一個。重量有變再按 ＋－，次數不夠才按「少做了」。</p>
   `;
 }
 
 function renderRest(session) {
   const left = Math.max(0, Math.ceil(((session.restUntil || 0) - Date.now()) / 1000));
-  return `<div class="rest-box">
+  return `<div class="rest-box" data-testid="rest-timer">
     <div class="muted">休息</div>
     <div class="t" id="rest-count">${left}</div>
     <p class="muted">秒後繼續下一組</p>
     <button type="button" class="btn primary xl" data-skip-rest>跳過休息</button>
+    <div class="acts"><button type="button" class="btn full" data-undo-set data-testid="btn-undo">復原</button></div>
   </div>`;
 }
 
@@ -964,7 +1096,7 @@ function renderBack(session) {
 }
 
 function renderDone(st, session) {
-  const week = weekSetCounts({ ...st, logs: { ...st.logs, [session.date]: { moves: session.moves } } }, new Date());
+  const week = weekSetCounts({ ...st, logs: { ...st.logs, [session.date]: { moves: session.moves } } }, now());
   const parts = todayPartsFromMoves(session.moves);
   const g = session.garmin || matchGarmin(session.date);
   const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
@@ -1014,7 +1146,7 @@ function renderRules() {
     <p class="sec">今天怎麼決定課表</p>
     <div class="card prose">
       <p>前一晚睡滿 6 小時，且靜止心率沒有比 7 日平均高 5 下，就練原課表；任一項沒過，改家裡快版 25 分鐘。</p>
-      <p>訓練日建議 16:00 先喝樂維根無糖蛋白粉（1 scoop 40 g，約 22 g 蛋白、約 185 kcal，估計值可改），大約 18:30–19:00 再練，練完晚餐吃雞胸 200g。</p>
+      <p>訓練日建議 16:00 喝兩份樂維根（芝麻／豆漿／杏仁各約 20 g 蛋白，極致約 25 g）加地瓜。一份極致則 18:30 雞胸 150g；兩份 20 g 則雞胸 200g 或 21:00 加蛋 2 顆。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
       <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次深蹲改腿推。</p>
@@ -1037,9 +1169,11 @@ function renderRules() {
 
 function go(tab) {
   ui.swap = null;
+  ui.elseMeal = null;
   location.hash = tab;
   render();
   window.scrollTo(0, 0);
+  maybeApplyDeferredUpdate();
 }
 
 function buildSteps(st, workout) {
@@ -1055,8 +1189,8 @@ function buildSteps(st, workout) {
       extra: false,
     };
   });
-  if (new Date().getDay() === 5) {
-    for (const ex of fridayExtras(st, steps, new Date())) {
+  if (now().getDay() === 5) {
+    for (const ex of fridayExtras(st, steps, now())) {
       steps.push({ name: ex.name, dose: ex.dose, video: ex.video, extra: true, extraFor: ex.extraFor, swapped: false });
     }
   }
@@ -1073,7 +1207,7 @@ function startWorkout() {
   const plan = todayPlan(st);
   if (!plan.train || !plan.workout) return;
   if (isReturnWeek(st) && !st.returnUntil) {
-    save({ returnUntil: todayKey(addDays(new Date(), 6)) });
+    save({ returnUntil: todayKey(addDays(now(), 6)) });
     st = state();
   }
   const session = {
@@ -1101,6 +1235,9 @@ function startWorkout() {
 function applySet(short, reps) {
   const st = state();
   const session = { ...st.session, moves: { ...st.session.moves } };
+  session.undoStack = [...(session.undoStack || []), JSON.parse(JSON.stringify({
+    i: session.i, setI: session.setI, moves: session.moves, phase: "set", restUntil: null, editWeight: session.editWeight, shortReps: null,
+  }))];
   const step = session.steps[session.i];
   const load = sessionLoad(session, st);
   const entry = {
@@ -1123,11 +1260,11 @@ function applySet(short, reps) {
     session.setI = 0;
     session.editWeight = null;
     session.phase = "rest";
-    session.restUntil = Date.now() + REST_SEC * 1000;
+    session.restUntil = Date.now() + restMs();
   } else {
     session.setI += 1;
     session.phase = "rest";
-    session.restUntil = Date.now() + REST_SEC * 1000;
+    session.restUntil = Date.now() + restMs();
   }
   save({ session });
   render();
@@ -1203,7 +1340,7 @@ function render() {
   });
   const main = document.getElementById("main");
   if (!main) return;
-  if (ui.swap) main.innerHTML = renderSwap(st);
+  if (ui.swap || ui.elseMeal) main.innerHTML = renderSwap(st);
   else if (st.tab === "shop") main.innerHTML = renderShop(st);
   else if (st.tab === "rules") main.innerHTML = renderRules();
   else if (st.tab === "workout") main.innerHTML = renderWorkout(st);
@@ -1212,13 +1349,14 @@ function render() {
 }
 
 function tick() {
-  const n = new Date();
+  const n = now();
   const pad = (x) => String(x).padStart(2, "0");
   const el = document.getElementById("clock");
   if (el) el.textContent = `${n.getMonth() + 1}/${n.getDate()} ${pad(n.getHours())}:${pad(n.getMinutes())}`;
   const s = load().session;
   if (s && s.phase === "rest" && s.restUntil) {
     if (Date.now() >= s.restUntil) {
+      try { navigator.vibrate?.(200); } catch (_) {}
       save({ session: { ...s, phase: "set", restUntil: null } });
       if (tabNow() === "workout") render();
     } else {
@@ -1276,6 +1414,52 @@ document.getElementById("main").addEventListener("click", (e) => {
     window.scrollTo(0, 0);
     return;
   }
+  const scoopPick = e.target.closest("[data-scoop-slot]");
+  if (scoopPick) {
+    const slot = Number(scoopPick.dataset.scoopSlot);
+    const id = scoopPick.dataset.scoopId;
+    const cur = selectedScoops(st);
+    cur[slot] = id;
+    save({ scoopPick: { ...(st.scoopPick || {}), [todayKey()]: cur } });
+    render();
+    return;
+  }
+  const eatElse = e.target.closest("[data-eat-else]");
+  if (eatElse) {
+    ui.elseMeal = eatElse.dataset.eatElse;
+    ui.swap = null;
+    render();
+    window.scrollTo(0, 0);
+    return;
+  }
+  const elsePick = e.target.closest("[data-else-pick]");
+  if (elsePick && ui.elseMeal) {
+    const item = (BENTO_ELSE || []).find((x) => x.id === elsePick.dataset.elsePick);
+    if (item) {
+      const day = todayKey();
+      const meals = { ...((st.mealLogs || {})[day] || {}) };
+      meals[ui.elseMeal] = { name: item.name, kcal: item.kcal, protein: item.protein, id: item.id, eaten: true, advice: item.advice };
+      save({ mealLogs: { ...st.mealLogs, [day]: meals }, lastAdvice: item.advice || "下一餐照計劃吃即可。" });
+    }
+    ui.elseMeal = null;
+    go("today");
+    return;
+  }
+  const dinnerAlt = e.target.closest("[data-dinner-alt]");
+  if (dinnerAlt) {
+    save({ dinnerAlt: { ...(st.dinnerAlt || {}), [todayKey()]: dinnerAlt.dataset.dinnerAlt } });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-undo-set]") && st.session) {
+    const stack = st.session.undoStack || [];
+    if (stack.length) {
+      const prev = stack[stack.length - 1];
+      save({ session: { ...st.session, ...prev, undoStack: stack.slice(0, -1) } });
+      render();
+    }
+    return;
+  }
   const pickP = e.target.closest("[data-pick-p]");
   if (pickP && ui.swap) {
     ui.swap = { ...ui.swap, mode: "groups", proteinId: pickP.dataset.pickP };
@@ -1315,7 +1499,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   }
   if (e.target.closest("[data-apply-swap]") && ui.swap) {
     const preview = ui.swap.mode === "whey"
-      ? wheyMeal(st, ui.swap.scoops)
+      ? twoScoopMeal(st)
       : composeSwapMeal(ui.swap.proteinId, ui.swap.starchId);
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
@@ -1379,6 +1563,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (e.target.closest("[data-finish-home]")) {
     save({ session: null });
     go("today");
+    maybeApplyDeferredUpdate();
     return;
   }
   if (e.target.closest("[data-leave]")) {
@@ -1433,10 +1618,150 @@ document.getElementById("main").addEventListener("touchend", (e) => {
 
 window.addEventListener("hashchange", () => {
   ui.swap = null;
+  ui.elseMeal = null;
   render();
 });
 
+
+const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
+let loadedVersion = null;
+let pendingReload = false;
+let reloading = false;
+
+function showToast(msg) {
+  let el = document.getElementById("toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "toast";
+    el.className = "toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { el.hidden = true; }, 2800);
+}
+function isBusy() {
+  if (ui.swap || ui.elseMeal) return true;
+  const s = load().session;
+  if (s && ["set", "rest", "short", "back"].includes(s.phase)) return true;
+  const el = document.activeElement;
+  if (el && /INPUT|TEXTAREA|SELECT/.test(el.tagName)) return true;
+  return false;
+}
+function safeReload() {
+  if (reloading) return;
+  reloading = true;
+  location.reload();
+}
+async function activateWaitingSW() {
+  if (!("serviceWorker" in navigator)) return;
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) return;
+  try { await reg.update(); } catch (_) {}
+  const w = reg.waiting || reg.installing;
+  if (w) w.postMessage({ type: "SKIP_WAITING" });
+  navigator.serviceWorker.controller?.postMessage({ type: "SKIP_WAITING" });
+}
+async function fetchNoStore(url) {
+  return fetch(url, { cache: "no-store" });
+}
+async function hardRefresh() {
+  showToast("重新整理中…");
+  await Promise.all(ASSETS.map((u) => fetchNoStore(u).catch(() => null)));
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  } catch (_) {}
+  await activateWaitingSW();
+  safeReload();
+}
+async function checkUpdates(opts) {
+  const force = !!(opts && opts.force);
+  try {
+    const [vr, dr] = await Promise.all([
+      fetchNoStore("./version.json").catch(() => null),
+      fetchNoStore("./data.json").catch(() => null),
+    ]);
+    if (dr && dr.ok) {
+      const data = await dr.json();
+      if (data && data.exportedAt && data.exportedAt !== LIVE.exportedAt) {
+        LIVE = data;
+        try { localStorage.setItem("fatcat-live", JSON.stringify(LIVE)); } catch (_) {}
+        if (!isBusy() || force) render();
+      }
+    }
+    if (vr && vr.ok) {
+      const ver = await vr.json();
+      if (ver && ver.version && loadedVersion && ver.version !== loadedVersion) {
+        if (force || !isBusy()) {
+          await activateWaitingSW();
+          safeReload();
+        } else {
+          pendingReload = true;
+          showToast("已更新");
+        }
+      }
+    }
+  } catch (_) {}
+}
+function maybeApplyDeferredUpdate() {
+  if (pendingReload && !isBusy()) {
+    pendingReload = false;
+    activateWaitingSW().then(() => safeReload());
+  }
+}
+
+let ptrY = null;
+window.addEventListener("touchstart", (e) => {
+  if (window.scrollY > 2) { ptrY = null; return; }
+  ptrY = e.touches[0].clientY;
+}, { passive: true });
+window.addEventListener("touchmove", (e) => {
+  if (ptrY == null) return;
+  const dy = e.touches[0].clientY - ptrY;
+  let bar = document.getElementById("ptr");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "ptr";
+    bar.textContent = "放開以重新整理全部";
+    document.body.appendChild(bar);
+  }
+  bar.classList.toggle("on", dy > 56);
+}, { passive: true });
+window.addEventListener("touchend", (e) => {
+  if (ptrY == null) return;
+  const dy = e.changedTouches[0].clientY - ptrY;
+  ptrY = null;
+  const bar = document.getElementById("ptr");
+  if (bar) bar.classList.remove("on");
+  if (dy > 80) hardRefresh();
+}, { passive: true });
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") checkUpdates();
+});
+setInterval(() => {
+  if (document.visibilityState === "visible") checkUpdates();
+}, 10 * 60 * 1000);
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (pendingReload && !isBusy()) safeReload();
+  });
+}
+
+window.__fatmiHardRefresh = hardRefresh;
+window.__fatmiCheckUpdates = checkUpdates;
+
 async function boot() {
+  try {
+    const v = await fetch("./version.json", { cache: "no-store" });
+    if (v.ok) {
+      const ver = await v.json();
+      loadedVersion = ver && ver.version;
+    }
+  } catch (_) {}
   try {
     const r = await fetch("./data.json", { cache: "no-store" });
     if (r.ok) {
