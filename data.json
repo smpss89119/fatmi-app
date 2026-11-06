@@ -1,23 +1,16 @@
 {
-  "exportedAt": "2026-11-06T23:56:09+07:00",
+  "exportedAt": "2026-11-07T06:59:42+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-08",
-        "kcal": 2236.0,
-        "steps": 5847,
-        "sleepHours": 7.3,
-        "restingHR": 48.0,
-        "weightKg": null
-      },
       {
         "date": "2026-10-09",
         "kcal": 2725.0,
         "steps": 17914,
         "sleepHours": 5.3,
         "restingHR": 54.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-10-10",
@@ -25,7 +18,8 @@
         "steps": 11609,
         "sleepHours": null,
         "restingHR": 54.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 10.0
       },
       {
         "date": "2026-10-11",
@@ -33,7 +27,8 @@
         "steps": 12091,
         "sleepHours": 8.1,
         "restingHR": 49.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 11.0
       },
       {
         "date": "2026-10-12",
@@ -41,7 +36,8 @@
         "steps": 6688,
         "sleepHours": 6.0,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 23.0
       },
       {
         "date": "2026-10-13",
@@ -49,7 +45,8 @@
         "steps": 12355,
         "sleepHours": 7.4,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 18.0
       },
       {
         "date": "2026-10-14",
@@ -57,7 +54,8 @@
         "steps": 5509,
         "sleepHours": 6.3,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 14.0
       },
       {
         "date": "2026-10-15",
@@ -65,7 +63,8 @@
         "steps": 8823,
         "sleepHours": 7.3,
         "restingHR": 51.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 8.0
       },
       {
         "date": "2026-10-16",
@@ -73,7 +72,8 @@
         "steps": 8530,
         "sleepHours": 6.4,
         "restingHR": 51.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-10-17",
@@ -81,7 +81,8 @@
         "steps": 5749,
         "sleepHours": 5.0,
         "restingHR": 47.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 11.0
       },
       {
         "date": "2026-10-18",
@@ -89,7 +90,8 @@
         "steps": 10020,
         "sleepHours": 5.2,
         "restingHR": 47.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 7.0
       },
       {
         "date": "2026-10-19",
@@ -97,7 +99,8 @@
         "steps": 6019,
         "sleepHours": 7.3,
         "restingHR": 46.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 27.0
       },
       {
         "date": "2026-10-20",
@@ -105,7 +108,8 @@
         "steps": 5938,
         "sleepHours": 7.8,
         "restingHR": 46.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 24.0
       },
       {
         "date": "2026-10-21",
@@ -113,7 +117,8 @@
         "steps": 6861,
         "sleepHours": 6.0,
         "restingHR": 46.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 13.0
       },
       {
         "date": "2026-10-22",
@@ -121,7 +126,8 @@
         "steps": 6336,
         "sleepHours": 6.7,
         "restingHR": 45.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 6.0
       },
       {
         "date": "2026-10-23",
@@ -129,7 +135,8 @@
         "steps": 7781,
         "sleepHours": 5.4,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-10-24",
@@ -137,7 +144,8 @@
         "steps": 6791,
         "sleepHours": 7.0,
         "restingHR": 47.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-10-25",
@@ -145,7 +153,8 @@
         "steps": 6361,
         "sleepHours": null,
         "restingHR": 51.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-10-26",
@@ -153,7 +162,8 @@
         "steps": 5025,
         "sleepHours": 6.9,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 8.0
       },
       {
         "date": "2026-10-27",
@@ -161,7 +171,8 @@
         "steps": 4811,
         "sleepHours": 6.8,
         "restingHR": 49.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 17.0
       },
       {
         "date": "2026-10-28",
@@ -169,7 +180,8 @@
         "steps": 5388,
         "sleepHours": 5.4,
         "restingHR": 49.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 14.0
       },
       {
         "date": "2026-10-29",
@@ -177,7 +189,8 @@
         "steps": 5578,
         "sleepHours": 6.5,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 6.0
       },
       {
         "date": "2026-10-30",
@@ -185,7 +198,8 @@
         "steps": 7072,
         "sleepHours": 6.7,
         "restingHR": 50.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 17.0
       },
       {
         "date": "2026-10-31",
@@ -193,7 +207,8 @@
         "steps": 14413,
         "sleepHours": 4.2,
         "restingHR": 48.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-01",
@@ -201,7 +216,8 @@
         "steps": 22316,
         "sleepHours": 5.4,
         "restingHR": 53.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-02",
@@ -209,7 +225,8 @@
         "steps": 16877,
         "sleepHours": 5.5,
         "restingHR": 52.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-03",
@@ -217,7 +234,8 @@
         "steps": 23017,
         "sleepHours": 8.2,
         "restingHR": 52.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-04",
@@ -225,7 +243,8 @@
         "steps": 24739,
         "sleepHours": 6.2,
         "restingHR": 53.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-05",
@@ -233,15 +252,26 @@
         "steps": 19772,
         "sleepHours": 7.3,
         "restingHR": 51.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-06",
-        "kcal": 2602.0,
+        "kcal": 2637.0,
         "steps": 14476,
         "sleepHours": 5.3,
         "restingHR": 53.0,
-        "weightKg": null
+        "weightKg": null,
+        "bodyBattery": 5.0
+      },
+      {
+        "date": "2026-11-07",
+        "kcal": 230.0,
+        "steps": null,
+        "sleepHours": null,
+        "restingHR": 56.0,
+        "weightKg": null,
+        "bodyBattery": 6.0
       }
     ],
     "activities": [
