@@ -55,6 +55,8 @@ test.describe("TRAINING", () => {
     await page.locator(".body-svg [data-part=quads]").first().click();
     const tip = page.locator("[data-testid=body-tip]");
     await expect(tip).toContainText("本週");
+    await expect(tip).toContainText("組");
+    await expect(tip).toContainText("來自");
     await expect(tip).toContainText("腿推");
     await expect(tip).toContainText("深蹲");
   });
@@ -134,14 +136,19 @@ test.describe("NUTRI", () => {
     await expect(page.locator("[data-testid=shop-hint]")).toContainText("/");
     await page.locator("[data-testid=shop-yam] .ck").click();
     await expect(page.locator("[data-testid=shop-starch-days]")).not.toHaveText("0");
+    await page.locator("[data-testid=shop-plus]").click();
     await page.locator("[data-testid=shop-add] [data-shop-new-name]").fill("自製雞胸");
-    await page.locator("[data-testid=shop-add] [data-shop-new-group]").selectOption("protein");
+    await page.locator("[data-testid=shop-add] [data-shop-new-amount]").fill("300g");
+    await expect(page.locator("[data-testid=shop-cats]")).toBeVisible();
+    await page.locator("[data-shop-cat=protein]").click();
     await page.locator("[data-testid=shop-add] [data-shop-add]").click();
-    await expect(page.locator("main")).toContainText("自製雞胸");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("300g");
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForSelector(".ttl");
     await page.locator("[data-tab=shop]").click();
-    await expect(page.locator("main")).toContainText("自製雞胸");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("300g");
     await expect(page.locator("[data-testid=shop-frequent-rice]")).toHaveClass(/on/);
   });
 
@@ -213,5 +220,104 @@ test.describe("FOOD", () => {
     await page.locator("[data-testid=meal-eggs21] [data-eat]").click();
     const ring = page.locator("[data-testid=eat-card] .ring").nth(1);
     await expect(ring).toContainText("106");
+  });
+});
+
+test.describe("FITMI", () => {
+  test("rest day shows 今天也想練 and shift-aware A/B picker", async ({ page }) => {
+    await open(page, { now: SAT_10, sleep: "8" });
+    await expect(page.locator("[data-testid=rest-line]")).toContainText("休息日");
+    await expect(page.locator("[data-testid=want-train]")).toHaveText("今天也想練");
+    await expect(page.locator("[data-testid=train-card]")).toHaveCount(0);
+    await page.locator("[data-testid=want-train]").click();
+    await expect(page.locator("[data-testid=rest-picks]")).toBeVisible();
+    await expect(page.locator("[data-testid=rest-train-gymA]")).toContainText("這週下一堂");
+    await page.locator("[data-testid=rest-train-gymA]").click();
+    await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 A");
+    await expect(page.locator("[data-start]")).toBeVisible();
+
+    await open(page, { now: SAT_10, sleep: "8" }, {
+      logs: { "2026-11-03": { workoutId: "gymA", finishedAt: "2026-11-03T11:00:00+07:00", moves: { 腿推: [{ done: true }] } } },
+    });
+    await page.locator("[data-testid=want-train]").click();
+    await expect(page.locator("[data-testid=rest-train-gymB]")).toContainText("這週下一堂");
+    await page.locator("[data-testid=rest-train-gymB]").click();
+    await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 B");
+  });
+
+  test("rest day one-liner says whether quick version is OK", async ({ page }) => {
+    await open(page, { now: SAT_10, sleep: "5", bb: "18" });
+    await expect(page.locator("[data-testid=rest-quick]")).toContainText("快版");
+    await expect(page.locator("[data-testid=rest-quick]")).toContainText(/睡|Body Battery/);
+
+    await open(page, { now: SAT_10, sleep: "8" });
+    await expect(page.locator("[data-testid=rest-quick]")).toContainText("可以練原課表");
+  });
+
+  test("unticking 16:00 protein subtracts the 340 kcal", async ({ page }) => {
+    await open(page, { now: SAT_10, sleep: "8" });
+    const snack = page.locator("[data-testid=meal-snack]");
+    await snack.locator("[data-testid=meal-more-snack]").click();
+    await snack.locator("[data-testid=whey2-snack]").click();
+    const ring = page.locator("[data-testid=eat-card] .ring").first().locator("b");
+    await expect(ring).toHaveText("340");
+    await expect(snack).toHaveClass(/eaten/);
+    await snack.locator("[data-eat]").click();
+    await expect(snack).not.toHaveClass(/eaten/);
+    await expect(ring).toHaveText("0");
+  });
+
+  test("full workout: exercise page, prefilled weight, done + rest, back score, export", async ({ page, context }) => {
+    test.setTimeout(60000);
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await open(page, { now: TUE_10, sleep: "8", rest: "1" }, withBreakfast("2026-11-10", {
+      lastLoads: { "腿推": { weight: 80, reps: 12, date: "2026-11-06" } },
+      logs: {
+        "2026-11-06": {
+          workoutId: "gymA",
+          finishedAt: "2026-11-06T11:00:00+07:00",
+          backScore: 1,
+          moves: { 腿推: [{ done: true, weight: 80, reps: 12 }] },
+        },
+      },
+    }));
+    await page.locator("[data-start]").click();
+    await expect(page.locator(".wo-name")).toContainText("腿推");
+    await expect(page.locator("[data-testid=wo-figure]")).toBeVisible();
+    await expect(page.locator("[data-testid=wo-cue]")).not.toHaveText("");
+    await expect(page.locator(".load .num").first()).toContainText("80");
+    await page.locator("[data-complete]").click();
+    await expect(page.locator("[data-testid=rest-timer]")).toBeVisible();
+    await page.locator("[data-skip-rest]").click();
+
+    for (let i = 0; i < 40; i++) {
+      const back = page.locator("[data-back]").first();
+      const skip = page.locator("[data-skip-rest]");
+      const done = page.locator("[data-complete]");
+      try {
+        await page.locator("[data-back], [data-skip-rest], [data-complete]").first().waitFor({ state: "visible", timeout: 5000 });
+      } catch (err) {
+        throw new Error("workout flow stuck at step " + i);
+      }
+      if (await back.isVisible()) break;
+      if (await skip.isVisible()) {
+        await skip.click();
+        continue;
+      }
+      if (await done.isVisible()) {
+        await done.click();
+        continue;
+      }
+      throw new Error("workout flow stuck at step " + i);
+    }
+    await page.locator("[data-back='2']").click();
+    await expect(page.locator("main")).toContainText("下背 2");
+    await page.locator("[data-finish-home]").click();
+    await page.locator("[data-testid=share-cats]").click();
+    const text = page.locator("[data-testid=share-sheet-text]");
+    await expect(text).toContainText("今天訓練");
+    await expect(text).toContainText("腿推");
+    await expect(text).toContainText("80 kg");
+    await expect(text).toContainText("下背：2");
   });
 });

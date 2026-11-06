@@ -173,3 +173,11 @@ nav#tabs button.on i{filter:none;opacity:1}
 .meal-row .row-acts{display:flex;gap:8px;margin-top:8px}
 .meal-row .row-acts .btn{flex:1}
 .item.freq{outline:1px dashed #C2410C}
+
+.body-svg .m{pointer-events:all;cursor:pointer}
+.rest-home{margin:12px 0}
+.rest-quick{margin:8px 4px 12px;font-size:15px;font-weight:700;color:var(--mut);line-height:1.4}
+.rest-picks{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.shop-plus{min-width:52px;font-size:28px;font-weight:800;padding:8px 16px;line-height:1}
+.shop-chips{margin:8px 0 12px;min-height:8px}
+.shop-cats{display:flex;flex-wrap:wrap;gap:8px;width:100%}

@@ -10,7 +10,7 @@ const HIGH_STEPS = 15000;
 const REST_SEC = 90;
 
 let LIVE = { garmin: { daily: [], activities: [] }, inbody: [], exportedAt: null, ok: {} };
-let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null };
+let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null, wantTrain: false, shopAdd: false, shopCat: "protein", shopDraftName: "", shopDraftAmount: "" };
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -110,6 +110,7 @@ function state() {
     hideSuggestReasons: !!s.hideSuggestReasons,
     shopExtra: Array.isArray(s.shopExtra) ? s.shopExtra : [],
     shopFrequent: s.shopFrequent || {},
+    restTrain: s.restTrain || {},
   };
 }
 
@@ -284,13 +285,27 @@ function mealLabel(id, trainDay, st) {
   if (id === "eggs21") return "21:00";
   return (MEAL_DEFS[id] && MEAL_DEFS[id].label) || id;
 }
+function restTrainPick(st, d = now()) {
+  return (st.restTrain || {})[todayKey(d)] || null;
+}
+function isActiveTrainDay(st, d = now()) {
+  return isTrainDay(st, d) || !!restTrainPick(st, d);
+}
+function restQuickLine(chk) {
+  if (!chk) return "還沒有睡眠和 Body Battery 資料";
+  if (chk.quick) return `今天較適合快版：${chk.reasons[0]}`;
+  const bit = chk.reasons[0] || "睡眠和 Body Battery 都還可以";
+  if (/可以練原課表/.test(bit)) return bit;
+  return `${bit}，可以練原課表`;
+}
 function todayPlan(st, d = now()) {
   const train = isTrainDay(st, d);
   const scheduled = pickScheduled(st, d);
   const chk = shouldQuick(d);
   const ov = (st.override || {})[todayKey(d)];
   const fasted = markedFasted(st, d);
-  if (!train) {
+  const extra = restTrainPick(st, d);
+  if (!train && !extra) {
     return {
       train: false, id: null, scheduled, workout: null,
       reason: "休息日，走走路就好", collapsed: true, chk, canOverride: false, fasted: false,
@@ -299,7 +314,11 @@ function todayPlan(st, d = now()) {
   let wantQuick = chk.quick || fasted;
   if (ov === "original") wantQuick = false;
   if (ov === "quick") wantQuick = true;
-  const id = wantQuick ? "quick" : scheduled;
+  let id = extra || (wantQuick ? "quick" : scheduled);
+  if (extra) {
+    id = extra;
+    wantQuick = extra === "quick";
+  }
   let reason = chk.reasons[0];
   if (fasted && wantQuick) {
     reason = chk.quick ? `空腹練，改 25 分鐘快版，不追重量（${chk.reasons[0]}）` : "空腹練，改 25 分鐘快版，不追重量";
@@ -308,8 +327,8 @@ function todayPlan(st, d = now()) {
   }
   return {
     train: true, id, scheduled, workout: WORKOUTS[id],
-    reason, chk, wantQuick, fasted,
-    canOverride: wantQuick && id === "quick",
+    reason, chk, wantQuick, fasted, restPick: !train && !!extra,
+    canOverride: !extra && wantQuick && id === "quick",
   };
 }
 
@@ -338,7 +357,7 @@ function weight7avg(d = now()) {
 }
 function dayHasMealLog(st, date) {
   const meals = ((st && st.mealLogs) || {})[date] || {};
-  return Object.values(meals).some((m) => m && (m.eaten || Number(m.kcal) || Number(m.protein)));
+  return Object.values(meals).some((m) => m && m.eaten === true);
 }
 function weightOnDate(date) {
   const row = dailyOn(date);
@@ -377,7 +396,7 @@ function computeKcalAdjust(st, d = now()) {
   return { adj: 0, note: null };
 }
 function kcalInfo(st, d = now()) {
-  const trainLike = isTrainDay(st, d);
+  const trainLike = isActiveTrainDay(st, d);
   const y = dailyOn(todayKey(addDays(d, -1)));
   const adj = computeKcalAdjust(st, d);
   let target = trainLike ? 2150 : 1950;
@@ -416,7 +435,7 @@ function mealTotals(st, d = now()) {
   const ids = MEAL_ORDER.slice();
   for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
-    if (m && m.eaten) {
+    if (m && m.eaten === true) {
       kcal += Number(m.kcal) || 0;
       protein += Number(m.protein) || 0;
     }
@@ -528,6 +547,17 @@ function shopAcquired(shop, id) {
 function shopAllItems(st) {
   return (SHOP_ITEMS || []).concat((st && st.shopExtra) || []);
 }
+function matchShopItem(st, name) {
+  const q = String(name || "").trim();
+  if (!q) return null;
+  const items = shopAllItems(st);
+  return items.find((it) => {
+    const n = String(it.name || "");
+    const stem = n.split(/[約（(]/)[0].trim();
+    if (!stem) return false;
+    return q === n || q === stem || n.startsWith(q) || q.startsWith(stem);
+  }) || null;
+}
 function isShopFrequent(st, item) {
   const flag = ((st && st.shopFrequent) || {})[item.id];
   if (flag === false) return false;
@@ -579,7 +609,7 @@ function formatSetLine(sets) {
 function shareCatsText(st) {
   const t = now();
   const day = todayKey(t);
-  const trainDay = isTrainDay(st, t);
+  const trainDay = isActiveTrainDay(st, t);
   const kcal = kcalInfo(st, t);
   const totals = mealTotals(st, t);
   const labels = { snack: "16:00", dinner: "18:30", eggs21: "21:00" };
@@ -906,16 +936,23 @@ function partClass(id, pri, sec, week, selected) {
   if (selected === id) cls += " is-on";
   return cls;
 }
+function partAliases(id) {
+  if (id === "frontDelts" || id === "rearDelts") return [id, "delts"];
+  if (id === "obliques") return [id, "core"];
+  if (id === "upperback") return [id, "midback"];
+  return [id];
+}
 function partWeekCount(id, week) {
-  if (id === "frontDelts" || id === "rearDelts") return Math.max(week[id] || 0, week.delts || 0);
-  return week[id] || 0;
+  week = week || {};
+  let n = 0;
+  for (const k of partAliases(id)) n = Math.max(n, Number(week[k]) || 0);
+  return n;
 }
 function partSourceNames(id, sources) {
-  const keys = [id];
-  if (id === "frontDelts" || id === "rearDelts") keys.push("delts");
+  sources = sources || {};
   const seen = new Set();
   const names = [];
-  for (const k of keys) {
+  for (const k of partAliases(id)) {
     for (const name of (sources[k] || [])) {
       if (!seen.has(name)) { seen.add(name); names.push(name); }
     }
@@ -929,12 +966,37 @@ function partTip(id, week, sources) {
   const from = names.length ? `，來自${names.join("、")}` : "";
   return `${label}：本週 ${n} 組${from}`;
 }
+function muscleIdFromEvent(e) {
+  const direct = e.target && e.target.closest && e.target.closest(".body-svg [data-part]");
+  if (direct) return direct.getAttribute("data-part");
+  if (typeof document.elementsFromPoint !== "function") return null;
+  const x = e.clientX;
+  const y = e.clientY;
+  if (x == null || y == null) return null;
+  for (const node of document.elementsFromPoint(x, y)) {
+    const el = node.closest && node.closest(".body-svg [data-part]");
+    if (el) return el.getAttribute("data-part");
+  }
+  return null;
+}
 function bodyMap(priList, secList, weekCounts, sourceMap) {
   const pri = new Set(priList || []);
   const sec = new Set(secList || []);
   const detail = weekPartSources(state(), now(), { includeSession: true });
-  const week = weekCounts && typeof weekCounts === "object" ? weekCounts : detail.counts;
-  const sources = sourceMap || detail.sources;
+  const week = detail.counts;
+  const sources = detail.sources;
+  if (weekCounts && typeof weekCounts === "object") {
+    for (const [k, v] of Object.entries(weekCounts)) {
+      if ((Number(v) || 0) > (Number(week[k]) || 0)) week[k] = v;
+    }
+  }
+  if (sourceMap) {
+    for (const [k, list] of Object.entries(sourceMap)) {
+      const extra = Array.isArray(list) ? list : [];
+      const cur = sources[k] || [];
+      sources[k] = [...new Set(cur.concat(extra))];
+    }
+  }
   const selected = ui.bodyPart || null;
   const svg = (typeof bodySvgMarkup === "function")
     ? bodySvgMarkup((id) => partClass(id, pri, sec, week, selected))
@@ -1154,7 +1216,18 @@ function renderHome(st) {
 
   let trainCard;
   if (!plan.train) {
-    trainCard = `<div class="rest-line" data-testid="rest-line">休息日，走走路就好</div>`;
+    const picks = ui.wantTrain
+      ? `<div class="rest-picks" data-testid="rest-picks">
+          <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A${plan.scheduled === "gymA" ? " · 這週下一堂" : ""}</button>
+          <button type="button" class="btn${plan.scheduled === "gymB" ? " primary" : ""}" data-rest-train="gymB" data-testid="rest-train-gymB">健身房 B${plan.scheduled === "gymB" ? " · 這週下一堂" : ""}</button>
+          <button type="button" class="btn${plan.chk && plan.chk.quick ? " primary" : ""}" data-rest-train="quick" data-testid="rest-train-quick">快版${plan.chk && plan.chk.quick ? " · 今天建議" : ""}</button>
+        </div>`
+      : `<button type="button" class="btn primary xl" data-want-train data-testid="want-train">今天也想練</button>`;
+    trainCard = `<div class="rest-home">
+      <div class="rest-line" data-testid="rest-line">休息日，走走路就好</div>
+      <div class="rest-quick" data-testid="rest-quick">${esc(restQuickLine(plan.chk))}</div>
+      ${picks}
+    </div>`;
   } else {
     const w = plan.workout;
     const primary = session
@@ -1499,16 +1572,27 @@ function renderShop(st) {
       </div>`;
     }).join("")}`;
   }).join("");
-  const add = `<div class="shop-add card" data-testid="shop-add">
-      <input type="text" data-shop-new-name placeholder="新增食材" aria-label="新增食材">
+  const extras = (st.shopExtra || []);
+  const chips = `<div class="chips shop-chips" data-testid="shop-chips">${extras.map((it) => {
+    const on = !!(shop.checked[it.id] || shop.have[it.id]);
+    return `<button type="button" class="chip${on ? " on" : ""}" data-shop-chip="${it.id}" data-testid="shop-chip-${it.id}">${esc(it.name)}</button>`;
+  }).join("")}</div>`;
+  const knownDraft = matchShopItem(st, ui.shopDraftName);
+  const add = ui.shopAdd ? `<div class="shop-add card" data-testid="shop-add">
+      <input type="text" data-shop-new-name placeholder="名稱，例如 雞柳" aria-label="名稱" value="${esc(ui.shopDraftName || "")}">
+      <input type="text" data-shop-new-amount placeholder="份量，例如 300g 或 2" aria-label="份量" value="${esc(ui.shopDraftAmount || "")}">
+      <div class="shop-cats" data-testid="shop-cats"${knownDraft ? " hidden" : ""}>
+        <button type="button" class="chip${(ui.shopCat || "protein") === "protein" ? " on" : ""}" data-shop-cat="protein">蛋白質</button>
+        <button type="button" class="chip${ui.shopCat === "starch" ? " on" : ""}" data-shop-cat="starch">澱粉</button>
+        <button type="button" class="chip${ui.shopCat === "veg" ? " on" : ""}" data-shop-cat="veg">蔬菜</button>
+      </div>
       <select data-shop-new-group aria-label="分類">
-        <option value="protein">蛋白質</option>
-        <option value="starch">澱粉</option>
-        <option value="veg">蔬菜</option>
+        <option value="protein"${(ui.shopCat || "protein") === "protein" ? " selected" : ""}>蛋白質</option>
+        <option value="starch"${ui.shopCat === "starch" ? " selected" : ""}>澱粉</option>
+        <option value="veg"${ui.shopCat === "veg" ? " selected" : ""}>蔬菜</option>
       </select>
-      <input type="number" data-shop-new-qty value="2" min="0" aria-label="掌或拳">
       <button type="button" class="btn primary" data-shop-add>新增</button>
-    </div>`;
+    </div>` : "";
   return `<section class="card hero">
       <div class="k">每週補貨</div>
       <div class="big">採買清單</div>
@@ -1517,10 +1601,14 @@ function renderShop(st) {
     <button type="button" class="shop-hint${shop.hintCollapsed ? " collapsed" : ""}" data-toggle-hint data-testid="shop-hint">${shop.hintCollapsed ? "本週存量提示" : esc(hint)}</button>
     ${bars}
     ${wheyWarn}
-    <div class="acts"><button type="button" class="btn" data-clear-shop>清除勾選</button></div>
+    <div class="acts">
+      <button type="button" class="btn" data-clear-shop>清除勾選</button>
+      <button type="button" class="btn shop-plus" data-shop-plus data-testid="shop-plus" aria-label="新增食材">＋</button>
+    </div>
+    ${chips}
     ${groups}
     ${add}
-    <p class="muted">長按＝家裡有。常買的項目每週都會留下。</p>
+    <p class="muted">長按＝家裡有。常買的項目每週都會留下。點 ＋ 可加入任意食材。</p>
     ${shareCatsBtn()}`;
 }
 
@@ -1783,10 +1871,9 @@ document.getElementById("main").addEventListener("click", (e) => {
     return;
   }
 
-  const muscle = e.target.closest("[data-part]");
-  if (muscle && muscle.closest(".body-svg")) {
-    const id = muscle.getAttribute("data-part");
-    ui.bodyPart = ui.bodyPart === id ? null : id;
+  const muscleId = muscleIdFromEvent(e);
+  if (muscleId) {
+    ui.bodyPart = ui.bodyPart === muscleId ? null : muscleId;
     render();
     return;
   }
@@ -1900,22 +1987,51 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  if (e.target.closest("[data-shop-plus]")) {
+    ui.shopAdd = !ui.shopAdd;
+    render();
+    return;
+  }
+  const shopCat = e.target.closest("[data-shop-cat]");
+  if (shopCat) {
+    ui.shopCat = shopCat.dataset.shopCat;
+    ui.shopDraftName = (document.querySelector("[data-shop-new-name]") || {}).value || ui.shopDraftName || "";
+    ui.shopDraftAmount = (document.querySelector("[data-shop-new-amount]") || {}).value || ui.shopDraftAmount || "";
+    render();
+    return;
+  }
+  const shopChip = e.target.closest("[data-shop-chip]");
+  if (shopChip) {
+    const shop = persistShopWeek(st);
+    const id = shopChip.dataset.shopChip;
+    save({ shopWeek: shop.week, shopChecked: { ...shop.checked, [id]: !shop.checked[id] } });
+    render();
+    return;
+  }
   if (e.target.closest("[data-shop-add]")) {
-    const name = (document.querySelector("[data-shop-new-name]") || {}).value;
-    const group = (document.querySelector("[data-shop-new-group]") || {}).value || "protein";
-    const qty = Math.max(0, Number((document.querySelector("[data-shop-new-qty]") || {}).value) || 0);
-    const label = String(name || "").trim();
+    ui.shopDraftName = (document.querySelector("[data-shop-new-name]") || {}).value || "";
+    ui.shopDraftAmount = (document.querySelector("[data-shop-new-amount]") || {}).value || "";
+    const label = String(ui.shopDraftName || "").trim();
+    const amount = String(ui.shopDraftAmount || "").trim();
+    const known = matchShopItem(st, label);
+    const selGroup = (document.querySelector("[data-shop-new-group]") || {}).value;
+    const group = known ? known.group : (ui.shopCat || selGroup || "protein");
+    const qty = Math.max(0, Number(String(amount).replace(/[^\d.]/g, "")) || 0);
     if (label) {
       const item = {
         id: "x-" + Date.now(),
         group,
-        name: label,
-        hint: "自訂",
+        name: amount ? `${label} ${amount}` : label,
+        hint: amount || "自訂",
         custom: true,
-        palms: group === "protein" ? qty : 0,
-        fists: group === "starch" ? qty : 0,
+        amount,
+        palms: group === "protein" ? (qty || 2) : 0,
+        fists: group === "starch" ? (qty || 2) : 0,
       };
       save({ shopExtra: (st.shopExtra || []).concat([item]), shopFrequent: { ...(st.shopFrequent || {}), [item.id]: true } });
+      ui.shopDraftName = "";
+      ui.shopDraftAmount = "";
+      ui.shopAdd = false;
     }
     render();
     return;
@@ -1930,6 +2046,23 @@ document.getElementById("main").addEventListener("click", (e) => {
     return;
   }
 
+  if (e.target.closest("[data-want-train]")) {
+    ui.wantTrain = true;
+    render();
+    return;
+  }
+  const restTrain = e.target.closest("[data-rest-train]");
+  if (restTrain) {
+    const pick = restTrain.getAttribute("data-rest-train") || restTrain.dataset.restTrain;
+    if (pick && typeof WORKOUTS !== "undefined" && WORKOUTS[pick]) {
+      const next = { ...((load().restTrain) || {}) };
+      next[todayKey()] = pick;
+      save({ restTrain: next });
+      ui.wantTrain = false;
+    }
+    render();
+    return;
+  }
   if (e.target.closest("[data-start]")) {
     startWorkout();
     return;
@@ -1950,7 +2083,7 @@ document.getElementById("main").addEventListener("click", (e) => {
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
     if (meals[id] && meals[id].eaten) {
-      meals[id] = { ...meals[id], eaten: false };
+      meals[id] = { eaten: false };
     } else {
       const est = mealEstimate(st, id);
       meals[id] = { ...(meals[id] || {}), ...est, eaten: true };
@@ -2152,6 +2285,18 @@ document.getElementById("main").addEventListener("click", (e) => {
   }
 });
 
+
+document.getElementById("main").addEventListener("input", (e) => {
+  if (e.target.matches("[data-shop-new-name]")) {
+    ui.shopDraftName = e.target.value;
+    const known = matchShopItem(state(), e.target.value);
+    const cats = document.querySelector("[data-testid=shop-cats]");
+    if (cats) cats.hidden = !!known;
+  }
+  if (e.target.matches("[data-shop-new-amount]")) ui.shopDraftAmount = e.target.value;
+  if (e.target.matches("[data-shop-new-group]")) ui.shopCat = e.target.value;
+});
+
 (function setupShopLongPress() {
   const main = document.getElementById("main");
   let timer = null;
@@ -2159,7 +2304,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
   main.addEventListener("pointerdown", (e) => {
     const item = e.target.closest("[data-shop]");
-    if (!item || e.target.closest("[data-whey-pack],[data-shop-frequent],[data-shop-del],[data-shop-add],input,select,button")) return;
+    if (!item || e.target.closest("[data-whey-pack],[data-shop-frequent],[data-shop-del],[data-shop-add],[data-shop-plus],[data-shop-chip],[data-shop-cat],input,select,button")) return;
     fired = false;
     timer = setTimeout(() => {
       fired = true;
