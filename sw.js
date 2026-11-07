@@ -8,7 +8,7 @@ const F = [
   "data.json",
   "body-svg.js",
   "version.json",
-  "manifest.webmanifest?v=preview-27",
+  "manifest.webmanifest?v=preview-30",
   "icon-180-20261107p25.png",
   "icon-512-20261107p25.png",
 ];
