@@ -1,4 +1,4 @@
-const C = "fatcat-preview-20261107d";
+const C = "fatcat-preview-20261107e";
 const F = [
   "./",
   "index.html",
@@ -45,12 +45,18 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then(
-      (r) =>
-        r ||
-        fetch(e.request).catch(() =>
-          e.request.mode === "navigate" ? caches.match("index.html") : Response.error()
+    fetch(e.request, { cache: "no-cache" })
+      .then((r) => {
+        if (r && r.ok && e.request.method === "GET") {
+          const copy = r.clone();
+          caches.open(C).then((c) => c.put(e.request, copy));
+        }
+        return r;
+      })
+      .catch(() =>
+        caches.match(e.request, { ignoreSearch: true }).then(
+          (r) => r || (e.request.mode === "navigate" ? caches.match("index.html") : Response.error())
         )
-    )
+      )
   );
 });

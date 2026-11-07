@@ -111,6 +111,7 @@ function state() {
     shopExtra: Array.isArray(s.shopExtra) ? s.shopExtra : [],
     shopFrequent: s.shopFrequent || {},
     restTrain: s.restTrain || {},
+    backSwap: s.backSwap || {},
   };
 }
 
@@ -1286,8 +1287,21 @@ function renderHome(st) {
   const session = st.session && st.session.date === todayKey() && st.session.phase !== "done" ? st.session : null;
   const returning = isReturnWeek(st);
 
+  const trainedToday = !!(todayLog && todayLog.finishedAt) && !session;
+  const pickRow = ui.wantTrain
+    ? `<div class="rest-picks" data-testid="rest-picks">
+        <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A</button>
+        <button type="button" class="btn${plan.scheduled === "gymB" ? " primary" : ""}" data-rest-train="gymB" data-testid="rest-train-gymB">健身房 B</button>
+        <button type="button" class="btn${plan.chk && plan.chk.quick ? " primary" : ""}" data-rest-train="quick" data-testid="rest-train-quick">快版</button>
+      </div>`
+    : `<button type="button" class="btn full" data-want-train data-testid="want-train">今天也想練</button>`;
   let trainCard;
-  if (!plan.train) {
+  if (trainedToday && !(ui.wantTrain === "picked")) {
+    trainCard = `<section class="card hero" data-testid="train-card">
+      <div class="big" data-testid="trained-today">今天已練 ✓</div>
+      <div class="acts">${pickRow}</div>
+    </section>`;
+  } else if (!plan.train) {
     const picks = ui.wantTrain
       ? `<div class="rest-picks" data-testid="rest-picks">
           <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A${plan.scheduled === "gymA" ? " · 這週下一堂" : ""}</button>
@@ -1321,6 +1335,7 @@ function renderHome(st) {
       ${(!st.hideSuggestReasons && ui.showReason && plan.reason) ? `<p class="reason" data-testid="reason">${esc(plan.reason)}</p>` : ""}
       <div class="acts">${primary}</div>
       <div class="acts">${fastedBtn}${ov}</div>
+      <div class="acts">${pickRow}</div>
     </section>`;
   }
 
@@ -1489,10 +1504,12 @@ function sessionLoad(session, st) {
     weight = session.returning ? Math.round(Number(hist.weight) * 0.7 * 2) / 2 : Number(hist.weight);
     if (!session.returning && !session.fasted && sug && sug.add) weight = Number(hist.weight) + Number(sug.add);
   }
+  const noWeight = NO_WEIGHT.test(step.name);
+  if (weight == null && !noWeight) weight = startKgFor(step.name);
   let target = dose.repsLow;
   if (hist && hist.reps && !session.returning) target = hist.reps;
   if (session.editTarget != null) target = session.editTarget;
-  return { weight, target, sets: dose.sets, perSide: dose.perSide, hist, sug, noWeight: NO_WEIGHT.test(step.name) };
+  return { weight, target, sets: dose.sets, perSide: dose.perSide, hist, sug, noWeight };
 }
 
 function renderWorkout(st) {
@@ -1502,6 +1519,7 @@ function renderWorkout(st) {
   }
   if (session.phase === "done") return renderDone(st, session);
   if (session.phase === "back") return renderBack(session);
+  if (session.phase === "exback") return renderExBack(session);
   if (session.phase === "rest") return renderRest(session);
 
   const step = session.steps[session.i];
@@ -1522,14 +1540,14 @@ function renderWorkout(st) {
       ? `連續兩次做滿且有餘力，建議加到 ${load.weight} kg（+${load.sug.add}）。不想加就改回原重量再按完成。`
       : null;
   const weightBlock = load.noWeight
-    ? `<p class="muted">這個動作不用加重。</p>`
+    ? `<div class="load"><div class="num" data-testid="wo-weight">徒手</div></div>`
     : `<div class="load">
-        <div><div class="num">${load.weight != null ? load.weight : "—"}<span class="unit"> kg</span></div>
-          <div class="muted">${load.hist && load.hist.weight != null ? `上次 ${load.hist.weight} kg × ${load.hist.reps || "?"} 下` : "Garmin 沒有重量，第一次請先調好再按完成"}</div>
+        <div><div class="num" data-testid="wo-weight">${load.weight}<span class="unit"> kg</span></div>
+          <div class="muted">${load.hist && load.hist.weight != null ? `上次 ${load.hist.weight} kg` : "起始重量"}</div>
         </div>
         <div class="stepper">
-          <button type="button" data-wdelta="-2.5" aria-label="減 2.5 公斤">−</button>
-          <button type="button" data-wdelta="2.5" aria-label="加 2.5 公斤">+</button>
+          <button type="button" data-wdelta="-${WEIGHT_STEP}" data-testid="w-minus" aria-label="減 ${WEIGHT_STEP} 公斤">−</button>
+          <button type="button" data-wdelta="${WEIGHT_STEP}" data-testid="w-plus" aria-label="加 ${WEIGHT_STEP} 公斤">+</button>
         </div>
       </div>`;
 
@@ -1570,11 +1588,23 @@ function renderRest(session) {
     <div class="muted">休息</div>
     <div class="t" id="rest-count">${left}</div>
     <p class="muted">秒後繼續下一組</p>
+    ${session.swapNote ? `<p class="note" data-testid="ex-swap-note">${esc(session.swapNote)}</p>` : ""}
     <button type="button" class="btn primary xl eat-toggle yes" data-undo-set data-testid="btn-undo">✓ 完成</button>
     <button type="button" class="btn full" data-skip-rest>跳過休息</button>
   </div>`;
 }
 
+function renderExBack(session) {
+  const step = session.steps[session.exBackI != null ? session.exBackI : session.i];
+  const btns = Array.from({ length: 11 }, (_, i) => `<button type="button" data-exback="${i}" data-testid="exback-${i}">${i}</button>`).join("");
+  return `<section class="card hero" data-testid="exback"><div class="k">${esc(step ? step.name : "")}</div><div class="big">下背 OK 嗎</div>
+    <div class="lab">0 很好 · 10 很痛</div></section>
+    <div class="back-grid">${btns}</div>`;
+}
+function exSwapTarget(name) {
+  const s = lookSafer(name, null);
+  return s ? s.name || s : null;
+}
 function renderBack(session) {
   const cur = session.backScore;
   const btns = Array.from({ length: 11 }, (_, i) =>
@@ -1591,7 +1621,8 @@ function renderDone(st, session) {
   const parts = todayPartsFromMoves(session.moves);
   const g = session.garmin || matchGarmin(session.date);
   const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
-  const swaps = upcomingBackSwaps(session.workoutId, session.backScore);
+  const exSw = Object.entries(session.exSwaps || {}).map(([n, t]) => `${n}：${t.replace(/^下次這動作/, "")}`);
+  const swaps = exSw.length ? exSw : (session.exBack ? [] : upcomingBackSwaps(session.workoutId, session.backScore));
   const swapLine = swaps.length
     ? `<p class="note" data-testid="back-swaps">下次換動作：${esc(swaps.join("、"))}</p>`
     : "";
@@ -1747,7 +1778,9 @@ function go(tab) {
 function buildSteps(st, workout) {
   const back = lastBackScore(st);
   const steps = workout.steps.map((s) => {
-    const r = resolveName(s, back);
+    let r = resolveName(s, back);
+    const sw = (st.backSwap || {})[moveKey(r.name)];
+    if (sw) r = { name: sw, video: r.video, swapped: true };
     return {
       name: r.name,
       dose: s.dose,
@@ -1781,6 +1814,7 @@ function startWorkout() {
   }
   const session = {
     date: todayKey(),
+    startedAt: Date.now(),
     workoutId: plan.id,
     steps: buildSteps(st, plan.workout),
     i: 0,
@@ -1821,20 +1855,55 @@ function applySet(short, reps) {
   session.shortReps = null;
   const finishedEx = session.setI + 1 >= load.sets;
   const finishedAll = finishedEx && session.i + 1 >= session.steps.length;
-  if (finishedAll) {
-    session.phase = "back";
+  session.swapNote = null;
+  if (finishedEx) {
+    session.exBackI = session.i;
+    session.phase = "exback";
     session.restUntil = null;
-  } else if (finishedEx) {
-    session.i += 1;
-    session.setI = 0;
-    session.editWeight = null;
-    session.phase = "rest";
-    session.restUntil = Date.now() + restMs();
   } else {
     session.setI += 1;
     session.phase = "rest";
     session.restUntil = Date.now() + restMs();
   }
+  save({ session });
+  render();
+}
+
+function applyExBack(score) {
+  const st = state();
+  const session = { ...st.session };
+  const idx = session.exBackI != null ? session.exBackI : session.i;
+  const step = session.steps[idx];
+  const n = Number(score);
+  session.exBack = { ...(session.exBack || {}), [step.name]: n };
+  const backSwap = { ...(st.backSwap || {}) };
+  const key = moveKey(step.name);
+  session.swapNote = null;
+  if (n >= 3) {
+    const to = exSwapTarget(step.name);
+    if (to) {
+      backSwap[key] = to;
+      session.swapNote = `下次這動作換成 ${to}`;
+    } else {
+      session.swapNote = "下次這動作減輕重量";
+    }
+    session.exSwaps = { ...(session.exSwaps || {}), [step.name]: session.swapNote };
+  } else {
+    delete backSwap[key];
+  }
+  save({ backSwap });
+  if (idx + 1 >= session.steps.length) {
+    save({ session });
+    const vals = Object.values(session.exBack);
+    finishWithScore(Math.max(...vals));
+    return;
+  }
+  session.i = idx + 1;
+  session.setI = 0;
+  session.editWeight = null;
+  session.exBackI = null;
+  session.phase = "rest";
+  session.restUntil = Date.now() + restMs();
   save({ session });
   render();
 }
@@ -1862,11 +1931,15 @@ function finishWithScore(score) {
       }
     }
   }
+  const prevLog = (st.logs || {})[session.date];
+  const mergedMoves = prevLog && prevLog.finishedAt && prevLog.sessionStart !== session.startedAt
+    ? { ...(prevLog.moves || {}), ...session.moves } : session.moves;
   const logs = {
     ...st.logs,
     [session.date]: {
       workoutId: session.workoutId,
-      moves: session.moves,
+      sessionStart: session.startedAt,
+      moves: mergedMoves,
       backScore: session.backScore,
       reason: session.reason,
       returning: session.returning,
@@ -1916,6 +1989,7 @@ function render() {
   else if (st.tab === "body") main.innerHTML = renderBody(st);
   else main.innerHTML = renderHome(st);
   if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
+  if (st.tab !== "workout") main.insertAdjacentHTML("beforeend", `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`);
 }
 
 function tick() {
@@ -2137,6 +2211,8 @@ document.getElementById("main").addEventListener("click", (e) => {
       next[todayKey()] = pick;
       save({ restTrain: next });
       ui.wantTrain = false;
+      const tl = (load().logs || {})[todayKey()];
+      if (tl && tl.finishedAt) { startWorkout(); return; }
     }
     render();
     return;
@@ -2285,7 +2361,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   const wdelta = e.target.closest("[data-wdelta]");
   if (wdelta && st.session) {
     const load = sessionLoad(st.session, st);
-    const cur = load.weight != null ? Number(load.weight) : 20;
+    const cur = load.weight != null ? Number(load.weight) : startKgFor(st.session.steps[st.session.i].name);
     const next = Math.max(0, Math.round((cur + Number(wdelta.dataset.wdelta)) * 2) / 2);
     save({ session: { ...st.session, editWeight: next } });
     render();
@@ -2316,6 +2392,11 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (e.target.closest("[data-skip-rest]")) {
     save({ session: { ...st.session, phase: "set", restUntil: null } });
     render();
+    return;
+  }
+  const exb = e.target.closest("[data-exback]");
+  if (exb) {
+    applyExBack(exb.dataset.exback);
     return;
   }
   const back = e.target.closest("[data-back]");
@@ -2428,6 +2509,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
+const APP_VERSION = "2026.11.07-preview-5";
 let pendingReload = false;
 let reloading = false;
 
@@ -2550,8 +2632,11 @@ setInterval(() => {
 
 if (navigator.serviceWorker) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (pendingReload && !isBusy()) safeReload();
+    if (!navigator.serviceWorker.__hadController) return;
+    if (!isBusy()) safeReload();
+    else pendingReload = true;
   });
+  navigator.serviceWorker.__hadController = !!navigator.serviceWorker.controller;
 }
 
 window.__fatmiHardRefresh = hardRefresh;
@@ -2563,6 +2648,14 @@ async function boot() {
     if (v.ok) {
       const ver = await v.json();
       loadedVersion = ver && ver.version;
+      if (loadedVersion && loadedVersion !== APP_VERSION) {
+        const k = "fatmi-ver-fix";
+        if (sessionStorage.getItem(k) !== loadedVersion) {
+          sessionStorage.setItem(k, loadedVersion);
+          if (!isBusy()) { hardRefresh(); return; }
+          pendingReload = true;
+        }
+      }
     }
   } catch (_) {}
   try {

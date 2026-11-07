@@ -189,6 +189,26 @@ const EXTRA_FOR_PART = {
 };
 
 const NO_WEIGHT = /死蟲|鳥狗|伏地|跪姿伏地/;
+const WEIGHT_STEP = 2.5;
+const START_KG = [
+  [/腿推/, 60],
+  [/深蹲/, 12.5],
+  [/地板臥推|啞鈴臥推/, 10],
+  [/胸推|臥推/, 20],
+  [/臀橋|髖推|臀推/, 20],
+  [/肩推/, 7.5],
+  [/胸靠划船|胸部支撐/, 20],
+  [/單臂|單手/, 12.5],
+  [/划船|下拉/, 30],
+  [/硬舉|早安/, 20],
+  [/彎舉|二頭/, 7.5],
+  [/三頭|下壓/, 15],
+  [/側平舉/, 5],
+];
+function startKgFor(name) {
+  for (const [re, kg] of START_KG) if (re.test(name)) return kg;
+  return 10;
+}
 
 const WHEY_OPTIONS = [
   { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 170 },

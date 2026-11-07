@@ -290,16 +290,21 @@ test.describe("FITMI", () => {
     await expect(page.locator("[data-testid=rest-timer]")).toBeVisible();
     await page.locator("[data-skip-rest]").click();
 
-    for (let i = 0; i < 40; i++) {
-      const back = page.locator("[data-back]").first();
+    for (let i = 0; i < 60; i++) {
+      const back = page.locator("[data-testid=done-screen], [data-finish-home]").first();
+      const exb = page.locator("[data-exback='2']");
       const skip = page.locator("[data-skip-rest]");
       const done = page.locator("[data-complete]");
       try {
-        await page.locator("[data-back], [data-skip-rest], [data-complete]").first().waitFor({ state: "visible", timeout: 5000 });
+        await page.locator("[data-finish-home], [data-exback], [data-skip-rest], [data-complete]").first().waitFor({ state: "visible", timeout: 5000 });
       } catch (err) {
         throw new Error("workout flow stuck at step " + i);
       }
       if (await back.isVisible()) break;
+      if (await exb.isVisible()) {
+        await exb.click();
+        continue;
+      }
       if (await skip.isVisible()) {
         await skip.click();
         continue;
@@ -310,7 +315,6 @@ test.describe("FITMI", () => {
       }
       throw new Error("workout flow stuck at step " + i);
     }
-    await page.locator("[data-back='2']").click();
     await expect(page.locator("main")).toContainText("下背 2");
     await page.locator("[data-finish-home]").click();
     await page.locator("[data-testid=share-cats]").click();
@@ -442,5 +446,114 @@ test.describe("FITMI2", () => {
     expect((rowText.match(/600g/g) || []).length).toBe(1);
     await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("14");
     await expect(page.locator("[data-testid=shop-bars]")).not.toContainText("314");
+  });
+});
+
+test.describe("ROUND3", () => {
+  const gymA = (extra = {}) => withBreakfast("2026-11-10", extra);
+  test("0) pantry from 3/14 stays X/14 after adding 雞胸 600g", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" });
+    await page.locator("[data-tab=shop]").click();
+    for (const id of ["shop-item-chicken", "shop-item-seafood"]) {
+      const el = page.locator(`[data-testid=${id}]`);
+      if (await el.count()) await el.first().click();
+    }
+    const before = await page.locator("[data-testid=shop-bars]").innerText();
+    await page.locator("[data-testid=shop-plus]").click();
+    await page.locator("[data-shop-new-name]").fill("雞胸");
+    await page.locator("[data-shop-new-amount]").fill("600g");
+    if (await page.locator("[data-testid=shop-cats]").isVisible()) await page.locator("[data-shop-cat=protein]").click();
+    await page.locator("[data-shop-add]").click();
+    const after = await page.locator("[data-testid=shop-bars]").innerText();
+    expect(after).toMatch(/蛋白質 \d+\/14 天/);
+    expect(after).not.toContain("314");
+    expect(after.match(/蛋白質 (\d+)/)[1]).toBe(before.match(/蛋白質 (\d+)/)[1]);
+    expect(await page.getByText("600g600g").count()).toBe(0);
+    expect(await page.locator(".item").filter({ hasText: "雞胸 600g" }).count()).toBe(1);
+  });
+  test("1) training-day share puts workout first even before training", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, gymA());
+    await page.locator("[data-testid=share-cats]").click();
+    const text = await page.locator("[data-testid=share-sheet-text]").innerText();
+    expect(text.indexOf("今天訓練")).toBeGreaterThan(0);
+    expect(text.indexOf("今天訓練")).toBeLessThan(text.indexOf("今天吃"));
+  });
+  test("2+3) default weights, 徒手, last-used, ±2.5", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, gymA({ lastLoads: { 腿推: { weight: 80, reps: 12 } }, logs: { "2026-11-06": { workoutId: "gymB", finishedAt: "2026-11-06T11:00:00+07:00", backScore: 1, moves: { 腿推: [{ done: true, weight: 80, reps: 12 }] } } } }));
+    await page.locator("[data-start]").click();
+    await expect(page.locator("[data-testid=wo-weight]")).toContainText("80");
+    await page.locator("[data-testid=w-plus]").click();
+    await expect(page.locator("[data-testid=wo-weight]")).toContainText("82.5");
+    await page.locator("[data-testid=w-minus]").click();
+    await page.locator("[data-testid=w-minus]").click();
+    await expect(page.locator("[data-testid=wo-weight]")).toContainText("77.5");
+    const seen = {};
+    for (let i = 0; i < 6; i++) {
+      const name = (await page.locator(".wo-name").innerText()).split("\n")[0].trim();
+      seen[name] = (await page.locator("[data-testid=wo-weight]").innerText()).trim();
+      await page.evaluate((n) => {
+        const s = JSON.parse(localStorage.getItem("fatcat-v2"));
+        s.session.i = n; s.session.setI = 0; s.session.editWeight = null;
+        localStorage.setItem("fatcat-v2", JSON.stringify(s));
+      }, i + 1);
+      await page.evaluate(() => { location.hash = "today"; });
+      await page.evaluate(() => { location.hash = "workout"; });
+      await page.waitForTimeout(100);
+      if (i + 1 >= 6) break;
+    }
+    expect(Object.keys(seen).length).toBeGreaterThanOrEqual(5);
+    for (const [n, w] of Object.entries(seen)) {
+      if (/死蟲/.test(n)) expect(w).toBe("徒手");
+      else { expect(w).toMatch(/^\d+(\.\d)? kg$/); expect(w).not.toContain("—"); }
+    }
+  });
+  test("4) per-exercise 下背 OK 嗎, >=3 swaps that exercise only", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8", rest: "0" }, gymA());
+    await page.locator("[data-start]").click();
+    // finish exercise 1 (腿推, 3 sets)
+    for (let s = 0; s < 3; s++) {
+      await page.locator("[data-complete]").click();
+      if (s < 2) await page.locator("[data-skip-rest]").click();
+    }
+    await expect(page.locator("[data-testid=exback]")).toContainText("下背 OK 嗎");
+    await page.locator("[data-exback='1']").click();
+    await page.locator("[data-skip-rest]").click();
+    // exercise 2 (胸推)
+    for (let s = 0; s < 3; s++) {
+      await page.locator("[data-complete]").click();
+      if (s < 2) await page.locator("[data-skip-rest]").click();
+    }
+    await page.locator("[data-exback='4']").click();
+    await expect(page.locator("[data-testid=ex-swap-note]")).toHaveText("下次這動作換成 地板臥推");
+    const sw = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).backSwap);
+    expect(Object.values(sw)).toEqual(["地板臥推"]);
+  });
+  test("4b) next session swaps only that exercise", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, gymA({ backSwap: { 胸推: "地板臥推" } }));
+    await page.locator("[data-start]").click();
+    const steps = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).session.steps.map((s) => s.name));
+    expect(steps).toContain("地板臥推");
+    expect(steps).toContain("坐姿划船");
+    expect(steps).toContain("坐姿啞鈴肩推");
+  });
+  test("5+6) home shows 今天已練 ✓ and 今天也想練 A/B/快版", async ({ page }) => {
+    await open(page, { now: TUE_15, sleep: "8" }, gymA({ logs: { "2026-11-10": { workoutId: "gymA", finishedAt: 1, backScore: 1, moves: { 腿推: [{ done: true, weight: 60, reps: 10 }] } } } }));
+    await expect(page.locator("[data-testid=trained-today]")).toHaveText("今天已練 ✓");
+    await expect(page.locator("[data-start]")).toHaveCount(0);
+    await page.locator("[data-testid=want-train]").click();
+    await expect(page.locator("[data-testid=rest-train-gymA]")).toBeVisible();
+    await expect(page.locator("[data-testid=rest-train-gymB]")).toBeVisible();
+    await expect(page.locator("[data-testid=rest-train-quick]")).toBeVisible();
+  });
+  test("6b) training day home offers 今天也想練 picker before training", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, gymA());
+    await page.locator("[data-testid=want-train]").click();
+    await page.locator("[data-testid=rest-train-quick]").click();
+    await expect(page.locator("[data-testid=train-card]")).toContainText("快版");
+  });
+  test("7) version shown on screen", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, gymA());
+    const v = await (await page.request.get("/preview/version.json")).json();
+    await expect(page.locator("[data-testid=app-version]")).toHaveText(`v${v.version}`);
   });
 });

@@ -181,3 +181,4 @@ nav#tabs button.on i{filter:none;opacity:1}
 .shop-plus{min-width:52px;font-size:28px;font-weight:800;padding:8px 16px;line-height:1}
 .shop-chips{margin:8px 0 12px;min-height:8px}
 .shop-cats{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+.app-ver{text-align:center;color:#a8a29e;font-size:12px;margin:18px 0 8px}
