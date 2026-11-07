@@ -8,7 +8,7 @@ const SAT_10 = "2026-11-07T10:00:00+07:00";
 
 function url(extra = {}) {
   const q = new URLSearchParams({ debug: "1", rest: "1", ...extra });
-  return `${process.env.FATMI_PREFIX || ""}/preview/?${q.toString()}`;
+  return `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/preview/"}?${q.toString()}`;
 }
 
 function withBreakfast(day, extra = {}) {
@@ -250,7 +250,7 @@ test.describe("FITMI", () => {
     await expect(page.locator("[data-testid=rest-quick]")).toContainText("快版");
     await expect(page.locator("[data-testid=rest-quick]")).toContainText(/睡|Body Battery/);
 
-    await open(page, { now: SAT_10, sleep: "8" });
+    await open(page, { now: SAT_10, sleep: "8", bb: "80", rhr: "55", rhrAvg: "55" });
     await expect(page.locator("[data-testid=rest-quick]")).toContainText("可以練原課表");
   });
 
@@ -553,7 +553,7 @@ test.describe("ROUND3", () => {
   });
   test("7) version shown on screen", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, gymA());
-    const v = await (await page.request.get(`${process.env.FATMI_PREFIX || ""}/preview/version.json?t=${Date.now()}`)).json();
+    const v = await (await page.request.get(`${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/preview/"}version.json?t=${Date.now()}`)).json();
     await expect(page.locator("[data-testid=app-version]")).toHaveText(`v${v.version}`);
   });
 });

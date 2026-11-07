@@ -2568,7 +2568,8 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-6";
+const APP_VERSION = "2026.11.07-preview-7";
+const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
 
@@ -2615,7 +2616,7 @@ async function hardRefresh() {
   await Promise.all(ASSETS.map((u) => fetchNoStore(u).catch(() => null)));
   try {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => String(k).includes("preview")).map((k) => caches.delete(k)));
+    await Promise.all(keys.filter((k) => String(k).startsWith(CACHE_PREFIX)).map((k) => caches.delete(k)));
   } catch (_) {}
   await activateWaitingSW();
   safeReload();
@@ -2698,10 +2699,29 @@ if (navigator.serviceWorker) {
   navigator.serviceWorker.__hadController = !!navigator.serviceWorker.controller;
 }
 
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "SW_UPDATED") {
+      if (!isBusy()) safeReload(); else pendingReload = true;
+    }
+  });
+}
 window.__fatmiHardRefresh = hardRefresh;
 window.__fatmiCheckUpdates = checkUpdates;
 
+function migrateGrocery() {
+  try {
+    const s = load();
+    if (s.groceryMigrated) return;
+    const map = { chicken: "chicken", eggs: "eggs", whey: "whey", carb: "rice", fish: "seafood" };
+    const g = s.grocery || {};
+    const shopChecked = { ...(s.shopChecked || {}) };
+    for (const [k, v] of Object.entries(g)) if (v && map[k] && shopChecked[map[k]] == null) shopChecked[map[k]] = true;
+    save({ shopChecked, groceryMigrated: true });
+  } catch (_) {}
+}
 async function boot() {
+  migrateGrocery();
   try {
     const v = await fetch("./version.json", { cache: "no-store" });
     if (v.ok) {

@@ -10,7 +10,7 @@ const HIGH_STEPS = 15000;
 const REST_SEC = 90;
 
 let LIVE = { garmin: { daily: [], activities: [] }, inbody: [], exportedAt: null, ok: {} };
-let ui = { swap: null };
+let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null, wantTrain: false, shopAdd: false, shopCat: "protein", shopDraftName: "", shopDraftAmount: "" };
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -43,6 +43,7 @@ function debugParams() {
     if (q.has("rhr")) out.rhr = Number(q.get("rhr"));
     if (q.has("rhrAvg")) out.rhrAvg = Number(q.get("rhrAvg"));
     if (q.has("rest")) out.rest = Number(q.get("rest"));
+    if (q.has("bb")) out.bb = Number(q.get("bb"));
     return out;
   } catch {
     return {};
@@ -100,6 +101,17 @@ function state() {
     scoopPick: s.scoopPick || {},
     dinnerAlt: s.dinnerAlt || {},
     lastAdvice: s.lastAdvice || "",
+    shopWeek: s.shopWeek || null,
+    shopChecked: s.shopChecked || {},
+    shopHave: s.shopHave || {},
+    shopHide: s.shopHide || {},
+    wheyPacks: s.wheyPacks != null ? Number(s.wheyPacks) : 14,
+    shopHintCollapsed: !!s.shopHintCollapsed,
+    hideSuggestReasons: !!s.hideSuggestReasons,
+    shopExtra: Array.isArray(s.shopExtra) ? s.shopExtra : [],
+    shopFrequent: s.shopFrequent || {},
+    restTrain: s.restTrain || {},
+    backSwap: s.backSwap || {},
   };
 }
 
@@ -137,11 +149,26 @@ function rhrAvg7(d = now()) {
 function isTrainDay(st, d = now()) {
   return (st.trainDays || DEFAULT_DAYS).includes(d.getDay());
 }
+function isGarminWorkout(a) {
+  if (!a) return false;
+  return /strength|multi_sport|training|fitness_equipment/i.test(a.type || "")
+    || /strength|肌力|重量|重訓/i.test(a.name || "");
+}
+function dateHasSession(st, date) {
+  const log = (st.logs || {})[date];
+  if (log && (log.workoutId || log.finishedAt != null || log.backScore != null || (log.moves && Object.keys(log.moves).length))) return true;
+  return (LIVE.garmin.activities || []).some((a) => a.date === date && isGarminWorkout(a));
+}
 function pickScheduled(st, d = now()) {
-  const days = (st.trainDays || DEFAULT_DAYS).slice().sort((a, b) => a - b);
-  const pos = days.indexOf(d.getDay());
-  if (pos <= 0) return "gymA";
-  return pos % 2 === 0 ? "gymA" : "gymB";
+  const { mon } = weekRange(d);
+  const today = todayKey(d);
+  let n = 0;
+  for (let i = 0; i < 7; i++) {
+    const key = todayKey(addDays(mon, i));
+    if (key >= today) break;
+    if (dateHasSession(st, key)) n += 1;
+  }
+  return n % 2 === 0 ? "gymA" : "gymB";
 }
 function yesterdaySteps(d = now()) {
   const row = dailyOn(todayKey(addDays(d, -1))) || dailyOn(todayKey(d));
@@ -153,10 +180,19 @@ function isHighStep(d = now()) {
   const steps = Math.max(today && today.steps != null ? today.steps : 0, yday && yday.steps != null ? yday.steps : 0);
   return steps >= HIGH_STEPS;
 }
+function bodyBatteryOn(d = now()) {
+  const dbg = debugParams();
+  if (dbg.bb != null && !Number.isNaN(dbg.bb)) return dbg.bb;
+  const row = dailyOn(todayKey(d));
+  if (!row) return null;
+  const v = row.bodyBattery != null ? row.bodyBattery : row.bodyBatteryMostRecent;
+  return v != null && v !== "" ? Number(v) : null;
+}
 function shouldQuick(d = now()) {
   const sleep = lastNightSleep(d);
   const rhr = rhrOn(d);
   const avg = rhrAvg7(d);
+  const bb = bodyBatteryOn(d);
   const reasons = [];
   let quick = false;
   if (sleep != null && sleep < 6) {
@@ -167,11 +203,15 @@ function shouldQuick(d = now()) {
     quick = true;
     reasons.push(`靜止心率 ${Math.round(rhr)}，比 7 日平均高 ${Math.round(rhr - avg)} 下`);
   }
+  if (bb != null && !Number.isNaN(bb) && bb < 30) {
+    quick = true;
+    reasons.push(`Body Battery ${Math.round(bb)}，身體還很累`);
+  }
   if (!reasons.length) {
     if (sleep != null) reasons.push(`${sleepText(sleep)}，心率正常`);
     else reasons.push("還沒有昨晚的睡眠資料，先照課表");
   }
-  return { quick, reasons, sleep, rhr, avg };
+  return { quick, reasons, sleep, rhr, avg, bb };
 }
 function markedFasted(st, d = now()) {
   return !!(st.fasted || {})[todayKey(d)];
@@ -224,8 +264,7 @@ function twoScoopMeal(st, d = now()) {
 }
 function dinnerFor(st, d = now()) {
   const shake = twoScoopMeal(st, d);
-  const alt = ((st.dinnerAlt || {})[todayKey(d)]) === "eggs21";
-  const grams = shake.hasPlant || alt ? 150 : 200;
+  const grams = shake.hasPlant ? 150 : 200;
   const chickenId = grams === 150 ? "chicken150" : "chicken200";
   const meal = composeSwapMeal(chickenId, "rice150");
   meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
@@ -242,10 +281,23 @@ function wheyMeal(st) {
   return twoScoopMeal(st);
 }
 function mealLabel(id, trainDay, st) {
-  if (id === "snack" && trainDay) return "16:00";
-  if (id === "dinner" && trainDay) return `18:30 雞胸 ${(st ? dinnerFor(st).chickenG : 200)}g`;
+  if (id === "snack") return "16:00";
+  if (id === "dinner") return "18:30";
   if (id === "eggs21") return "21:00";
   return (MEAL_DEFS[id] && MEAL_DEFS[id].label) || id;
+}
+function restTrainPick(st, d = now()) {
+  return (st.restTrain || {})[todayKey(d)] || null;
+}
+function isActiveTrainDay(st, d = now()) {
+  return isTrainDay(st, d) || !!restTrainPick(st, d);
+}
+function restQuickLine(chk) {
+  if (!chk) return "還沒有睡眠和 Body Battery 資料";
+  if (chk.quick) return `今天較適合快版：${chk.reasons[0]}`;
+  const bit = chk.reasons[0] || "睡眠和 Body Battery 都還可以";
+  if (/可以練原課表/.test(bit)) return bit;
+  return `${bit}，可以練原課表`;
 }
 function todayPlan(st, d = now()) {
   const train = isTrainDay(st, d);
@@ -253,7 +305,8 @@ function todayPlan(st, d = now()) {
   const chk = shouldQuick(d);
   const ov = (st.override || {})[todayKey(d)];
   const fasted = markedFasted(st, d);
-  if (!train) {
+  const extra = restTrainPick(st, d);
+  if (!train && !extra) {
     return {
       train: false, id: null, scheduled, workout: null,
       reason: "休息日，走走路就好", collapsed: true, chk, canOverride: false, fasted: false,
@@ -262,7 +315,11 @@ function todayPlan(st, d = now()) {
   let wantQuick = chk.quick || fasted;
   if (ov === "original") wantQuick = false;
   if (ov === "quick") wantQuick = true;
-  const id = wantQuick ? "quick" : scheduled;
+  let id = extra || (wantQuick ? "quick" : scheduled);
+  if (extra) {
+    id = extra;
+    wantQuick = extra === "quick";
+  }
   let reason = chk.reasons[0];
   if (fasted && wantQuick) {
     reason = chk.quick ? `空腹練，改 25 分鐘快版，不追重量（${chk.reasons[0]}）` : "空腹練，改 25 分鐘快版，不追重量";
@@ -271,8 +328,8 @@ function todayPlan(st, d = now()) {
   }
   return {
     train: true, id, scheduled, workout: WORKOUTS[id],
-    reason, chk, wantQuick, fasted,
-    canOverride: wantQuick && id === "quick",
+    reason, chk, wantQuick, fasted, restPick: !train && !!extra,
+    canOverride: !extra && wantQuick && id === "quick",
   };
 }
 
@@ -299,7 +356,28 @@ function weight7avg(d = now()) {
   const last = lastInbody();
   return { value: last.weightKg, source: `近一次 ${fmtMD(last.date)}`, stale: true, date: last.date };
 }
-function computeKcalAdjust(d = now()) {
+function dayHasMealLog(st, date) {
+  const meals = ((st && st.mealLogs) || {})[date] || {};
+  return Object.values(meals).some((m) => m && m.eaten === true);
+}
+function weightOnDate(date) {
+  const row = dailyOn(date);
+  if (row && row.weightKg != null) return Number(row.weightKg);
+  const scan = (LIVE.inbody || []).find((s) => s.date === date && s.weightKg != null);
+  return scan ? Number(scan.weightKg) : null;
+}
+function loggedWeightAvg(st, fromDays, toDays, d) {
+  const xs = [];
+  for (let i = fromDays; i < toDays; i++) {
+    const date = todayKey(addDays(d, -i));
+    if (!dayHasMealLog(st, date)) continue;
+    const w = weightOnDate(date);
+    if (w != null && !Number.isNaN(w)) xs.push(w);
+  }
+  if (!xs.length) return null;
+  return xs.reduce((a, b) => a + b, 0) / xs.length;
+}
+function computeKcalAdjust(st, d = now()) {
   const scans = LIVE.inbody || [];
   if (scans.length < 2) return { adj: 0, note: null };
   const last = scans[scans.length - 1];
@@ -311,44 +389,28 @@ function computeKcalAdjust(d = now()) {
   if (last.smmKg != null && prev.smmKg != null && Number(last.smmKg) <= Number(prev.smmKg) - 0.5) {
     return { adj: 150, note: `骨骼肌從 ${prev.smmKg} 降到 ${last.smmKg} kg，熱量先加回 150` };
   }
-  const avgIn = (from, to) => {
-    const xs = scans.filter((s) => {
-      const days = (d - parseISO(s.date)) / 86400000;
-      return days >= from && days < to && s.weightKg != null;
-    });
-    if (!xs.length) return null;
-    return xs.reduce((a, s) => a + Number(s.weightKg), 0) / xs.length;
-  };
-  const w0 = avgIn(0, 7);
-  const w1 = avgIn(7, 14);
-  const w2 = avgIn(14, 21);
-  if (w0 != null && w1 != null && w2 != null && Math.abs(w0 - w1) < 0.2 && Math.abs(w1 - w2) < 0.2 && w0 >= w2 - 0.15) {
-    return { adj: -125, note: "兩週體重 7 日平均幾乎沒降，目標再減 125 kcal" };
+  const w0 = loggedWeightAvg(st, 0, 14, d);
+  const w1 = loggedWeightAvg(st, 14, 28, d);
+  if (w0 != null && w1 != null && Math.abs(w0 - w1) < 0.25 && w0 >= w1 - 0.15) {
+    return { adj: -125, note: "兩週平均體重幾乎沒降，目標再減 125 kcal" };
   }
   return { adj: 0, note: null };
 }
 function kcalInfo(st, d = now()) {
-  const trainLike = isTrainDay(st, d) || isHighStep(d);
+  const trainLike = isActiveTrainDay(st, d);
   const y = dailyOn(todayKey(addDays(d, -1)));
-  const adj = computeKcalAdjust(d);
-  let target;
-  let source;
-  if (y && y.kcal) {
-    target = Math.max(KCAL_FLOOR, Math.round(Number(y.kcal) - 450));
-    source = `昨天消耗 ${Math.round(y.kcal)} kcal − 450`;
-  } else {
-    target = trainLike ? 2150 : 1950;
-    source = trainLike ? "還沒有昨天的消耗，訓練日或步數多先抓 2100–2200" : "還沒有昨天的消耗，工作日先抓 1900–2000";
-  }
+  const adj = computeKcalAdjust(st, d);
+  let target = trainLike ? 2150 : 1950;
   if (adj.adj) target = Math.max(KCAL_FLOOR, target + adj.adj);
   const sleep = lastNightSleep(d);
+  const label = String(target);
   return {
     target,
-    source,
+    source: trainLike ? `訓練日 ${target}` : `休息日 ${target}`,
     adj,
     trainLike,
-    band: trainLike ? "2100–2200" : "1900–2000",
-    bandLabel: trainLike ? "訓練日或步數多 2100–2200 kcal" : "工作日 1900–2000 kcal",
+    band: label,
+    bandLabel: label,
     sleepLow: sleep != null && sleep < 6,
     yesterdayKcal: y && y.kcal != null ? Number(y.kcal) : null,
   };
@@ -366,30 +428,334 @@ function mealOf(def, trainLike) {
 function currentMeal(st, id, d = now()) {
   const logs = (st.mealLogs || {})[todayKey(d)] || {};
   if (logs[id]) return logs[id];
-  const trainLike = isTrainDay(st, d);
-  if (id === "snack" && trainLike) return { ...twoScoopMeal(st, d), eaten: false };
-  if (id === "dinner" && trainLike) return { ...dinnerFor(st, d), eaten: false };
-  if (id === "eggs21") {
-    if (((st.dinnerAlt || {})[todayKey(d)]) === "eggs21") {
-      return { name: "21:00 雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
-    }
-    return { name: "", kcal: 0, protein: 0, eaten: false, hidden: true };
-  }
-  const base = mealOf(MEAL_DEFS[id], trainLike);
-  return { ...base, id: "default", eaten: false };
+  return { ...suggestionOf(st, id, d), eaten: false };
 }
 function mealTotals(st, d = now()) {
   let kcal = 0;
   let protein = 0;
-  const ids = MEAL_ORDER.concat(["eggs21"]);
+  const ids = MEAL_ORDER.slice();
   for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
-    if (m && m.eaten) {
+    if (m && m.eaten === true) {
       kcal += Number(m.kcal) || 0;
       protein += Number(m.protein) || 0;
     }
   }
   return { kcal, protein };
+}
+
+
+function whey2Macros(st, d = now()) {
+  const ids = selectedScoops(st, d);
+  const a = resolveWhey(st, ids[0] || "sesame");
+  const b = resolveWhey(st, ids[1] || "soymilk");
+  return {
+    kcal: (Number(a.kcal) || 170) + (Number(b.kcal) || 170),
+    protein: Number(a.protein) + Number(b.protein),
+    name: "蛋白粉 2 匙",
+    scoopIds: [a.id, b.id],
+  };
+}
+function portionMacros(p, st, d = now()) {
+  if (!p) return { kcal: 0, protein: 0, name: "" };
+  if (p.mode === "whey2") {
+    const w = whey2Macros(st, d);
+    return { kcal: w.kcal, protein: w.protein, name: w.name };
+  }
+  if (p.mode === "out") {
+    const base = (OUT_MEALS || []).find((x) => x.id === p.outType) || (OUT_MEALS || [])[0];
+    const size = (OUT_SIZES || []).find((x) => x.id === p.outSize) || (OUT_SIZES || [])[1];
+    const kcal = Math.round((base.kcal || 0) * (size.mult || 1));
+    const protein = Math.round((base.protein || 0) * (size.mult || 1));
+    return { kcal, protein, name: `外食${base.name}／${size.name}` };
+  }
+  const palms = Number(p.palms) || 0;
+  const fists = Number(p.fists) || 0;
+  const veg = !!p.veg;
+  if (!palms && !fists && !veg) return { kcal: 0, protein: 0, name: "" };
+  const bits = [];
+  if (palms) bits.push(`${palms} 掌蛋白`);
+  if (fists) bits.push(`${fists} 拳澱粉`);
+  if (veg) bits.push("蔬菜半盤");
+  return {
+    kcal: palms * PALM_KCAL + fists * FIST_KCAL + (veg ? VEG_KCAL : 0),
+    protein: palms * PALM_PROTEIN + fists * FIST_PROTEIN + (veg ? VEG_PROTEIN : 0),
+    name: bits.join("＋"),
+  };
+}
+function suggestionOf(st, id, d = now()) {
+  if (id === "snack") return { ...twoScoopMeal(st, d), eaten: false };
+  if (id === "dinner") return { ...dinnerFor(st, d), eaten: false };
+  if (id === "eggs21") {
+    return { name: "雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
+  }
+  const def = MEAL_DEFS[id];
+  if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
+  return { ...mealOf(def, isTrainDay(st, d)), id: "default", eaten: false };
+}
+function hasCustomPortions(m) {
+  if (!m) return false;
+  if (m.mode === "whey2" || m.mode === "out") return true;
+  return !!(Number(m.palms) || Number(m.fists) || m.veg);
+}
+function mealEstimate(st, id, d = now()) {
+  const logged = ((st.mealLogs || {})[todayKey(d)] || {})[id];
+  const sug = suggestionOf(st, id, d);
+  if (logged && hasCustomPortions(logged)) {
+    const est = portionMacros(logged, st, d);
+    return { ...sug, ...logged, ...est, suggestName: sug.name };
+  }
+  if (logged && logged.eaten && (logged.kcal || logged.protein) && !hasCustomPortions(logged)) {
+    return { ...sug, ...logged, suggestName: sug.name };
+  }
+  return { ...sug, ...(logged || {}), kcal: sug.kcal, protein: sug.protein, name: logged && logged.name ? logged.name : sug.name, suggestName: sug.name };
+}
+
+function shopWeekKey(d = now()) {
+  return todayKey(weekRange(d).mon);
+}
+function readShop(st) {
+  const wk = shopWeekKey();
+  if (st.shopWeek === wk) {
+    return {
+      week: wk,
+      checked: st.shopChecked || {},
+      have: st.shopHave || {},
+      hide: st.shopHide || {},
+      wheyPacks: st.wheyPacks != null ? Number(st.wheyPacks) : 14,
+      hintCollapsed: !!st.shopHintCollapsed,
+    };
+  }
+  return {
+    week: wk,
+    checked: {},
+    have: {},
+    hide: st.shopHave || {},
+    wheyPacks: st.wheyPacks != null ? Number(st.wheyPacks) : 14,
+    hintCollapsed: !!st.shopHintCollapsed,
+  };
+}
+function persistShopWeek(st) {
+  const shop = readShop(st);
+  if (st.shopWeek !== shop.week) {
+    save({ shopWeek: shop.week, shopChecked: {}, shopHave: {}, shopHide: shop.hide });
+  }
+  return shop;
+}
+function shopAcquired(shop, id) {
+  return !!(shop.checked[id] || shop.have[id] || shop.hide[id]);
+}
+function shopAllItems(st) {
+  return (SHOP_ITEMS || []).concat((st && st.shopExtra) || []);
+}
+function matchShopItem(st, name) {
+  const q = String(name || "").trim();
+  if (!q) return null;
+  const items = shopAllItems(st);
+  return items.find((it) => {
+    const n = String(it.name || "");
+    const stem = n.split(/[約（(]/)[0].trim();
+    if (!stem) return false;
+    return q === n || q === stem || n.startsWith(q) || q.startsWith(stem);
+  }) || null;
+}
+function isShopFrequent(st, item) {
+  const flag = ((st && st.shopFrequent) || {})[item.id];
+  if (flag === false) return false;
+  if (flag) return true;
+  return !!item.frequent;
+}
+function shopDaysStats(st) {
+  const shop = readShop(st);
+  let planP = 0, planS = 0, gotP = 0, gotS = 0;
+  for (const item of shopAllItems(st)) {
+    const palms = Number(item.palms) || 0;
+    const fists = Number(item.fists) || 0;
+    planP += palms;
+    planS += fists;
+    if (shopAcquired(shop, item.id)) {
+      gotP += palms;
+      gotS += fists;
+    }
+  }
+  return {
+    proteinBought: Math.floor(gotP / 2),
+    proteinPlan: Math.floor(planP / 2),
+    starchBought: Math.floor(gotS / 2),
+    starchPlan: Math.floor(planS / 2),
+  };
+}
+function shopDaysHint(st) {
+  const s = shopDaysStats(st);
+  return `蛋白質夠吃 ${Number(s.proteinBought)}/${Number(s.proteinPlan)} 天 · 澱粉夠吃 ${Number(s.starchBought)}/${Number(s.starchPlan)} 天`;
+}
+function parseShopQty(amount) {
+  const a = String(amount || "").trim();
+  if (!a) return 0;
+  if (/^\d+(\.\d+)?$/.test(a)) return Number(a);
+  return 0;
+}
+function shopDisplayName(label, amount) {
+  const name = String(label || "").trim();
+  const amt = String(amount || "").trim();
+  if (!amt) return name;
+  if (name.includes(amt)) return name;
+  return `${name} ${amt}`.trim();
+}
+function shopItemHint(it) {
+  const hint = String((it && it.hint) || "");
+  const name = String((it && it.name) || "");
+  if (!hint || hint === "自訂") return "";
+  if (name.includes(hint)) return "";
+  return hint;
+}
+
+function mealLineText(st, id) {
+  const m = ((st.mealLogs || {})[todayKey()] || {})[id];
+  const est = mealEstimate(st, id);
+  const mark = m && m.eaten ? "✓" : "○";
+  if (m && m.eaten) {
+    return `${mark} ${est.name || est.suggestName}（約 ${Math.round(est.kcal || 0)} kcal／蛋白 ${Math.round(est.protein || 0)} g）`;
+  }
+  return `${mark} 還沒吃（建議：${est.suggestName || est.name}）`;
+}
+function formatSetLine(sets) {
+  const done = (sets || []).filter((x) => x.done);
+  if (!done.length) return "尚未記錄";
+  const groups = [];
+  for (const x of done) {
+    const w = (x.weight != null && x.weight !== "") ? Number(x.weight) : null;
+    const r = x.reps;
+    const key = `${w}::${r}`;
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) last.n += 1;
+    else groups.push({ key, w, r, n: 1 });
+  }
+  return groups.map((g) => {
+    if (g.w != null && !Number.isNaN(g.w)) return `${g.w}kg×${g.r}×${g.n}`;
+    return `${g.r}下×${g.n}`;
+  }).join("、");
+}
+function shareCatsText(st) {
+  const t = now();
+  const day = todayKey(t);
+  const trainDay = isActiveTrainDay(st, t);
+  const kcal = kcalInfo(st, t);
+  const totals = mealTotals(st, t);
+  const labels = { snack: "16:00", dinner: "18:30", eggs21: "21:00" };
+  const mealIds = MEAL_ORDER.slice();
+  const mealLines = mealIds.map((id) => `${labels[id] || id}：${mealLineText(st, id)}`).join("\n");
+  const remainK = Math.round(kcal.target - totals.kcal);
+  const remainP = Math.round(PROTEIN_TARGET - totals.protein);
+  const remain = remainK >= 0
+    ? `還剩 ${remainK} kcal，蛋白${remainP >= 0 ? `還差 ${remainP}` : `已多 ${-remainP}`} g`
+    : `熱量超出 ${-remainK} kcal，蛋白 ${Math.round(totals.protein)} g`;
+
+  const shop = readShop(st);
+  const shopLines = (SHOP_GROUPS || []).map((g) => {
+    const items = (SHOP_ITEMS || []).filter((it) => it.group === g.id);
+    const bits = items.map((it) => {
+      if (shop.hide[it.id]) return `${it.name}（家裡有）`;
+      if (shop.have[it.id]) return `${it.name}（家裡有）`;
+      if (shop.checked[it.id]) return `${it.name} ✓`;
+      return `${it.name} ○`;
+    });
+    return `${g.name}：${bits.join("、")}`;
+  }).join("\n");
+  const vegN = (SHOP_ITEMS || []).filter((it) => it.pick && shopAcquired(shop, it.id)).length;
+
+  const log = (st.logs || {})[day];
+  const session = st.session && st.session.date === day ? st.session : null;
+  const src = log || session;
+  let trainBlock;
+  if (!trainDay && !src) {
+    trainBlock = "休息日，沒有訓練";
+  } else if (!src) {
+    trainBlock = "今天還沒訓練";
+  } else {
+    const wid = src.workoutId || (session && session.workoutId);
+    const w = (typeof WORKOUTS !== "undefined" && wid && WORKOUTS[wid]) ? WORKOUTS[wid] : null;
+    const title = w ? `${w.name}${w.tag ? `（${w.tag}）` : ""}` : (wid || "訓練");
+    const moves = src.moves || {};
+    const names = (session && session.steps) ? session.steps.map((s) => s.name) : Object.keys(moves);
+    const seen = new Set();
+    const lines = [];
+    for (const name of names) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      lines.push(`${name} ${formatSetLine(moves[name])}`);
+    }
+    for (const name of Object.keys(moves)) {
+      if (seen.has(name)) continue;
+      lines.push(`${name} ${formatSetLine(moves[name])}`);
+    }
+    const score = src.backScore != null ? src.backScore : (session && session.backScore);
+    const scoreLine = score != null ? `\n下背：${score} 分` : "";
+    trainBlock = `課表：${title}\n${lines.join("\n") || "還沒有動作紀錄"}${scoreLine}`;
+  }
+
+  const header = `【${t.getMonth() + 1}/${t.getDate()} 週${DOW[t.getDay()]}】`;
+  const eatSection = `■ 今天吃
+${mealLines}
+合計：${Math.round(totals.kcal)} kcal／蛋白 ${Math.round(totals.protein)} g（目標 ${kcal.band} kcal，蛋白 140–160 g）
+${remain}`;
+  const shopSection = `■ 採買／家裡
+${shopLines}
+蔬菜已選 ${vegN} 種（建議 4–5 種）
+蛋白粉剩 ${shop.wheyPacks} 包${shop.wheyPacks < 6 ? "（不到 6 包，該補貨）" : ""}
+${shopDaysHint(st)}`;
+  const trainSection = `■ 今天訓練
+${trainBlock}`;
+  if (trainDay || src) {
+    return `${header}
+
+${trainSection}
+
+${eatSection}
+
+${shopSection}`;
+  }
+  return `${header}
+
+${eatSection}
+
+${shopSection}
+
+${trainSection}`;
+}
+async function copyShareText(st) {
+  const text = shareCatsText(st);
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (_) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (__) {}
+    ta.remove();
+  }
+  showToast("已複製，貼給喵喵們就好");
+}
+function shareCatsBtn() {
+  return `<button type="button" class="btn primary xl" data-share-cats data-testid="share-cats">傳給喵喵們</button>`;
+}
+function renderShareSheet() {
+  if (!ui.shareSheet) return "";
+  const copied = !!ui.shareSheet.copied;
+  return `<div class="sheet" data-testid="share-sheet">
+    <div class="sheet-card">
+      <div class="k">傳給喵喵們</div>
+      <pre class="sheet-text" data-testid="share-sheet-text">${esc(ui.shareSheet.text)}</pre>
+      <div class="acts">
+        <button type="button" class="btn primary xl" data-share-copy data-testid="share-copy">${copied ? "已複製" : "複製"}</button>
+        <button type="button" class="btn full" data-share-close data-testid="share-close">關閉</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function musclesFor(name) {
@@ -417,25 +783,63 @@ function parseDose(dose) {
 function lastBackScore(st) {
   const dates = Object.keys(st.logs || {}).sort();
   for (let i = dates.length - 1; i >= 0; i--) {
-    const sc = st.logs[dates[i]].backScore;
+    const lg = st.logs[dates[i]];
+    if (lg.exBack) return 0;
+    const sc = lg.backScore;
     if (sc != null) return Number(sc);
   }
   return 0;
 }
+function lookSafer(name, video) {
+  const raw = String(name || "").replace(/（選做）/g, "").trim();
+  const list = (typeof BACK_SAFER !== "undefined" && BACK_SAFER) ? BACK_SAFER : [];
+  for (const s of list) {
+    if (s.test.test(raw) && raw !== s.name) {
+      return { name: s.name, video: s.video || video, swapped: true };
+    }
+  }
+  return null;
+}
 function resolveName(step, backScore) {
   const raw = String(step.name || "").replace(/（選做）/g, "").trim();
-  const pick = (name, video, swapped) => ({ name, video, swapped: !!swapped });
-  if (!raw.includes("或")) {
-    if (backScore >= 3 && /深蹲/.test(raw)) return pick("腿推", "legpress", true);
-    return pick(raw, step.video, false);
+  const pick = (name, video, swapped) => ({ name, video: video || step.video, swapped: !!swapped });
+  if (Number(backScore) >= 3) {
+    if (raw.includes("或")) {
+      const parts = raw.split("或").map((x) => x.trim()).filter(Boolean);
+      for (const part of parts) {
+        if (!lookSafer(part, step.video)) return pick(part, step.video, part !== parts[0]);
+      }
+      const safer = lookSafer(parts[0], step.video);
+      if (safer) return pick(safer.name, safer.video, true);
+    } else {
+      const safer = lookSafer(raw, step.video);
+      if (safer) return pick(safer.name, safer.video, true);
+    }
   }
-  const parts = raw.split("或").map((s) => s.trim());
-  if (backScore >= 3) {
-    const lp = parts.find((p) => p.includes("腿推"));
-    if (lp) return pick(lp, "legpress", parts[0] !== lp);
-    if (parts.some((p) => /深蹲/.test(p))) return pick("腿推", "legpress", true);
+  if (raw.includes("或")) {
+    const parts = raw.split("或").map((x) => x.trim()).filter(Boolean);
+    return pick(parts[0] || raw, step.video, false);
   }
-  return pick(parts[0], step.video, false);
+  return pick(raw, step.video, false);
+}
+function upcomingBackSwaps(workoutId, score) {
+  if (!(Number(score) >= 3)) return [];
+  const w = (typeof WORKOUTS !== "undefined" && workoutId) ? WORKOUTS[workoutId] : null;
+  if (!w) return [];
+  const hints = [];
+  const seen = new Set();
+  for (const step of w.steps || []) {
+    const cur = resolveName(step, 0);
+    const nxt = resolveName(step, score);
+    if (nxt.swapped && nxt.name !== cur.name) {
+      const key = `${cur.name}→${nxt.name}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        hints.push(key);
+      }
+    }
+  }
+  return hints;
 }
 function lastStrengthBefore(st, d = now()) {
   const today = todayKey(d);
@@ -501,23 +905,43 @@ function countPlanned(steps) {
   }
   return counts;
 }
-function weekSetCounts(st, d = now(), opts = {}) {
+function weekPartSources(st, d = now(), opts = {}) {
   const { mon } = weekRange(d);
   const today = todayKey(d);
   const counts = {};
+  const sources = {};
+  function addMoves(moves) {
+    if (!moves) return;
+    for (const [name, sets] of Object.entries(moves)) {
+      const n = (sets || []).filter((s) => s.done).length;
+      if (!n) continue;
+      const clean = String(name).replace(/（選做）/g, "").trim();
+      const m = musclesFor(name);
+      const parts = [...(m.primary || []), ...(m.secondary || [])];
+      for (const part of parts) {
+        bumpPart(counts, part, n);
+        (sources[part] ||= new Set()).add(clean);
+        if (part === "frontDelts" || part === "rearDelts") (sources.delts ||= new Set()).add(clean);
+      }
+    }
+  }
+  const sessionDate = (opts.includeSession && st.session && st.session.date) ? st.session.date : null;
   for (let i = 0; i < 7; i++) {
     const key = todayKey(addDays(mon, i));
     if (opts.excludeToday && key === today) continue;
+    if (sessionDate && key === sessionDate) {
+      addMoves(st.session.moves);
+      continue;
+    }
     const log = (st.logs || {})[key];
-    if (!log) continue;
-    const part = countMoves(log.moves);
-    for (const [k, v] of Object.entries(part)) counts[k] = (counts[k] || 0) + v;
+    if (log) addMoves(log.moves);
   }
-  if (opts.includeSession && st.session && st.session.date === today) {
-    const part = countMoves(st.session.moves);
-    for (const [k, v] of Object.entries(part)) counts[k] = (counts[k] || 0) + v;
-  }
-  return counts;
+  const lists = {};
+  for (const [k, set] of Object.entries(sources)) lists[k] = [...set];
+  return { counts, sources: lists };
+}
+function weekSetCounts(st, d = now(), opts = {}) {
+  return weekPartSources(st, d, opts).counts;
 }
 function fridayExtras(st, baseSteps, d = now()) {
   if (d.getDay() !== 5) return [];
@@ -581,74 +1005,81 @@ function ringEl(value, max, top, sub, ok) {
   </div>`;
 }
 
-function fillFor(svgPart, pri, sec) {
-  if (pri.has(svgPart)) return "#9A3412";
-  if (svgPart === "frontDelts" && pri.has("delts")) return "#9A3412";
-  if (svgPart === "rearDelts" && pri.has("delts")) return "#9A3412";
-  if (pri.has("rotator") && svgPart === "rearDelts") return "#9A3412";
-  if (sec.has(svgPart)) return "#F0B27A";
-  if (svgPart === "frontDelts" && sec.has("delts")) return "#F0B27A";
-  if (svgPart === "rearDelts" && (sec.has("delts") || sec.has("rotator"))) return "#F0B27A";
-  return "#E8D7C0";
+function partClass(id, pri, sec, week, selected) {
+  if (!id || id === "skin") return "skin";
+  const mapped = id === "frontDelts" || id === "rearDelts" ? "delts" : id;
+  const isPri = pri.has(id)
+    || (id === "frontDelts" && pri.has("delts"))
+    || (id === "rearDelts" && (pri.has("delts") || pri.has("rotator")));
+  const isSec = sec.has(id)
+    || (id === "frontDelts" && sec.has("delts"))
+    || (id === "rearDelts" && (sec.has("delts") || sec.has("rotator")));
+  let cls = "m";
+  if (isPri) cls += " pri";
+  else if (isSec) cls += " sec";
+  if (MAIN_PARTS.includes(mapped) && (week[mapped] || 0) < 6) cls += " low";
+  if (selected === id) cls += " is-on";
+  return cls;
 }
-function strokeFor(svgPart, week) {
-  const mapped = svgPart === "frontDelts" || svgPart === "rearDelts" ? "delts" : svgPart;
-  if (MAIN_PARTS.includes(mapped) && (week[mapped] || 0) < 6) return "#EA580C";
-  if (MAIN_PARTS.includes(svgPart) && (week[svgPart] || 0) < 6) return "#EA580C";
-  return "none";
+function partAliases(id) {
+  if (id === "frontDelts" || id === "rearDelts") return [id, "delts"];
+  if (id === "obliques") return [id, "core"];
+  if (id === "upperback") return [id, "midback"];
+  return [id];
 }
-function bodyMap(priList, secList, weekCounts) {
+function partWeekCount(id, week) {
+  week = week || {};
+  let n = 0;
+  for (const k of partAliases(id)) n = Math.max(n, Number(week[k]) || 0);
+  return n;
+}
+function partSourceNames(id, sources) {
+  sources = sources || {};
+  const seen = new Set();
+  const names = [];
+  for (const k of partAliases(id)) {
+    for (const name of (sources[k] || [])) {
+      if (!seen.has(name)) { seen.add(name); names.push(name); }
+    }
+  }
+  return names;
+}
+function partTip(id, week, sources) {
+  const n = partWeekCount(id, week);
+  const names = partSourceNames(id, sources);
+  const label = (typeof PARTS !== "undefined" && PARTS[id]) ? PARTS[id] : id;
+  const from = names.length ? `，來自${names.join("、")}` : "";
+  return `${label}：本週 ${n} 組${from}`;
+}
+function muscleIdFromEvent(e) {
+  const direct = e.target && e.target.closest && e.target.closest(".body-svg [data-part]");
+  if (direct) return direct.getAttribute("data-part");
+  if (typeof document.elementsFromPoint !== "function") return null;
+  const x = e.clientX;
+  const y = e.clientY;
+  if (x == null || y == null) return null;
+  for (const node of document.elementsFromPoint(x, y)) {
+    const el = node.closest && node.closest(".body-svg [data-part]");
+    if (el) return el.getAttribute("data-part");
+  }
+  return null;
+}
+function bodyMap(priList, secList, weekCounts, sourceMap) {
   const pri = new Set(priList || []);
   const sec = new Set(secList || []);
-  const week = weekCounts || {};
-  const p = (id, d) => {
-    const f = fillFor(id, pri, sec);
-    const s = strokeFor(id, week);
-    const sw = s === "none" ? 0 : 2.2;
-    return `data-part="${id}" fill="${f}" stroke="${s}" stroke-width="${sw}" d="${d}"`;
-  };
-  const e = (id, attrs) => {
-    const f = fillFor(id, pri, sec);
-    const s = strokeFor(id, week);
-    const sw = s === "none" ? 0 : 2.2;
-    return `${attrs} data-part="${id}" fill="${f}" stroke="${s}" stroke-width="${sw}"`;
-  };
+  const detail = weekPartSources(state(), now(), { includeSession: true });
+  const week = detail.counts;
+  const sources = detail.sources;
+  const selected = ui.bodyPart || null;
+  const svg = (typeof bodySvgMarkup === "function")
+    ? bodySvgMarkup((id) => partClass(id, pri, sec, week, selected))
+    : `<svg class="body-svg" viewBox="0 0 100 40"></svg>`;
+  const tip = selected ? partTip(selected, week, sources) : "點一下部位，看本週練了幾組";
   return `<div class="body-wrap">
-    <div class="legend"><span><i class="p"></i>主要</span><span><i class="s"></i>輔助</span><span>不到 6 組會標橘色</span></div>
-    <svg class="body-svg" viewBox="0 0 420 360" role="img" aria-label="人體正面與背面部位圖">
-      <text x="100" y="18" text-anchor="middle" fill="#5C4A36" font-size="14" font-weight="700">正面</text>
-      <text x="320" y="18" text-anchor="middle" fill="#5C4A36" font-size="14" font-weight="700">背面</text>
-      <circle cx="100" cy="48" r="20" fill="#F3E2C8"/>
-      <rect x="92" y="66" width="16" height="12" rx="4" fill="#F3E2C8"/>
-      <ellipse ${e("frontDelts", 'cx="68" cy="92" rx="20" ry="15"')}/>
-      <ellipse ${e("frontDelts", 'cx="132" cy="92" rx="20" ry="15"')}/>
-      <path ${p("chest", "M78 86h20c4 0 7 3 7 8v22c0 6-4 11-10 11h-8c-5 0-9-5-9-12V94c0-5 3-8 8-8z")}/>
-      <path ${p("chest", "M102 86h20c5 0 8 3 8 8v21c0 7-4 12-9 12h-8c-6 0-10-5-10-11V94c0-5 3-8 7-8z")}/>
-      <rect ${e("bis", 'x="44" y="98" width="18" height="42" rx="9"')}/>
-      <rect ${e("bis", 'x="138" y="98" width="18" height="42" rx="9"')}/>
-      <rect ${e("core", 'x="82" y="126" width="36" height="54" rx="10"')}/>
-      <rect ${e("quads", 'x="74" y="198" width="24" height="78" rx="12"')}/>
-      <rect ${e("quads", 'x="102" y="198" width="24" height="78" rx="12"')}/>
-      <rect x="76" y="278" width="20" height="48" rx="9" fill="#EDE0CC"/>
-      <rect x="104" y="278" width="20" height="48" rx="9" fill="#EDE0CC"/>
-      <circle cx="320" cy="48" r="20" fill="#F3E2C8"/>
-      <rect x="312" y="66" width="16" height="12" rx="4" fill="#F3E2C8"/>
-      <ellipse ${e("rearDelts", 'cx="288" cy="92" rx="20" ry="15"')}/>
-      <ellipse ${e("rearDelts", 'cx="352" cy="92" rx="20" ry="15"')}/>
-      <rect ${e("upperback", 'x="298" y="78" width="44" height="24" rx="8"')}/>
-      <path ${p("lats", "M276 104h22c3 8 4 22 3 38-1 8-6 14-14 14h-8c-5 0-7-6-6-14 2-16 2-30 3-38z")}/>
-      <path ${p("lats", "M344 104h22c1 8 1 22 3 38 1 8-1 14-6 14h-8c-8 0-13-6-14-14-1-16 0-30 3-38z")}/>
-      <rect ${e("midback", 'x="304" y="104" width="32" height="30" rx="8"')}/>
-      <rect ${e("lowback", 'x="306" y="136" width="28" height="22" rx="7"')}/>
-      <rect ${e("tris", 'x="264" y="98" width="18" height="42" rx="9"')}/>
-      <rect ${e("tris", 'x="358" y="98" width="18" height="42" rx="9"')}/>
-      <rect ${e("glutes", 'x="294" y="176" width="24" height="30" rx="10"')}/>
-      <rect ${e("glutes", 'x="322" y="176" width="24" height="30" rx="10"')}/>
-      <rect ${e("hams", 'x="294" y="208" width="24" height="70" rx="12"')}/>
-      <rect ${e("hams", 'x="322" y="208" width="24" height="70" rx="12"')}/>
-      <rect x="296" y="280" width="20" height="48" rx="9" fill="#EDE0CC"/>
-      <rect x="324" y="280" width="20" height="48" rx="9" fill="#EDE0CC"/>
-    </svg>
+    <div class="legend"><span><i class="p"></i>主要</span><span><i class="s"></i>輔助</span><span>不到 6 組會標橘色外框</span></div>
+    ${svg}
+    <div class="body-tip" data-testid="body-tip"${selected ? "" : " data-empty=\"1\""}>${esc(tip)}</div>
+    <p class="body-credit">輪廓改編自 react-body-highlighter（MIT）</p>
   </div>`;
 }
 
@@ -658,10 +1089,12 @@ function yt(key) {
   return `<a class="yt" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">▶ ${esc(v.label)}</a>`;
 }
 function cueFor(name) {
-  if (/腿推/.test(name)) return "腰靠穩在椅背上，不要用腰發力。";
+  if (/腿推/.test(name)) return "下背別離開椅背";
   if (/深蹲/.test(name)) return "不要蹲太深，胸口打直，下背保持中立。";
+  if (/胸靠划船|胸部支撐/.test(name)) return "胸口貼穩，不要用腰拉。";
   if (/臀橋|髖推|臀推/.test(name)) return "用臀部發力，不要靠腰撐起來。";
-  if (/胸推|臥推|伏地/.test(name)) return "肩胛收穩，腰別過度拱起。";
+  if (/地板臥推|胸推|臥推|伏地/.test(name)) return "肩胛收穩，腰別過度拱起。";
+  if (/有靠背肩推/.test(name)) return "背靠穩椅背，不要後仰或聳肩。";
   if (/肩推/.test(name)) return "核心收緊，不要聳肩或後仰。";
   if (/划船/.test(name)) return "保持坐姿，不要彎腰拉。";
   if (/下拉/.test(name)) return "胸口上挺，不要晃腰借力。";
@@ -693,23 +1126,34 @@ function dueNotifs(st) {
   const totals = mealTotals(st);
   const hour = now().getHours();
   if (hour >= 16 && totals.protein < PROTEIN_TARGET * 0.5 && !shown.includes("protein")) {
-    out.push({ id: "protein", text: "下午蛋白還不到一半，補一罐乳清或無糖優格。" });
+    out.push({ id: "protein", text: "蛋白還不到一半，先補一份。" });
   }
   const log = (st.logs || {})[key];
   const gToday = (LIVE.garmin.activities || []).some((a) => a.date === key && /strength|multi_sport|training/i.test(a.type || ""));
   const meals = (st.mealLogs || {})[key] || {};
   const recovered = !!(meals.snack && meals.snack.eaten) || !!(meals.dinner && meals.dinner.eaten);
   if ((log || gToday) && !recovered && !shown.includes("post") && out.length < left) {
-    out.push({ id: "post", text: "練後 2 小時內用雞、蛋或乳清把蛋白質補滿。" });
+    out.push({ id: "post", text: "練完了，把蛋白質補上。" });
   }
   return out.slice(0, left);
 }
 
-function renderBanners(st) {
+function homeSuggestion(st, kcal) {
+  const sf = proteinShortfall(st);
+  if (sf) return { testid: "shortfall", text: sf, warn: true };
   const notes = dueNotifs(st);
-  if (!notes.length) return "";
-  return notes.map((n) => `<div class="banner" data-notif="${esc(n.id)}"><p>${esc(n.text)}</p>
-    <button type="button" class="btn" data-dismiss-notif="${esc(n.id)}">知道了</button></div>`).join("");
+  if (notes[0]) return { testid: "suggest-" + notes[0].id, text: notes[0].text, notif: notes[0].id };
+  if (st.lastAdvice) return { testid: "next-advice", text: st.lastAdvice };
+  if (kcal && kcal.sleepLow) return { testid: "protein-reminder", text: "昨晚睡不夠，蛋白質還是要吃滿。" };
+  return null;
+}
+function renderSuggestion(st, kcal) {
+  const s = homeSuggestion(st, kcal);
+  if (!s) return "";
+  const dismiss = s.notif
+    ? `<button type="button" class="btn" data-dismiss-notif="${esc(s.notif)}">知道了</button>`
+    : "";
+  return `<div class="note${s.warn ? " warn" : ""} suggest-card" data-testid="${esc(s.testid)}"><p>${esc(s.text)}</p>${dismiss}</div>`;
 }
 
 function renderSunday(st) {
@@ -725,7 +1169,7 @@ function renderSunday(st) {
     if (t.protein >= PROTEIN_MIN) proteinDays += 1;
   }
   const last = lastInbody();
-  const adj = computeKcalAdjust();
+  const adj = computeKcalAdjust(st);
   const w = weight7avg();
   return `<section class="card">
     <div class="k" style="font-weight:800;color:#5C4A36">每週小結</div>
@@ -738,8 +1182,9 @@ function renderSunday(st) {
 
 function scoopPicker(st, slot) {
   const ids = selectedScoops(st);
+  const label = (o) => o.id === "plant" ? "極致" : String(o.name || "").replace("樂維根 ", "").replace("無糖", "").trim();
   return `<div class="chips" data-scoop-row="${slot}">${WHEY_OPTIONS.map((o) =>
-    `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(o.name.replace("樂維根 ", ""))}</button>`
+    `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(label(o))}</button>`
   ).join("")}</div>`;
 }
 function proteinShortfall(st) {
@@ -749,10 +1194,83 @@ function proteinShortfall(st) {
   const snackOk = !!(logs.snack && logs.snack.eaten);
   const others = ["breakfast", "lunch", "dinner", "eggs21"].some((id) => logs[id] && logs[id].eaten);
   if (snackOk && !others && mealTotals(st).protein < PROTEIN_MIN) {
-    return "16:00 的蛋白粉已記，但今天蛋白質還不夠，21:00 前要把雞胸或蛋補上。";
+    return "蛋白粉已記，晚上前把雞胸或蛋補上。";
   }
   return null;
 }
+function remainText(st, totals, kcal) {
+  const leftK = Math.round((kcal.target || 0) - (totals.kcal || 0));
+  const leftP = Math.round(PROTEIN_TARGET - (totals.protein || 0));
+  if (leftK >= 0) {
+    return `還剩 ${leftK} kcal（目標 ${kcal.band}）· 蛋白${leftP >= 0 ? `還差 ${leftP}` : `已多 ${-leftP}`} g（140–160 g）`;
+  }
+  return `熱量超出 ${-leftK} kcal（目標 ${kcal.band}）· 蛋白 ${Math.round(totals.protein || 0)} g（140–160 g）`;
+}
+function patchMeal(st, id, patch) {
+  const day = todayKey();
+  const prev = { ...(((st.mealLogs || {})[day] || {})[id] || {}) };
+  const next = { ...prev, ...patch };
+  const est = mealEstimate({ ...st, mealLogs: { ...(st.mealLogs || {}), [day]: { ...((st.mealLogs || {})[day] || {}), [id]: next } } }, id);
+  next.kcal = est.kcal;
+  next.protein = est.protein;
+  if (est.name) next.name = est.name;
+  const meals = { ...((st.mealLogs || {})[day] || {}), [id]: next };
+  save({ mealLogs: { ...(st.mealLogs || {}), [day]: meals } });
+}
+function renderMealRow(st, id, trainDay) {
+  const logged = ((st.mealLogs || {})[todayKey()] || {})[id] || {};
+  const sug = suggestionOf(st, id);
+  if (sug.hidden) return "";
+  const est = mealEstimate(st, id);
+  const eaten = !!logged.eaten;
+  const palms = Number(logged.palms) || 0;
+  const fists = Number(logged.fists) || 0;
+  const veg = !!logged.veg;
+  const outType = logged.outType || "";
+  const outSize = logged.outSize || "normal";
+  const suggestLine = [sug.name || est.suggestName || "", sug.extraLine].filter(Boolean).join("＋");
+  const more = ui.mealMore === id;
+  const portionPane = more ? `
+    <div class="portion-pane" data-testid="portion-${id}">
+      <div class="portion-row">
+        <span>🥩</span>
+        <div class="stepper">
+          <button type="button" data-palm="${id}" data-delta="-1" aria-label="少一掌">−</button>
+          <b data-testid="palm-${id}">${palms} 掌</b>
+          <button type="button" data-palm="${id}" data-delta="1" aria-label="加一掌">+</button>
+        </div>
+        <span>🍞</span>
+        <div class="stepper">
+          <button type="button" data-fist="${id}" data-delta="-1" aria-label="少一拳">−</button>
+          <b data-testid="fist-${id}">${fists} 拳</b>
+          <button type="button" data-fist="${id}" data-delta="1" aria-label="加一拳">+</button>
+        </div>
+      </div>
+      <button type="button" class="chip${veg ? " on" : ""}" data-veg="${id}" data-testid="veg-${id}">蔬菜半盤</button>
+      <button type="button" class="btn" data-whey2="${id}" data-testid="whey2-${id}">蛋白粉 2 匙</button>
+      <div class="out-row">
+        <span>外食</span>
+        ${(OUT_MEALS || []).map((o) => `<button type="button" class="chip${logged.mode === "out" && outType === o.id ? " on" : ""}" data-out-type="${id}" data-oid="${o.id}">${esc(o.name)}</button>`).join("")}
+      </div>
+      <div class="out-row">
+        <span>份量</span>
+        ${(OUT_SIZES || []).map((s) => `<button type="button" class="chip${outSize === s.id ? " on" : ""}" data-out-size="${id}" data-sid="${s.id}">${esc(s.name)}</button>`).join("")}
+      </div>
+      ${hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : ""}
+    </div>` : (hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : "");
+  return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
+    <div class="who">${esc(mealLabel(id, trainDay, st))} <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span></div>
+    <p class="suggest">建議：${esc(suggestLine)}</p>
+    ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}` : ""}
+    <div class="row-acts">
+      <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
+      <button type="button" class="btn xl" data-eat-else="${id}">吃了別的</button>
+    </div>
+    <button type="button" class="btn ghost short-btn" data-meal-more="${id}" data-testid="meal-more-${id}">${more ? "收起份量" : "份量"}</button>
+    ${portionPane}
+  </div>`;
+}
+
 function renderHome(st) {
   const t = now();
   const plan = todayPlan(st);
@@ -771,9 +1289,33 @@ function renderHome(st) {
   const session = st.session && st.session.date === todayKey() && st.session.phase !== "done" ? st.session : null;
   const returning = isReturnWeek(st);
 
+  const trainedToday = !!(todayLog && todayLog.finishedAt) && !session;
+  const pickRow = ui.wantTrain
+    ? `<div class="rest-picks" data-testid="rest-picks">
+        <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A</button>
+        <button type="button" class="btn${plan.scheduled === "gymB" ? " primary" : ""}" data-rest-train="gymB" data-testid="rest-train-gymB">健身房 B</button>
+        <button type="button" class="btn${plan.chk && plan.chk.quick ? " primary" : ""}" data-rest-train="quick" data-testid="rest-train-quick">快版</button>
+      </div>`
+    : `<button type="button" class="btn full" data-want-train data-testid="want-train">今天也想練</button>`;
   let trainCard;
-  if (!plan.train) {
-    trainCard = `<div class="rest-line" data-testid="rest-line">休息日，走走路就好<small>${esc(plan.reason)}</small></div>`;
+  if (trainedToday && !(ui.wantTrain === "picked")) {
+    trainCard = `<section class="card hero" data-testid="train-card">
+      <div class="big" data-testid="trained-today" data-log-row="${todayKey()}">今天已練 ✓</div>
+      <div class="acts">${pickRow}</div>
+    </section>`;
+  } else if (!plan.train) {
+    const picks = ui.wantTrain
+      ? `<div class="rest-picks" data-testid="rest-picks">
+          <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A${plan.scheduled === "gymA" ? " · 這週下一堂" : ""}</button>
+          <button type="button" class="btn${plan.scheduled === "gymB" ? " primary" : ""}" data-rest-train="gymB" data-testid="rest-train-gymB">健身房 B${plan.scheduled === "gymB" ? " · 這週下一堂" : ""}</button>
+          <button type="button" class="btn${plan.chk && plan.chk.quick ? " primary" : ""}" data-rest-train="quick" data-testid="rest-train-quick">快版${plan.chk && plan.chk.quick ? " · 今天建議" : ""}</button>
+        </div>`
+      : `<button type="button" class="btn primary xl" data-want-train data-testid="want-train">今天也想練</button>`;
+    trainCard = `<div class="rest-home">
+      <div class="rest-line" data-testid="rest-line">休息日，走走路就好</div>
+      <div class="rest-quick" data-testid="rest-quick">${esc(restQuickLine(plan.chk))}</div>
+      ${picks}
+    </div>`;
   } else {
     const w = plan.workout;
     const primary = session
@@ -786,55 +1328,26 @@ function renderHome(st) {
         : "";
     const fastedOn = markedFasted(st);
     const fastedBtn = `<button type="button" class="btn full" data-fasted="${fastedOn ? "off" : "on"}">${fastedOn ? "取消空腹" : "今天空腹練"}</button>`;
+    const reasonBtn = (!st.hideSuggestReasons && plan.reason)
+      ? `<button type="button" class="info-i" data-toggle-reason data-testid="reason-info" aria-label="原因">ⓘ</button>`
+      : "";
     trainCard = `<section class="card hero" data-testid="train-card">
-      <div class="k">${t.getMonth() + 1}/${t.getDate()}（週${DOW[t.getDay()]}）· ${esc(w.where)} · ${esc(w.time)}${returning ? ' · <span data-testid="buffer-week">緩衝週</span>' : ""}</div>
-      <div class="big">今天：${esc(w.name)}</div>
-      <p class="reason" data-testid="reason">${esc(plan.reason)}</p>
+      <div class="k">${t.getMonth() + 1}/${t.getDate()} 週${DOW[t.getDay()]}${returning ? ' · <span data-testid="buffer-week">緩衝週</span>' : ""}</div>
+      <div class="big">${esc(w.name)} · ${esc(w.time)}${reasonBtn}</div>
+      ${(!st.hideSuggestReasons && ui.showReason && plan.reason) ? `<p class="reason" data-testid="reason">${esc(plan.reason)}</p>` : ""}
       <div class="acts">${primary}</div>
       <div class="acts">${fastedBtn}${ov}</div>
+      <div class="acts">${pickRow}</div>
     </section>`;
   }
 
   const trainDay = isTrainDay(st);
-  const hour = t.getHours();
-  const shake = trainDay ? twoScoopMeal(st) : null;
-  const topPowder = trainDay && hour < 16
-    ? `<section class="card hero" data-testid="top-card" data-top="powder">
-        <div class="k">訓練日</div>
-        <div class="big">16:00 兩份蛋白粉</div>
-        <p class="reason">選兩個口味，配地瓜 150g</p>
-        <p class="sec">第一份</p>${scoopPicker(st, 0)}
-        <p class="sec">第二份</p>${scoopPicker(st, 1)}
-        <p class="note">地瓜 150g</p>
-      </section>`
-    : "";
-  const mealIds = MEAL_ORDER.concat(((st.dinnerAlt || {})[todayKey()] === "eggs21") ? ["eggs21"] : []);
-  const meals = mealIds.map((id) => {
-    const m = currentMeal(st, id);
-    if (m.hidden) return "";
-    const est = m.estimate ? " · 估計值，可改" : "";
-    const extra = m.extraLine ? `<div class="meta">${esc(m.extraLine)}</div>` : "";
-    const alt = id === "dinner" && m.eggsAlt
-      ? `<button type="button" class="btn full" data-dinner-alt="eggs21">或 21:00 再加蛋 2 顆（雞胸改 150g）</button>`
-      : "";
-    return `<div class="meal-row${m.eaten ? " eaten" : ""}" data-testid="meal-${id}">
-      <div class="who">${esc(mealLabel(id, trainDay, st))}</div>
-      <h3>${esc(m.name)}</h3>
-      ${extra}
-      <div class="meta">${Math.round(m.kcal || 0)} kcal · 蛋白 ${Math.round(m.protein || 0)} g${est}</div>
-      <div class="row-acts">
-        <button type="button" class="btn ${m.eaten ? "" : "primary"}" data-eat="${id}">${m.eaten ? "復原" : "照吃了"}</button>
-        <button type="button" class="btn" data-swap="${id}">換一個</button>
-        <button type="button" class="btn" data-eat-else="${id}">吃了別的</button>
-      </div>
-      ${alt}
-    </div>`;
-  }).join("");
-  const shortfall = proteinShortfall(st);
+  const mealIds = MEAL_ORDER.slice();
+  const meals = mealIds.map((id) => renderMealRow(st, id, trainDay)).join("");
 
   const chips = MAIN_PARTS.map((p) => {
     const n = week[p] || 0;
-    return `<span class="chip${n < 6 ? " low" : ""}">${esc(PARTS[p])} ${n} 組</span>`;
+    return `<span class="chip${n < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${n} 組</span>`;
   }).join("");
 
   const gAttach = todayLog && (todayLog.garmin || matchGarmin(todayKey()));
@@ -843,21 +1356,17 @@ function renderHome(st) {
     : "";
 
   return `
-    ${renderBanners(st)}
-    ${topPowder}
     ${trainCard}
+    ${renderSuggestion(st, kcal)}
     <p class="sec">今天吃</p>
     <section class="card" data-testid="eat-card">
       <div class="rings">
-        ${ringEl(totals.kcal, kcal.target, `/ ${kcal.target} kcal`, kcal.bandLabel, false)}
-        ${ringEl(totals.protein, PROTEIN_TARGET, "蛋白 g", "目標 140–160 g", totals.protein >= PROTEIN_MIN)}
+        ${ringEl(totals.kcal, kcal.target, "kcal", String(kcal.target), false)}
+        ${ringEl(totals.protein, PROTEIN_TARGET, "蛋白 g", "140–160", totals.protein >= PROTEIN_MIN)}
       </div>
-      <p class="muted">${esc(kcal.source)}${kcal.adj.adj ? ` · ${esc(kcal.adj.note)}` : ""}</p>
-      ${kcal.sleepLow ? `<p class="note" data-testid="protein-reminder">昨晚睡不夠，蛋白質還是要吃滿，不用再少吃。熱量不另外往下砍。</p>` : ""}
-      ${trainDay ? `<p class="note">訓練日節奏：16:00 兩份蛋白粉＋地瓜，大約 18:30–19:00 再練，練完吃雞胸 ${shake ? shake.chickenG : 200}g。</p>` : ""}
-      ${shortfall ? `<p class="note warn" data-testid="shortfall">${esc(shortfall)}</p>` : ""}
-      ${st.lastAdvice ? `<p class="note" data-testid="next-advice">${esc(st.lastAdvice)}</p>` : ""}
+      <p class="remain" data-testid="remain">${esc(remainText(st, totals, kcal))}</p>
       ${meals}
+      ${shareCatsBtn()}
     </section>
     <p class="sec">身體趨勢</p>
     <button type="button" class="trend-item" data-go="body">
@@ -904,7 +1413,7 @@ function renderElse(st) {
   const items = (typeof BENTO_ELSE !== "undefined" ? BENTO_ELSE : []).filter((x) => !/罐頭/.test(x.name));
   return `<button type="button" class="btn" data-go="today">← 回到今天</button>
     <h2 class="sheet-title">吃了別的</h2>
-    <p class="note">便當估算熱量與蛋白質，選完會給下一餐建議。沒有罐頭食品。</p>
+    <p class="note">便當估算熱量與蛋白質，選完會給下一餐建議。只列家常便當與自煮組合。</p>
     <div class="swap-list" data-testid="else-list">
       ${items.map((it) => `<button type="button" data-else-pick="${esc(it.id)}">
         ${esc(it.name)}<small>${it.kcal} kcal · 蛋白 ${it.protein} g</small>
@@ -946,6 +1455,40 @@ function renderSwap(st) {
     <button type="button" class="btn primary xl" data-apply-swap>照這個吃</button>`;
 }
 
+function deleteLog(date) {
+  const st = state();
+  const logs = { ...(st.logs || {}) };
+  if (!logs[date]) return;
+  delete logs[date];
+  const lastLoads = {};
+  for (const d of Object.keys(logs).sort()) {
+    for (const [name, sets] of Object.entries(logs[d].moves || {})) {
+      const done = (sets || []).filter((s) => s.done && s.weight != null);
+      if (done.length) { const l = done[done.length - 1]; lastLoads[moveKey(name)] = { weight: l.weight, reps: l.reps, date: d, returning: !!logs[d].returning }; }
+    }
+  }
+  const backSwap = {};
+  for (const [k, v] of Object.entries(st.backSwap || {})) if (!(v && v.date === date) && logs[v && v.date]) backSwap[k] = v;
+  const loadHistory = {};
+  for (const [k, arr] of Object.entries(st.loadHistory || {})) loadHistory[k] = (arr || []).filter((x) => x.date !== date);
+  const suggest = {};
+  for (const [k, arr] of Object.entries(loadHistory)) if (arr.length >= 2 && arr[arr.length - 1].hitAll && arr[arr.length - 2].hitAll) suggest[k] = { add: 2.5 };
+  const session = st.session && st.session.date === date ? null : st.session;
+  const restTrain = { ...(st.restTrain || {}) }; delete restTrain[date];
+  save({ logs, lastLoads, backSwap, loadHistory, suggest, session, restTrain });
+  showToast("已刪除這筆訓練");
+  render();
+}
+function renderLogRows(st) {
+  const dates = Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length).sort().reverse();
+  if (!dates.length) return `<p class="muted">還沒有訓練紀錄。</p>`;
+  return dates.map((d) => {
+    const l = st.logs[d];
+    const w = WORKOUTS[l.workoutId];
+    const n = Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0);
+    return `<div class="stat" data-log-row="${d}" data-testid="log-row-${d}"><span>${fmtMD(d)} ${esc(w ? w.name : "訓練")}</span><span>${n} 組</span></div>`;
+  }).join("") + `<p class="muted">長按一筆可刪除</p>`;
+}
 function renderBody(st) {
   const last = lastInbody();
   const daily = LIVE.garmin.daily || [];
@@ -978,6 +1521,8 @@ function renderBody(st) {
     <div class="card">${lineChart(rhr, "#B45309", 320, 140, "chart chart-lg")}<p class="muted">比 7 日平均高 5 下以上，今天改家裡快版。</p></div>
     <p class="sec">最近 InBody</p>
     <div class="card">${rows}</div>
+    <p class="sec">訓練紀錄</p>
+    <div class="card" data-testid="log-list">${renderLogRows(st)}</div>
     <p class="sec">運動心率／時長</p>
     <div class="card">${actRows}</div>`;
 }
@@ -994,13 +1539,15 @@ function sessionLoad(session, st) {
   let weight = session.editWeight;
   if (weight == null && lastSet && lastSet.weight != null) weight = lastSet.weight;
   if (weight == null && hist && hist.weight != null) {
-    weight = session.returning ? Math.round(Number(hist.weight) * 0.7 * 2) / 2 : Number(hist.weight);
+    weight = session.returning && !hist.returning ? Math.round(Number(hist.weight) * 0.7 * 2) / 2 : Number(hist.weight);
     if (!session.returning && !session.fasted && sug && sug.add) weight = Number(hist.weight) + Number(sug.add);
   }
+  const noWeight = NO_WEIGHT.test(step.name);
+  if (weight == null && !noWeight) weight = startKgFor(step.name);
   let target = dose.repsLow;
   if (hist && hist.reps && !session.returning) target = hist.reps;
   if (session.editTarget != null) target = session.editTarget;
-  return { weight, target, sets: dose.sets, perSide: dose.perSide, hist, sug, noWeight: NO_WEIGHT.test(step.name) };
+  return { weight, target, sets: dose.sets, perSide: dose.perSide, hist, sug, noWeight };
 }
 
 function renderWorkout(st) {
@@ -1010,6 +1557,7 @@ function renderWorkout(st) {
   }
   if (session.phase === "done") return renderDone(st, session);
   if (session.phase === "back") return renderBack(session);
+  if (session.phase === "exback") return renderExBack(session);
   if (session.phase === "rest") return renderRest(session);
 
   const step = session.steps[session.i];
@@ -1030,14 +1578,14 @@ function renderWorkout(st) {
       ? `連續兩次做滿且有餘力，建議加到 ${load.weight} kg（+${load.sug.add}）。不想加就改回原重量再按完成。`
       : null;
   const weightBlock = load.noWeight
-    ? `<p class="muted">這個動作不用加重。</p>`
+    ? `<div class="load"><div class="num" data-testid="wo-weight">徒手</div></div>`
     : `<div class="load">
-        <div><div class="num">${load.weight != null ? load.weight : "—"}<span class="unit"> kg</span></div>
-          <div class="muted">${load.hist && load.hist.weight != null ? `上次 ${load.hist.weight} kg × ${load.hist.reps || "?"} 下` : "Garmin 沒有重量，第一次請先調好再按完成"}</div>
+        <div><div class="num" data-testid="wo-weight">${load.weight}<span class="unit"> kg</span></div>
+          <div class="muted">${load.hist && load.hist.weight != null ? `上次 ${load.hist.weight} kg` : "起始重量"}</div>
         </div>
         <div class="stepper">
-          <button type="button" data-wdelta="-2.5" aria-label="減 2.5 公斤">−</button>
-          <button type="button" data-wdelta="2.5" aria-label="加 2.5 公斤">+</button>
+          <button type="button" data-wdelta="-${WEIGHT_STEP}" data-testid="w-minus" aria-label="減 ${WEIGHT_STEP} 公斤">−</button>
+          <button type="button" data-wdelta="${WEIGHT_STEP}" data-testid="w-plus" aria-label="加 ${WEIGHT_STEP} 公斤">+</button>
         </div>
       </div>`;
 
@@ -1059,16 +1607,15 @@ function renderWorkout(st) {
       <button type="button" class="btn" data-leave>先離開</button>
       <div class="wo-prog">${session.i + 1} / ${session.steps.length} · 第 ${setNo} / ${load.sets} 組</div>
     </div>
-    <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">改腿推</span>' : ""}${session.returning ? '<span class="chip" data-testid="buffer-week">緩衝週</span>' : ""}</div>
-    <div data-testid="wo-figure">${bodyMap((musclesFor(step.name).primary), (musclesFor(step.name).secondary), {})}</div>
+    <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">換動作</span>' : ""}${session.returning ? '<span class="chip" data-testid="buffer-week">緩衝週</span>' : ""}</div>
+    <div data-testid="wo-figure">${bodyMap((musclesFor(step.name).primary), (musclesFor(step.name).secondary), weekSetCounts(st, now(), { includeSession: true }))}</div>
     <p class="muted">${esc(step.dose)}${load.perSide ? "（單側次數）" : ""} · 目標 ${load.target} 下${load.hist && load.hist.reps ? ` · 上次 ${load.hist.reps} 下` : ""}</p>
     <p class="wo-cue" data-testid="wo-cue">${esc(cueFor(step.name))}</p>
     ${yt(step.video)}
     ${weightBlock}
     ${note ? `<p class="note">${esc(note)}</p>` : ""}
     <button type="button" class="btn primary xl" data-complete>完成</button>
-    <div class="acts"><button type="button" class="btn full danger" data-short>少做了</button></div>
-    ${((session.undoStack || []).length) ? `<div class="acts"><button type="button" class="btn full" data-undo-set data-testid="btn-undo">復原</button></div>` : ""}
+    <button type="button" class="btn ghost short-btn" data-short>少做了</button>
     <p class="muted">左滑下一個動作，右滑回上一個。重量有變再按 ＋－，次數不夠才按「少做了」。</p>
   `;
 }
@@ -1079,11 +1626,23 @@ function renderRest(session) {
     <div class="muted">休息</div>
     <div class="t" id="rest-count">${left}</div>
     <p class="muted">秒後繼續下一組</p>
-    <button type="button" class="btn primary xl" data-skip-rest>跳過休息</button>
-    <div class="acts"><button type="button" class="btn full" data-undo-set data-testid="btn-undo">復原</button></div>
+    ${session.swapNote ? `<p class="note" data-testid="ex-swap-note">${esc(session.swapNote)}</p>` : ""}
+    <button type="button" class="btn primary xl eat-toggle yes" data-undo-set data-testid="btn-undo">✓ 完成</button>
+    <button type="button" class="btn full" data-skip-rest>跳過休息</button>
   </div>`;
 }
 
+function renderExBack(session) {
+  const step = session.steps[session.exBackI != null ? session.exBackI : session.i];
+  const btns = Array.from({ length: 11 }, (_, i) => `<button type="button" data-exback="${i}" data-testid="exback-${i}">${i}</button>`).join("");
+  return `<section class="card hero" data-testid="exback"><div class="k">${esc(step ? step.name : "")}</div><div class="big">下背 OK 嗎</div>
+    <div class="lab">0 很好 · 10 很痛</div></section>
+    <div class="back-grid">${btns}</div>`;
+}
+function exSwapTarget(name) {
+  const s = lookSafer(name, null);
+  return s ? s.name || s : null;
+}
 function renderBack(session) {
   const cur = session.backScore;
   const btns = Array.from({ length: 11 }, (_, i) =>
@@ -1092,19 +1651,25 @@ function renderBack(session) {
   return `<section class="card hero"><div class="big">下背感覺？</div>
     <div class="lab">0 沒感覺，10 很不適。點一下就好。</div></section>
     <div class="back-grid">${btns}</div>
-    <p class="muted">3 分以上，下次深蹲會自動改成腿推。</p>`;
+    <p class="muted">3 分以上，下次改成較安全的動作。</p>`;
 }
 
 function renderDone(st, session) {
-  const week = weekSetCounts({ ...st, logs: { ...st.logs, [session.date]: { moves: session.moves } } }, now());
+  const week = weekSetCounts(st, now(), { includeSession: true });
   const parts = todayPartsFromMoves(session.moves);
   const g = session.garmin || matchGarmin(session.date);
-  const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
+  const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
+  const exSw = Object.entries(session.exSwaps || {}).map(([n, t]) => `${n}：${t.replace(/^下次這動作/, "")}`);
+  const swaps = exSw.length ? exSw : (session.exBack ? [] : upcomingBackSwaps(session.workoutId, session.backScore));
+  const swapLine = swaps.length
+    ? `<p class="note" data-testid="back-swaps">下次換動作：${esc(swaps.join("、"))}</p>`
+    : "";
   return `<section class="card hero">
       <div class="k">練完了</div>
       <div class="big">今天部位</div>
-      <div class="lab">下背 ${session.backScore} 分${session.backScore >= 3 ? " · 下次深蹲改腿推" : ""}</div>
+      <div class="lab" data-testid="back-score">下背 ${session.backScore} 分</div>
     </section>
+    ${swapLine}
     ${bodyMap(parts.pri, parts.sec, week)}
     <div class="chips">${chips}</div>
     ${g ? `<p class="muted">Garmin：${g.durationMin != null ? g.durationMin + " 分" : ""}${g.avgHR != null ? " · 平均心率 " + Math.round(g.avgHR) : ""}${g.kcal != null ? " · " + Math.round(g.kcal) + " kcal" : ""}</p>` : `<p class="muted">今天的 Garmin 紀錄之後同步，會自動對上這次訓練的心率和時間。</p>`}
@@ -1112,29 +1677,101 @@ function renderDone(st, session) {
 }
 
 function renderShop(st) {
-  const n = GROCERY.filter((g) => st.grocery[g.id]).length;
-  return `<section class="card hero">
-      <div class="k">備餐底料</div>
-      <div class="big">採買清單</div>
-      <div class="lab">已勾 ${n} / ${GROCERY.length}。勾選存在這支手機。</div>
-    </section>
-    <div class="acts"><button type="button" class="btn" data-clear-shop>清除勾選</button></div>
-    ${GROCERY.map((g) => {
-      const on = !!st.grocery[g.id];
-      return `<button type="button" class="item${on ? " on" : ""}" data-g="${g.id}">
+  const shop = persistShopWeek(st);
+  const stats = shopDaysStats(st);
+  const visible = shopAllItems(st).filter((it) => !shop.hide[it.id] || isShopFrequent(st, it));
+  const hint = shopDaysHint(st);
+  const wheyWarn = shop.wheyPacks < 6
+    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 包，不到 6 包，該補貨了。</p>`
+    : "";
+  const pPct = stats.proteinPlan ? Math.min(100, Math.round(100 * stats.proteinBought / stats.proteinPlan)) : 0;
+  const sPct = stats.starchPlan ? Math.min(100, Math.round(100 * stats.starchBought / stats.starchPlan)) : 0;
+  const bars = `<div class="shop-bars" data-testid="shop-bars">
+      <div class="shop-bar">
+        <div class="lab">蛋白質 <b data-testid="shop-protein-days">${stats.proteinBought}</b>/<span data-testid="shop-protein-plan">${stats.proteinPlan}</span> 天</div>
+        <div class="bar" role="progressbar" aria-valuenow="${pPct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pPct}%"></i></div>
+      </div>
+      <div class="shop-bar">
+        <div class="lab">澱粉 <b data-testid="shop-starch-days">${stats.starchBought}</b>/<span data-testid="shop-starch-plan">${stats.starchPlan}</span> 天</div>
+        <div class="bar" role="progressbar" aria-valuenow="${sPct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${sPct}%"></i></div>
+      </div>
+    </div>`;
+  const groups = (SHOP_GROUPS || []).map((g) => {
+    const items = visible.filter((it) => it.group === g.id);
+    if (!items.length) return "";
+    const vegNote = g.id === "veg" ? `<p class="muted">本週選 4–5 種，各 1 份。已選 ${shopAllItems(st).filter((it) => it.pick && shopAcquired(shop, it.id)).length} 種。</p>` : "";
+    return `<p class="sec">${esc(g.name)}</p>${vegNote}${items.map((it) => {
+      const on = !!shop.checked[it.id];
+      const have = !!shop.have[it.id];
+      const freq = isShopFrequent(st, it);
+      const whey = it.whey ? `<div class="whey-stock">目前剩 <span data-testid="whey-packs">${shop.wheyPacks}</span> 包
+        <span class="stepper">
+          <button type="button" data-whey-pack="-1">−</button>
+          <button type="button" data-whey-pack="1">+</button>
+        </span></div>` : "";
+      const del = it.custom ? `<button type="button" class="btn ghost short-btn" data-shop-del="${it.id}">刪</button>` : "";
+      return `<div class="item${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
         <span class="ck${on ? " on" : ""}">${on ? "✓" : ""}</span>
-        <span><b>${esc(g.name)}</b><br><span class="muted">${esc(g.hint)}</span></span>
-      </button>`;
+        <span><b>${esc(it.name)}</b>${shopItemHint(it) ? `<br><span class="muted">${esc(shopItemHint(it))}</span>` : ""}${have ? `<br><span class="have-tag">家裡有${freq ? "" : "（下週隱藏）"}</span>` : ""}${whey}</span>
+        <button type="button" class="chip${freq ? " on" : ""}" data-shop-frequent="${it.id}" data-testid="shop-frequent-${it.id}">常買</button>
+        ${del}
+      </div>`;
     }).join("")}`;
+  }).join("");
+  const extras = (st.shopExtra || []);
+  const chips = `<div class="chips shop-chips" data-testid="shop-chips">${extras.map((it) => {
+    const on = !!(shop.checked[it.id] || shop.have[it.id]);
+    return `<button type="button" class="chip${on ? " on" : ""}" data-shop-chip="${it.id}" data-testid="shop-chip-${it.id}">${esc(it.name)}</button>`;
+  }).join("")}</div>`;
+  const knownDraft = matchShopItem(st, ui.shopDraftName);
+  const add = ui.shopAdd ? `<div class="shop-add card" data-testid="shop-add">
+      <input type="text" data-shop-new-name placeholder="名稱，例如 雞柳" aria-label="名稱" value="${esc(ui.shopDraftName || "")}">
+      <input type="text" data-shop-new-amount placeholder="份量，例如 300g 或 2" aria-label="份量" value="${esc(ui.shopDraftAmount || "")}">
+      <div class="shop-cats" data-testid="shop-cats"${knownDraft ? " hidden" : ""}>
+        <button type="button" class="chip${(ui.shopCat || "protein") === "protein" ? " on" : ""}" data-shop-cat="protein">蛋白質</button>
+        <button type="button" class="chip${ui.shopCat === "starch" ? " on" : ""}" data-shop-cat="starch">澱粉</button>
+        <button type="button" class="chip${ui.shopCat === "veg" ? " on" : ""}" data-shop-cat="veg">蔬菜</button>
+      </div>
+      <select data-shop-new-group aria-label="分類">
+        <option value="protein"${(ui.shopCat || "protein") === "protein" ? " selected" : ""}>蛋白質</option>
+        <option value="starch"${ui.shopCat === "starch" ? " selected" : ""}>澱粉</option>
+        <option value="veg"${ui.shopCat === "veg" ? " selected" : ""}>蔬菜</option>
+      </select>
+      <button type="button" class="btn primary" data-shop-add>新增</button>
+    </div>` : "";
+  return `<section class="card hero">
+      <div class="k">每週補貨</div>
+      <div class="big">採買清單</div>
+      <div class="lab">點選＝已買 · 長按＝家裡有 · 常買會記住</div>
+    </section>
+    <button type="button" class="shop-hint${shop.hintCollapsed ? " collapsed" : ""}" data-toggle-hint data-testid="shop-hint">${shop.hintCollapsed ? "本週存量提示" : esc(hint)}</button>
+    ${bars}
+    ${wheyWarn}
+    <div class="acts">
+      <button type="button" class="btn" data-clear-shop>清除勾選</button>
+      <button type="button" class="btn shop-plus" data-shop-plus data-testid="shop-plus" aria-label="新增食材">＋</button>
+    </div>
+    ${chips}
+    ${groups}
+    ${add}
+    <p class="muted">長按＝家裡有。常買的項目每週都會留下。點 ＋ 可加入任意食材。</p>
+    ${shareCatsBtn()}`;
 }
 
-function renderRules() {
+function renderRules(st) {
   const last = lastInbody();
   return `<section class="card hero">
       <div class="k">減脂喵守則</div>
       <div class="big">規則與目標</div>
       <div class="lab">下背友善、每週至少兩練、吃夠蛋白質。</div>
     </section>
+    <p class="sec">設定</p>
+    <div class="card">
+      <button type="button" class="item" data-toggle-reasons data-testid="toggle-reasons">
+        <span class="ck${st && st.hideSuggestReasons ? " on" : ""}">${st && st.hideSuggestReasons ? "✓" : ""}</span>
+        <span><b>隱藏建議原因</b><br><span class="muted">課表只說改快版，不寫睡眠或 Body Battery 的原因。提醒只在打開 App 時顯示一張卡片。</span></span>
+      </button>
+    </div>
     <p class="sec">目標</p>
     <div class="card">
       <div class="stat"><span>體位參考</span><span>${last.weightKg} kg／體脂 ${last.pbf}%／骨骼肌 ${last.smmKg} kg（${fmtMD(last.date)}）</span></div>
@@ -1145,11 +1782,11 @@ function renderRules() {
     </div>
     <p class="sec">今天怎麼決定課表</p>
     <div class="card prose">
-      <p>前一晚睡滿 6 小時，且靜止心率沒有比 7 日平均高 5 下，就練原課表；任一項沒過，改家裡快版 25 分鐘。</p>
+      <p>睡滿 6 小時、心率正常、Body Battery ≥ 30 就練原課表，否則改 25 分鐘快版。Garmin 有重訓也算一堂；錯過就延後，不跳過。熱量只看有吃飯紀錄的日子，用兩週體重平均。</p>
       <p>訓練日建議 16:00 喝兩份樂維根（芝麻／豆漿／杏仁各約 20 g 蛋白，極致約 25 g）加地瓜。一份極致則 18:30 雞胸 150g；兩份 20 g 則雞胸 200g 或 21:00 加蛋 2 顆。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
-      <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次深蹲改腿推。</p>
+      <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
       <p>換餐時蛋白質可互選：雞胸 200g、蝦仁 150g、吳郭魚排 1 片、雞蛋 3 顆。澱粉可互選：飯 150g、地瓜 150g、酸種麵包 2 片。</p>
     </div>
     <p class="sec">下背：少做</p>
@@ -1179,7 +1816,10 @@ function go(tab) {
 function buildSteps(st, workout) {
   const back = lastBackScore(st);
   const steps = workout.steps.map((s) => {
-    const r = resolveName(s, back);
+    let r = resolveName(s, back);
+    const swv = (st.backSwap || {})[moveKey(r.name)];
+    const sw = swv && (swv.to || swv);
+    if (sw && typeof sw === "string") r = { name: sw, video: r.video, swapped: true };
     return {
       name: r.name,
       dose: s.dose,
@@ -1191,7 +1831,8 @@ function buildSteps(st, workout) {
   });
   if (now().getDay() === 5) {
     for (const ex of fridayExtras(st, steps, now())) {
-      steps.push({ name: ex.name, dose: ex.dose, video: ex.video, extra: true, extraFor: ex.extraFor, swapped: false });
+      const r = resolveName(ex, back);
+      steps.push({ name: r.name, dose: ex.dose, video: r.video || ex.video, extra: true, extraFor: ex.extraFor, swapped: r.swapped });
     }
   }
   return steps;
@@ -1199,11 +1840,7 @@ function buildSteps(st, workout) {
 
 function startWorkout() {
   let st = state();
-  const noMeal = !hasPreWorkoutMeal(st);
-  if (noMeal && !markedFasted(st)) {
-    save({ fasted: { ...(st.fasted || {}), [todayKey()]: true } });
-    st = state();
-  }
+  const noMeal = false;
   const plan = todayPlan(st);
   if (!plan.train || !plan.workout) return;
   if (isReturnWeek(st) && !st.returnUntil) {
@@ -1212,6 +1849,7 @@ function startWorkout() {
   }
   const session = {
     date: todayKey(),
+    startedAt: Date.now(),
     workoutId: plan.id,
     steps: buildSteps(st, plan.workout),
     i: 0,
@@ -1252,20 +1890,55 @@ function applySet(short, reps) {
   session.shortReps = null;
   const finishedEx = session.setI + 1 >= load.sets;
   const finishedAll = finishedEx && session.i + 1 >= session.steps.length;
-  if (finishedAll) {
-    session.phase = "back";
+  session.swapNote = null;
+  if (finishedEx) {
+    session.exBackI = session.i;
+    session.phase = "exback";
     session.restUntil = null;
-  } else if (finishedEx) {
-    session.i += 1;
-    session.setI = 0;
-    session.editWeight = null;
-    session.phase = "rest";
-    session.restUntil = Date.now() + restMs();
   } else {
     session.setI += 1;
     session.phase = "rest";
     session.restUntil = Date.now() + restMs();
   }
+  save({ session });
+  render();
+}
+
+function applyExBack(score) {
+  const st = state();
+  const session = { ...st.session };
+  const idx = session.exBackI != null ? session.exBackI : session.i;
+  const step = session.steps[idx];
+  const n = Number(score);
+  session.exBack = { ...(session.exBack || {}), [step.name]: n };
+  const backSwap = { ...(st.backSwap || {}) };
+  const key = moveKey(step.name);
+  session.swapNote = null;
+  if (n >= 3) {
+    const to = exSwapTarget(step.name);
+    if (to) {
+      backSwap[key] = { to, date: session.date };
+      session.swapNote = `下次這動作換成 ${to}`;
+    } else {
+      session.swapNote = "下次這動作減輕重量";
+    }
+    session.exSwaps = { ...(session.exSwaps || {}), [step.name]: session.swapNote };
+  } else {
+    delete backSwap[key];
+  }
+  save({ backSwap });
+  if (idx + 1 >= session.steps.length) {
+    save({ session });
+    const vals = Object.values(session.exBack);
+    finishWithScore(Math.max(...vals));
+    return;
+  }
+  session.i = idx + 1;
+  session.setI = 0;
+  session.editWeight = null;
+  session.exBackI = null;
+  session.phase = "rest";
+  session.restUntil = Date.now() + restMs();
   save({ session });
   render();
 }
@@ -1276,13 +1949,17 @@ function finishWithScore(score) {
   const lastLoads = { ...st.lastLoads };
   const loadHistory = { ...st.loadHistory };
   const suggest = { ...st.suggest };
+  for (const [name, sets] of Object.entries(session.moves || {})) {
+    const done = (sets || []).filter((s) => s.done);
+    if (!done.length) continue;
+    const last = done[done.length - 1];
+    lastLoads[moveKey(name)] = { weight: last.weight, reps: last.reps, date: session.date, returning: !!session.returning };
+  }
   if (!session.fasted) {
     for (const [name, sets] of Object.entries(session.moves || {})) {
       const done = (sets || []).filter((s) => s.done);
       if (!done.length) continue;
       const key = moveKey(name);
-      const last = done[done.length - 1];
-      lastLoads[key] = { weight: last.weight, reps: last.reps, date: session.date };
       const hitAll = done.every((s) => !s.short && Number(s.reps) >= Number(s.target));
       const arr = [...(loadHistory[key] || []), { date: session.date, hitAll }].slice(-4);
       loadHistory[key] = arr;
@@ -1293,11 +1970,16 @@ function finishWithScore(score) {
       }
     }
   }
+  const prevLog = (st.logs || {})[session.date];
+  const mergedMoves = prevLog && prevLog.finishedAt && prevLog.sessionStart !== session.startedAt
+    ? { ...(prevLog.moves || {}), ...session.moves } : session.moves;
   const logs = {
     ...st.logs,
     [session.date]: {
       workoutId: session.workoutId,
-      moves: session.moves,
+      sessionStart: session.startedAt,
+      exBack: session.exBack || null,
+      moves: mergedMoves,
       backScore: session.backScore,
       reason: session.reason,
       returning: session.returning,
@@ -1342,10 +2024,12 @@ function render() {
   if (!main) return;
   if (ui.swap || ui.elseMeal) main.innerHTML = renderSwap(st);
   else if (st.tab === "shop") main.innerHTML = renderShop(st);
-  else if (st.tab === "rules") main.innerHTML = renderRules();
+  else if (st.tab === "rules") main.innerHTML = renderRules(st);
   else if (st.tab === "workout") main.innerHTML = renderWorkout(st);
   else if (st.tab === "body") main.innerHTML = renderBody(st);
   else main.innerHTML = renderHome(st);
+  if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
+  if (st.tab !== "workout") main.insertAdjacentHTML("beforeend", `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`);
 }
 
 function tick() {
@@ -1378,6 +2062,201 @@ document.getElementById("main").addEventListener("click", (e) => {
     go(goBtn.dataset.go);
     return;
   }
+
+  const muscleId = muscleIdFromEvent(e);
+  if (muscleId) {
+    ui.bodyPart = ui.bodyPart === muscleId ? null : muscleId;
+    render();
+    return;
+  }
+  if (e.target.closest("[data-share-cats]")) {
+    ui.shareSheet = { text: shareCatsText(st), copied: false };
+    render();
+    return;
+  }
+  if (e.target.closest("[data-share-copy]")) {
+    copyShareText(st).then(() => {
+      if (ui.shareSheet) ui.shareSheet.copied = true;
+      render();
+    });
+    return;
+  }
+  if (e.target.closest("[data-share-close]")) {
+    ui.shareSheet = null;
+    render();
+    return;
+  }
+  const mealMore = e.target.closest("[data-meal-more]");
+  if (mealMore) {
+    const id = mealMore.dataset.mealMore;
+    ui.mealMore = ui.mealMore === id ? null : id;
+    render();
+    return;
+  }
+  const palm = e.target.closest("[data-palm]");
+  if (palm) {
+    const id = palm.dataset.palm;
+    const cur = Number((((st.mealLogs || {})[todayKey()] || {})[id] || {}).palms) || 0;
+    patchMeal(st, id, { mode: "portions", palms: Math.max(0, cur + Number(palm.dataset.delta)), outType: undefined });
+    render();
+    return;
+  }
+  const fist = e.target.closest("[data-fist]");
+  if (fist) {
+    const id = fist.dataset.fist;
+    const cur = Number((((st.mealLogs || {})[todayKey()] || {})[id] || {}).fists) || 0;
+    patchMeal(st, id, { mode: "portions", fists: Math.max(0, cur + Number(fist.dataset.delta)) });
+    render();
+    return;
+  }
+  const veg = e.target.closest("[data-veg]");
+  if (veg) {
+    const id = veg.dataset.veg;
+    const cur = !!((((st.mealLogs || {})[todayKey()] || {})[id] || {}).veg);
+    patchMeal(st, id, { mode: "portions", veg: !cur });
+    render();
+    return;
+  }
+  const whey2 = e.target.closest("[data-whey2]");
+  if (whey2) {
+    const w = whey2Macros(st);
+    patchMeal(st, whey2.dataset.whey2, {
+      mode: "whey2", eaten: true, palms: 0, fists: 0, veg: false,
+      name: w.name, kcal: w.kcal, protein: w.protein, scoopIds: w.scoopIds,
+    });
+    render();
+    return;
+  }
+  const outType = e.target.closest("[data-out-type]");
+  if (outType) {
+    const prev = ((st.mealLogs || {})[todayKey()] || {})[outType.dataset.outType] || {};
+    patchMeal(st, outType.dataset.outType, { mode: "out", outType: outType.dataset.oid, outSize: prev.outSize || "normal" });
+    render();
+    return;
+  }
+  const outSize = e.target.closest("[data-out-size]");
+  if (outSize) {
+    const prev = ((st.mealLogs || {})[todayKey()] || {})[outSize.dataset.outSize] || {};
+    patchMeal(st, outSize.dataset.outSize, { mode: "out", outType: prev.outType || "bento", outSize: outSize.dataset.sid });
+    render();
+    return;
+  }
+  const wheyPack = e.target.closest("[data-whey-pack]");
+  if (wheyPack) {
+    const shop = persistShopWeek(st);
+    save({ wheyPacks: Math.max(0, shop.wheyPacks + Number(wheyPack.dataset.wheyPack)), shopWeek: shop.week });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-toggle-hint]")) {
+    save({ shopHintCollapsed: !st.shopHintCollapsed });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-toggle-reasons]")) {
+    save({ hideSuggestReasons: !st.hideSuggestReasons });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-toggle-reason]")) {
+    ui.showReason = !ui.showReason;
+    render();
+    return;
+  }
+  const shopFreq = e.target.closest("[data-shop-frequent]");
+  if (shopFreq) {
+    const id = shopFreq.dataset.shopFrequent;
+    const next = { ...(st.shopFrequent || {}) };
+    next[id] = !isShopFrequent(st, shopAllItems(st).find((it) => it.id === id) || { id, frequent: false });
+    save({ shopFrequent: next });
+    render();
+    return;
+  }
+  const shopDel = e.target.closest("[data-shop-del]");
+  if (shopDel) {
+    const id = shopDel.dataset.shopDel;
+    save({ shopExtra: (st.shopExtra || []).filter((it) => it.id !== id) });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-shop-plus]")) {
+    ui.shopAdd = !ui.shopAdd;
+    render();
+    return;
+  }
+  const shopCat = e.target.closest("[data-shop-cat]");
+  if (shopCat) {
+    ui.shopCat = shopCat.dataset.shopCat;
+    ui.shopDraftName = (document.querySelector("[data-shop-new-name]") || {}).value || ui.shopDraftName || "";
+    ui.shopDraftAmount = (document.querySelector("[data-shop-new-amount]") || {}).value || ui.shopDraftAmount || "";
+    render();
+    return;
+  }
+  const shopChip = e.target.closest("[data-shop-chip]");
+  if (shopChip) {
+    const shop = persistShopWeek(st);
+    const id = shopChip.dataset.shopChip;
+    save({ shopWeek: shop.week, shopChecked: { ...shop.checked, [id]: !shop.checked[id] } });
+    render();
+    return;
+  }
+  if (e.target.closest("[data-shop-add]")) {
+    ui.shopDraftName = (document.querySelector("[data-shop-new-name]") || {}).value || "";
+    ui.shopDraftAmount = (document.querySelector("[data-shop-new-amount]") || {}).value || "";
+    const label = String(ui.shopDraftName || "").trim();
+    const amount = String(ui.shopDraftAmount || "").trim();
+    const known = matchShopItem(st, label);
+    const selGroup = (document.querySelector("[data-shop-new-group]") || {}).value;
+    const group = known ? known.group : (ui.shopCat || selGroup || "protein");
+    const qty = parseShopQty(amount);
+    if (label) {
+      const item = {
+        id: "x-" + Date.now(),
+        group,
+        name: shopDisplayName(label, amount),
+        hint: "",
+        custom: true,
+        amount,
+        palms: group === "protein" ? qty : 0,
+        fists: group === "starch" ? qty : 0,
+      };
+      save({ shopExtra: (st.shopExtra || []).concat([item]), shopFrequent: { ...(st.shopFrequent || {}), [item.id]: true } });
+      ui.shopDraftName = "";
+      ui.shopDraftAmount = "";
+      ui.shopAdd = false;
+    }
+    render();
+    return;
+  }
+  const shopItem = e.target.closest("[data-shop]");
+  if (shopItem && !e.target.closest("[data-whey-pack]") && !e.target.closest("[data-shop-frequent]") && !e.target.closest("[data-shop-del]")) {
+    if (window.__shopHaveLock) { window.__shopHaveLock = false; return; }
+    const shop = persistShopWeek(st);
+    const id = shopItem.dataset.shop;
+    save({ shopWeek: shop.week, shopChecked: { ...shop.checked, [id]: !shop.checked[id] } });
+    render();
+    return;
+  }
+
+  if (e.target.closest("[data-want-train]")) {
+    ui.wantTrain = true;
+    render();
+    return;
+  }
+  const restTrain = e.target.closest("[data-rest-train]");
+  if (restTrain) {
+    const pick = restTrain.getAttribute("data-rest-train") || restTrain.dataset.restTrain;
+    if (pick && typeof WORKOUTS !== "undefined" && WORKOUTS[pick]) {
+      const next = { ...((load().restTrain) || {}) };
+      next[todayKey()] = pick;
+      save({ restTrain: next });
+      ui.wantTrain = false;
+      const tl = (load().logs || {})[todayKey()];
+      if (tl && tl.finishedAt) { startWorkout(); return; }
+    }
+    render();
+    return;
+  }
   if (e.target.closest("[data-start]")) {
     startWorkout();
     return;
@@ -1398,10 +2277,10 @@ document.getElementById("main").addEventListener("click", (e) => {
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
     if (meals[id] && meals[id].eaten) {
-      meals[id] = { ...meals[id], eaten: false };
+      meals[id] = { eaten: false };
     } else {
-      const cur = currentMeal(st, id);
-      meals[id] = { ...cur, eaten: true };
+      const est = mealEstimate(st, id);
+      meals[id] = { ...(meals[id] || {}), ...est, eaten: true };
     }
     save({ mealLogs: { ...st.mealLogs, [day]: meals } });
     render();
@@ -1522,7 +2401,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   const wdelta = e.target.closest("[data-wdelta]");
   if (wdelta && st.session) {
     const load = sessionLoad(st.session, st);
-    const cur = load.weight != null ? Number(load.weight) : 20;
+    const cur = load.weight != null ? Number(load.weight) : startKgFor(st.session.steps[st.session.i].name);
     const next = Math.max(0, Math.round((cur + Number(wdelta.dataset.wdelta)) * 2) / 2);
     save({ session: { ...st.session, editWeight: next } });
     render();
@@ -1553,6 +2432,11 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (e.target.closest("[data-skip-rest]")) {
     save({ session: { ...st.session, phase: "set", restUntil: null } });
     render();
+    return;
+  }
+  const exb = e.target.closest("[data-exback]");
+  if (exb) {
+    applyExBack(exb.dataset.exback);
     return;
   }
   const back = e.target.closest("[data-back]");
@@ -1594,10 +2478,69 @@ document.getElementById("main").addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("[data-clear-shop]")) {
-    save({ grocery: {} });
+    const shop = persistShopWeek(st);
+    save({ grocery: {}, shopChecked: {}, shopWeek: shop.week });
     render();
   }
 });
+
+
+document.getElementById("main").addEventListener("input", (e) => {
+  if (e.target.matches("[data-shop-new-name]")) {
+    ui.shopDraftName = e.target.value;
+    const known = matchShopItem(state(), e.target.value);
+    const cats = document.querySelector("[data-testid=shop-cats]");
+    if (cats) cats.hidden = !!known;
+  }
+  if (e.target.matches("[data-shop-new-amount]")) ui.shopDraftAmount = e.target.value;
+  if (e.target.matches("[data-shop-new-group]")) ui.shopCat = e.target.value;
+});
+
+(function setupLogLongPress() {
+  const main = document.getElementById("main");
+  let timer = null;
+  const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  main.addEventListener("pointerdown", (e) => {
+    const row = e.target.closest("[data-log-row]");
+    if (!row) return;
+    timer = setTimeout(() => {
+      timer = null;
+      const d = row.dataset.logRow;
+      if (window.confirm(`刪除 ${fmtMD(d)} 這筆訓練？`)) deleteLog(d);
+    }, 600);
+  });
+  main.addEventListener("pointerup", clear);
+  main.addEventListener("pointercancel", clear);
+  main.addEventListener("pointermove", (e) => { if (Math.abs(e.movementY) > 6) clear(); });
+})();
+window.__fatmiDeleteLog = deleteLog;
+
+(function setupShopLongPress() {
+  const main = document.getElementById("main");
+  let timer = null;
+  let fired = false;
+  const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  main.addEventListener("pointerdown", (e) => {
+    const item = e.target.closest("[data-shop]");
+    if (!item || e.target.closest("[data-whey-pack],[data-shop-frequent],[data-shop-del],[data-shop-add],[data-shop-plus],[data-shop-chip],[data-shop-cat],input,select,button")) return;
+    fired = false;
+    timer = setTimeout(() => {
+      fired = true;
+      window.__shopHaveLock = true;
+      const st = state();
+      const shop = persistShopWeek(st);
+      const id = item.dataset.shop;
+      save({ shopWeek: shop.week, shopHave: { ...shop.have, [id]: !shop.have[id] } });
+      render();
+    }, 550);
+  });
+  main.addEventListener("pointerup", clear);
+  main.addEventListener("pointercancel", clear);
+  main.addEventListener("pointerleave", (e) => {
+    if (e.target && e.target.closest && e.target.closest("[data-shop]")) clear();
+  }, true);
+})();
+
 
 let touchX = null;
 document.getElementById("main").addEventListener("touchstart", (e) => {
@@ -1623,8 +2566,10 @@ window.addEventListener("hashchange", () => {
 });
 
 
-const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
+const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
+const APP_VERSION = "2026.11.07-5";
+const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
 
@@ -1671,7 +2616,7 @@ async function hardRefresh() {
   await Promise.all(ASSETS.map((u) => fetchNoStore(u).catch(() => null)));
   try {
     const keys = await caches.keys();
-    await Promise.all(keys.map((k) => caches.delete(k)));
+    await Promise.all(keys.filter((k) => String(k).startsWith(CACHE_PREFIX)).map((k) => caches.delete(k)));
   } catch (_) {}
   await activateWaitingSW();
   safeReload();
@@ -1747,19 +2692,49 @@ setInterval(() => {
 
 if (navigator.serviceWorker) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (pendingReload && !isBusy()) safeReload();
+    if (!navigator.serviceWorker.__hadController) return;
+    if (!isBusy()) safeReload();
+    else pendingReload = true;
   });
+  navigator.serviceWorker.__hadController = !!navigator.serviceWorker.controller;
 }
 
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "SW_UPDATED") {
+      if (!isBusy()) safeReload(); else pendingReload = true;
+    }
+  });
+}
 window.__fatmiHardRefresh = hardRefresh;
 window.__fatmiCheckUpdates = checkUpdates;
 
+function migrateGrocery() {
+  try {
+    const s = load();
+    if (s.groceryMigrated) return;
+    const map = { chicken: "chicken", eggs: "eggs", whey: "whey", carb: "rice", fish: "seafood" };
+    const g = s.grocery || {};
+    const shopChecked = { ...(s.shopChecked || {}) };
+    for (const [k, v] of Object.entries(g)) if (v && map[k] && shopChecked[map[k]] == null) shopChecked[map[k]] = true;
+    save({ shopChecked, groceryMigrated: true });
+  } catch (_) {}
+}
 async function boot() {
+  migrateGrocery();
   try {
     const v = await fetch("./version.json", { cache: "no-store" });
     if (v.ok) {
       const ver = await v.json();
       loadedVersion = ver && ver.version;
+      if (loadedVersion && loadedVersion !== APP_VERSION) {
+        const k = "fatmi-ver-fix";
+        if (sessionStorage.getItem(k) !== loadedVersion) {
+          sessionStorage.setItem(k, loadedVersion);
+          if (!isBusy()) { hardRefresh(); return; }
+          pendingReload = true;
+        }
+      }
     }
   } catch (_) {}
   try {
@@ -1782,7 +2757,7 @@ async function boot() {
 }
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js").catch(() => {});
+  navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => {});
 }
 tick();
 setInterval(tick, 500);

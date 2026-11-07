@@ -145,6 +145,11 @@ const PARTS = {
   upperback: "上背",
   rotator: "旋轉肌",
   lowback: "下背穩定",
+  calves: "小腿",
+  forearms: "前臂",
+  obliques: "腹斜",
+  abductors: "外展肌",
+  adductors: "內收肌",
 };
 
 const MAIN_PARTS = ["quads", "glutes", "hams", "chest", "delts", "lats", "midback", "core"];
@@ -154,12 +159,22 @@ const MOVE_MUSCLES = [
   { keys: ["高腳杯深蹲", "深蹲"], primary: ["quads", "glutes"], secondary: ["core"] },
   { keys: ["臀橋", "臀推", "髖推"], primary: ["glutes"], secondary: ["hams"] },
   { keys: ["胸推", "地板臥推", "臥推", "伏地挺身", "跪姿伏地"], primary: ["chest"], secondary: ["tris", "frontDelts"] },
-  { keys: ["坐姿啞鈴肩推", "肩推"], primary: ["delts"], secondary: ["tris"] },
-  { keys: ["坐姿划船", "單臂划船", "單手划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
+  { keys: ["坐姿有靠背肩推", "坐姿啞鈴肩推", "肩推"], primary: ["delts"], secondary: ["tris"] },
+  { keys: ["胸靠划船", "胸部支撐划船", "坐姿划船", "單臂划船", "單手划船", "划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
   { keys: ["下拉", "滑輪下拉"], primary: ["lats"], secondary: ["bis"] },
   { keys: ["面拉"], primary: ["rearDelts", "upperback"], secondary: ["rotator"] },
   { keys: ["死蟲"], primary: ["core"], secondary: ["lowback"] },
   { keys: ["鳥狗"], primary: ["core"], secondary: ["lowback"] },
+];
+
+const BACK_SAFER = [
+  { test: /深蹲/, name: "腿推", video: "legpress" },
+  { test: /硬舉|早安/, name: "臀橋", video: "bridge" },
+  { test: /單臂划船|單手划船|彎腰划船/, name: "胸靠划船", video: "seatedrow" },
+  { test: /划船/, name: "胸靠划船", video: "seatedrow" },
+  { test: /肩推/, name: "坐姿有靠背肩推", video: "press" },
+  { test: /髖推|臀推/, name: "臀橋", video: "bridge" },
+  { test: /胸推|臥推/, name: "地板臥推", video: "floor" },
 ];
 
 const EXTRA_FOR_PART = {
@@ -174,6 +189,26 @@ const EXTRA_FOR_PART = {
 };
 
 const NO_WEIGHT = /死蟲|鳥狗|伏地|跪姿伏地/;
+const WEIGHT_STEP = 2.5;
+const START_KG = [
+  [/腿推/, 60],
+  [/深蹲/, 12.5],
+  [/地板臥推|啞鈴臥推/, 10],
+  [/胸推|臥推/, 20],
+  [/臀橋|髖推|臀推/, 20],
+  [/肩推/, 7.5],
+  [/胸靠划船|胸部支撐/, 20],
+  [/單臂|單手/, 12.5],
+  [/划船|下拉/, 30],
+  [/硬舉|早安/, 20],
+  [/彎舉|二頭/, 7.5],
+  [/三頭|下壓/, 15],
+  [/側平舉/, 5],
+];
+function startKgFor(name) {
+  for (const [re, kg] of START_KG) if (re.test(name)) return kg;
+  return 10;
+}
 
 const WHEY_OPTIONS = [
   { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 170 },
@@ -235,16 +270,56 @@ const MEAL_DEFS = {
   },
   snack: {
     id: "snack",
-    label: "午後",
+    label: "16:00",
     train: { name: "16:00 兩份蛋白粉＋地瓜 150g", kcal: 470, protein: 42 },
     rest: { name: "乳清或無糖優格", kcal: 150, protein: 24 },
   },
   dinner: {
     id: "dinner",
-    label: "晚餐",
+    label: "18:30",
     train: { name: "18:30 雞胸 200g＋大份蔬菜＋半碗飯或地瓜", kcal: 455, protein: 52 },
     rest: { name: "手掌大蛋白質＋大份蔬菜＋碳水再減半", kcal: 500, protein: 45 },
   },
 };
 
-const MEAL_ORDER = ["breakfast", "lunch", "snack", "dinner"];
+const MEAL_ORDER = ["snack", "dinner", "eggs21"];
+
+const PALM_PROTEIN = 30;
+const PALM_KCAL = 160;
+const FIST_PROTEIN = 4;
+const FIST_KCAL = 180;
+const VEG_PROTEIN = 3;
+const VEG_KCAL = 50;
+
+const OUT_MEALS = [
+  { id: "bento", name: "便當", kcal: 650, protein: 35 },
+  { id: "noodle", name: "麵", kcal: 700, protein: 25 },
+  { id: "hotpot", name: "火鍋", kcal: 800, protein: 40 },
+  { id: "gathering", name: "聚餐", kcal: 900, protein: 35 },
+];
+const OUT_SIZES = [
+  { id: "small", name: "小份", mult: 0.75 },
+  { id: "normal", name: "正常", mult: 1 },
+  { id: "full", name: "很飽", mult: 1.35 },
+];
+
+const SHOP_GROUPS = [
+  { id: "protein", name: "蛋白質" },
+  { id: "starch", name: "澱粉" },
+  { id: "veg", name: "蔬菜" },
+];
+const SHOP_ITEMS = [
+  { id: "chicken", group: "protein", name: "雞胸約 1.2kg", hint: "7 餐", palms: 7 },
+  { id: "seafood", group: "protein", name: "蝦仁 500g＋吳郭魚排 4 片", hint: "", palms: 8 },
+  { id: "edamame", group: "protein", name: "冷凍毛豆 700g", hint: "", palms: 2 },
+  { id: "eggs", group: "protein", name: "雞蛋 10 顆", hint: "備用", palms: 3 },
+  { id: "whey", group: "protein", name: "蛋白粉 14 包", hint: "少於 6 包要補貨", palms: 9, whey: true },
+  { id: "yam", group: "starch", name: "地瓜約 2kg", hint: "", fists: 13 },
+  { id: "rice", group: "starch", name: "糙米和白米", hint: "照常補貨", fists: 7, frequent: true },
+  { id: "sourdough", group: "starch", name: "酸種麵包 1 條", hint: "訓練日帶去公司", fists: 4 },
+  { id: "veg-cabbage", group: "veg", name: "高麗菜", hint: "1 份", pick: true },
+  { id: "veg-kongxin", group: "veg", name: "空心菜", hint: "1 份", pick: true },
+  { id: "veg-pepper", group: "veg", name: "甘椒", hint: "1 份", pick: true },
+  { id: "veg-radish", group: "veg", name: "白蘿蔔", hint: "1 份", pick: true },
+  { id: "veg-tomato", group: "veg", name: "番茄", hint: "1 份", pick: true },
+];

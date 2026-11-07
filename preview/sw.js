@@ -1,4 +1,4 @@
-const C = "fatcat-preview-20261107f";
+const C = "fatcat-preview-20261107g";
 const F = [
   "./",
   "index.html",
@@ -21,6 +21,8 @@ self.addEventListener("activate", (e) => {
       .keys()
       .then((k) => Promise.all(k.filter((x) => x.startsWith("fatcat-preview-") && x !== C).map((x) => caches.delete(x))))
       .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then((cs) => Promise.all(cs.map((c) => c.postMessage({ type: "SW_UPDATED", cache: C }))))
   );
 });
 self.addEventListener("message", (e) => {

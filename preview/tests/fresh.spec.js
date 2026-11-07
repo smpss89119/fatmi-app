@@ -1,5 +1,5 @@
 const { test, expect } = require("@playwright/test");
-const P = `${process.env.FATMI_PREFIX || ""}/preview/`;
+const P = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/preview/"}`;
 const u = (now) => `${P}?debug=1&rest=0&sleep=8&now=${encodeURIComponent(now)}`;
 const TUE = "2026-11-10T10:00:00+07:00";
 const FRI = "2026-11-13T10:00:00+07:00";
@@ -31,7 +31,7 @@ async function fullWorkout(page, scores = {}) {
 test.describe("FRESH (empty storage)", () => {
   test("a) 胸推 and 臀橋 show a starting weight with no history", async ({ page }) => {
     await page.goto(u(TUE)); await page.waitForSelector(".ttl");
-    expect(await page.evaluate(() => localStorage.getItem("fatcat-v2"))).toBeNull();
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2") || "{}").logs)).toBeFalsy();
     await page.locator("[data-start]").click();
     const steps = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).session.steps.map((s) => s.name));
     for (const want of ["胸推", "臀橋"]) {

@@ -1,4 +1,4 @@
-const C = "fatcat-2-20261107e";
+const C = "fatcat-2-20261107f";
 const F = [
   "./",
   "index.html",
@@ -6,6 +6,7 @@ const F = [
   "app.css",
   "data.js",
   "data.json",
+  "body-svg.js",
   "version.json",
   "manifest.webmanifest",
   "icon-180.png",
@@ -18,8 +19,10 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches
       .keys()
-      .then((k) => Promise.all(k.filter((x) => x !== C).map((x) => caches.delete(x))))
+      .then((k) => Promise.all(k.filter((x) => x.startsWith("fatcat-2-") && x !== C).map((x) => caches.delete(x))))
       .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then((cs) => Promise.all(cs.map((c) => c.postMessage({ type: "SW_UPDATED", cache: C }))))
   );
 });
 self.addEventListener("message", (e) => {
@@ -44,12 +47,18 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then(
-      (r) =>
-        r ||
-        fetch(e.request).catch(() =>
-          e.request.mode === "navigate" ? caches.match("index.html") : Response.error()
+    fetch(e.request, { cache: "no-cache" })
+      .then((r) => {
+        if (r && r.ok && e.request.method === "GET") {
+          const copy = r.clone();
+          caches.open(C).then((c) => c.put(e.request, copy));
+        }
+        return r;
+      })
+      .catch(() =>
+        caches.match(e.request, { ignoreSearch: true }).then(
+          (r) => r || (e.request.mode === "navigate" ? caches.match("index.html") : Response.error())
         )
-    )
+      )
   );
 });
