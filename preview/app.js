@@ -1410,10 +1410,10 @@ function wheyCatalogSelects(prefix) {
   const seriesOpts2 = WHEY_SERIES.map((s) => `<option value="${s.id}"${s.id === first ? " selected" : ""}>${esc(s.title)}</option>`).join("");
   const flav = (by[first] || []).map((o) => `<option value="${esc(o.id)}"${o.id === "plantAlmond" ? " selected" : ""}>${esc(wheyChip(o))}</option>`).join("");
   return `<div class="whey-add" data-testid="whey-add">
-    <label class="whey-add-row"><span>系列</span>
-      <select data-whey-add-series data-testid="whey-add-series">${seriesOpts2}</select></label>
-    <label class="whey-add-row"><span>口味</span>
-      <select data-whey-add-flavor data-testid="whey-add-flavor">${flav}</select></label>
+    <div class="whey-add-row"><span>系列</span>
+      <select data-whey-add-series data-testid="whey-add-series">${seriesOpts2}</select></div>
+    <div class="whey-add-row"><span>口味</span>
+      <select data-whey-add-flavor data-testid="whey-add-flavor">${flav}</select></div>
     <button type="button" class="btn" data-whey-add-have data-testid="whey-add-have">加入庫存口味</button>
   </div>`;
 }
@@ -1427,8 +1427,10 @@ function scoopPicker(st, slot) {
       <p class="note warn" data-testid="whey-empty">庫存尚無蛋白粉口味 — 請到採買 → 蛋白粉 → 從目錄加入</p>
     </div>`;
   }
+  const solo = have.length === 1;
   return `<div class="whey-pick" data-scoop-row="${slot}" data-testid="scoop-row-${slot}">
-    <label class="whey-pick-label">第 ${slot + 1} 份 ${wheySelectHtml(st, slot, cur)}</label>
+    <div class="whey-pick-label"><span class="whey-pick-cap">第 ${slot + 1} 份</span> ${wheySelectHtml(st, slot, cur)}</div>
+    ${solo ? `<p class="note" data-testid="whey-solo">僅此一口味 · 採買 → 蛋白粉 → 從目錄加入第二款</p>` : ""}
   </div>`;
 }
 function proteinShortfall(st) {
@@ -2207,8 +2209,12 @@ function renderShop(st) {
           <label>熱量 <input type="number" inputmode="decimal" data-whey-k="${o.id}" data-testid="whey-kcal-${o.id}" value="${w.kcal == null ? "" : w.kcal}" placeholder="?"> kcal</label>
           <button type="button" class="btn" data-whey-have-del="${o.id}" data-testid="whey-have-del-${o.id}">移出庫存</button>
           ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : (w.source ? `<small class="muted" data-testid="whey-src-${o.id}">${esc(w.source)}${w.note ? " · " + esc(w.note) : ""}</small>` : "")}</div>`; }).join("");
-        return `<p class="muted">庫存口味（記吃只顯示這些）</p>${haveRows || "<p class=\"muted\">尚未加入口味</p>"}
-          <p class="muted">從目錄加入</p>${wheyCatalogSelects()}`;
+        return `<div class="sheet-scroll" data-testid="whey-edit-scroll">
+          <p class="muted">庫存口味（記吃只顯示這些）</p>${haveRows || "<p class=\"muted\">尚未加入口味</p>"}
+        </div>
+        <div class="sheet-pin" data-testid="whey-edit-pin">
+          <p class="muted">從目錄加入</p>${wheyCatalogSelects()}
+        </div>`;
       })()
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
          <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
@@ -2220,8 +2226,11 @@ function renderShop(st) {
          <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : fmtServ(shopLeft(st, editIt))}</p>${!shopServings(st, editIt).pending && typeof shopBasisG(st, editIt) === "number" ? `<small class="muted" data-testid="edit-left">剩 ${fmtG(shopLeft(st, editIt).n * shopBasisG(st, editIt))}</small>` : ""}`;
     const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
-    editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
-      <div class="k">${esc(shopLabel(st, editIt))}</div>${body}${mergeBtn}
+    const bodyBlock = editIt.whey
+      ? `${body}${mergeBtn}`
+      : `<div class="sheet-scroll">${body}${mergeBtn}</div>`;
+    editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card${editIt.whey ? " sheet-card-whey" : ""}">
+      <div class="k">${esc(shopLabel(st, editIt))}</div>${bodyBlock}
       <div class="acts"><button type="button" class="btn primary xl" data-edit-save="${editIt.id}" data-testid="edit-save">儲存</button>
       ${editIt.custom ? `<button type="button" class="btn" data-shop-del="${editIt.id}" data-testid="edit-del">刪除</button>` : ""}
       <button type="button" class="btn full" data-edit-close>關閉</button></div></div></div>`;
@@ -2545,6 +2554,8 @@ document.getElementById("tabs").addEventListener("click", (e) => {
 });
 
 document.getElementById("main").addEventListener("click", (e) => {
+  // Never re-render on native <select>/option taps (iOS picker dies if DOM is replaced)
+  if (e.target && (e.target.closest("select") || e.target.tagName === "OPTION")) return;
   const st = state();
   const goBtn = e.target.closest("[data-go]");
   if (goBtn) {
@@ -3255,9 +3266,9 @@ window.addEventListener("hashchange", () => {
 });
 
 
-const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-29", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
+const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-29";
+const APP_VERSION = "2026.11.07-preview-30";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3527,7 +3538,7 @@ document.getElementById("main").addEventListener("change", (e) => {
     const by = wheyBySeries();
     const list = by[series.value] || [];
     const flav = document.querySelector("[data-whey-add-flavor]");
-    if (flav) flav.innerHTML = list.map((o) => `<option value="${o.id}">${wheyChip(o)}</option>`).join("");
+    if (flav) flav.innerHTML = list.map((o) => `<option value="${esc(o.id)}">${esc(wheyChip(o))}</option>`).join("");
     return;
   }
 
