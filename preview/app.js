@@ -1595,33 +1595,50 @@ function renderHypnogram(sl) {
   </div>`;
 }
 function renderSleepBars(rows, n) {
-  const list = rows.slice(-n);
-  if (!list.length) return "";
-  const mins = list.map(sleepMinOf);
-  const maxM = Math.max(9 * 60, ...mins);
-  const avg = mins.reduce((s, x) => s + x, 0) / mins.length;
+  if (!rows.length) return "";
+  // Calendar days ending at the latest night; missing nights stay empty (no estimate).
+  const byDate = {};
+  for (const r of rows) byDate[r.date] = r;
+  const end = parseISO(rows[rows.length - 1].date);
+  const list = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const key = todayKey(addDays(end, -i));
+    list.push(byDate[key] || { date: key, missing: true });
+  }
+  const have = list.filter((r) => !r.missing);
+  const mins = list.map((r) => (r.missing ? 0 : sleepMinOf(r)));
+  const maxH = Math.max(10, Math.ceil(Math.max(...mins) / 60 / 2) * 2);
+  const maxM = maxH * 60;
+  const avg = have.length ? have.reduce((s, r) => s + sleepMinOf(r), 0) / have.length : 0;
   const W = 320, H = 160, bw = W / list.length;
   const bars = list.map((r, i) => {
+    if (r.missing) return "";
     const x = i * bw + bw * 0.2, w = bw * 0.6;
     if (r.sleep) {
       let yb = H;
-      return SLEEP_ORDER.slice().reverse().filter((s) => s !== "awake").map((s) => {
+      return ["deep", "core", "rem"].map((s) => {
         const h = (r.sleep[s + "Min"] || 0) / maxM * H; yb -= h;
         return `<rect x="${x.toFixed(1)}" y="${yb.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${SLEEP_COLORS[s]}"/>`;
       }).join("");
     }
     const h = mins[i] / maxM * H;
-    return `<rect x="${x.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${SLEEP_COLORS.core}"/>`;
+    return `<rect class="nostage" data-nostage="${r.date}" x="${x.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#8E8E93"/>`;
   }).join("");
+  const ticks = [];
+  for (let hh = 0; hh <= maxH; hh += 2) ticks.push(hh);
+  const grid = ticks.map((hh) => `<line x1="0" x2="${W}" y1="${(H - hh * 60 / maxM * H).toFixed(1)}" y2="${(H - hh * 60 / maxM * H).toFixed(1)}" stroke="${hh === 0 ? "#48484A" : "#2C2C2E"}"/>`).join("");
+  const tickLabels = ticks.map((hh) => `<span data-testid="sleep-tick-${hh}" style="top:${((1 - hh / maxH) * 100).toFixed(1)}%">${hh}h</span>`).join("");
   const ya = H - avg / maxM * H;
   const labels = n <= 7
     ? list.map((r, i) => `<span style="left:${((i + 0.5) * bw / W * 100).toFixed(1)}%">${"日一二三四五六"[parseISO(r.date).getDay()]}</span>`).join("")
     : [0, Math.floor(list.length / 2), list.length - 1].map((i) => `<span style="left:${((i + 0.5) * bw / W * 100).toFixed(1)}%">${fmtMD(list[i].date)}</span>`).join("");
-  return `<div class="sl-avg"><span class="k">平均睡眠時間</span><span class="v" data-testid="sleep-avg">${hmHtml(avg)}</span><span class="d">${fmtMD(list[0].date)}–${fmtMD(list[list.length - 1].date)}</span></div>
-    <div class="sl-chart" data-testid="sleep-bars"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-      ${[3, 6, 9].map((hh) => `<line x1="0" x2="${W}" y1="${H - hh * 60 / maxM * H}" y2="${H - hh * 60 / maxM * H}" stroke="#3A3A3C"/>`).join("")}
-      ${bars}<line x1="0" x2="${W}" y1="${ya.toFixed(1)}" y2="${ya.toFixed(1)}" stroke="#30D158" stroke-width="2" stroke-dasharray="5 4"/></svg>
-      <div class="sl-x">${labels}</div></div>`;
+  const missN = list.filter((r) => r.missing).length;
+  const noStageN = have.filter((r) => !r.sleep).length;
+  return `<div class="sl-avg"><span class="k">平均睡眠時間</span><span class="v" data-testid="sleep-avg">${have.length ? hmHtml(avg) : "—"}</span><span class="d">${fmtMD(list[0].date)}–${fmtMD(list[list.length - 1].date)}${missN ? ` · ${missN} 晚無資料` : ""}</span></div>
+    <div class="sl-chart" data-testid="sleep-bars"><div class="sl-plot"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      ${grid}${bars}${have.length ? `<line x1="0" x2="${W}" y1="${ya.toFixed(1)}" y2="${ya.toFixed(1)}" stroke="#30D158" stroke-width="2" stroke-dasharray="5 4"/>` : ""}</svg>
+      <div class="sl-y" data-testid="sleep-yaxis">${tickLabels}</div></div>
+      <div class="sl-x">${labels}</div>${noStageN ? `<p class="sl-note" data-testid="sleep-nostage-note">灰色＝無階段資料</p>` : ""}</div>`;
 }
 function renderSleep(st) {
   const rows = sleepRows();
@@ -1629,7 +1646,7 @@ function renderSleep(st) {
   const seg = ["D", "W", "M"].map((r) => `<button type="button" class="${range === r ? "on" : ""}" data-sleep-range="${r}" data-testid="sleep-range-${r}">${{ D: "日", W: "週", M: "月" }[r]}</button>`).join("");
   const head = `<div class="sl-top"><button type="button" class="sl-back" data-go="today">‹ 今天</button><b>睡眠</b><span></span></div>
     <div class="sl-seg">${seg}</div>`;
-  if (!rows.length) return `${head}<p class="sl-empty">還沒有睡眠資料</p>`;
+  if (!rows.length) return `<div class="sleep-page" data-testid="sleep-page">${head}<div class="sl-card"><div class="sl-k">睡眠時間</div><div class="sl-big">—</div><p class="sl-empty" data-testid="sleep-empty">還沒有睡眠資料</p></div></div>`;
   let body = "";
   if (range === "D") {
     const idx = Math.min(rows.length - 1, Math.max(0, ui.sleepIdx != null ? ui.sleepIdx : rows.length - 1));
@@ -1641,7 +1658,7 @@ function renderSleep(st) {
       const m = sl[s + "Min"] || 0;
       const pct = inBed ? Math.round(m / inBed * 100) : 0;
       return `<div class="sl-stage" data-testid="sleep-stage-${s}"><i style="background:${SLEEP_COLORS[s]}"></i><span>${SLEEP_NAMES[s]}</span><b>${hmHtml(m)}</b><em>${pct}%</em></div>`;
-    }).join("") : `<p class="sl-empty">這天只有總睡眠時數</p>`;
+    }).join("") : `<p class="sl-empty" data-testid="sleep-nostage">無階段資料</p>`;
     body = `<div class="sl-card">
         <div class="sl-nav"><button type="button" data-sleep-step="-1" aria-label="前一天"${idx === 0 ? " disabled" : ""}>‹</button>
           <span>${fmtMD(r.date)} 週${DOW[parseISO(r.date).getDay()]}</span>
@@ -2833,7 +2850,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-9";
+const APP_VERSION = "2026.11.07-preview-10";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;

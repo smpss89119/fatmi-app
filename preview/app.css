@@ -265,3 +265,9 @@ body.mode-sleep header,body.mode-sleep nav#tabs{background:#000;color:#fff;borde
 .sleep-mini .bar i{display:block}
 html.mode-sleep{background:#000}
 .shop-name .pend{flex:none}
+.sl-plot{position:relative;padding-right:28px}
+.sl-y{position:absolute;right:0;top:0;bottom:0;width:26px}
+.sl-y span{position:absolute;right:0;transform:translateY(-50%);font-size:10px;color:#8E8E93}
+.sl-chart .sl-x{margin-right:28px}
+.sl-note{color:#8E8E93;font-size:12px;margin:6px 0 0}
+.sleep-page{max-width:100%;overflow-x:hidden}
