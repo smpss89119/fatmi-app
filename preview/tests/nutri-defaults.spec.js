@@ -24,6 +24,7 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + whey; custom 
   await page.locator("[data-edit-close]").click();
 
   await page.locator("[data-testid=shop-edit-edamame]").click();
+  await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("100 g");
   await expect(page.locator("[data-testid=edit-kcal]")).toHaveValue("129");
   await expect(page.locator("[data-testid=edit-prot]")).toHaveValue("15");
   await expect(page.locator("[data-testid=edit-nutri-src]")).toHaveText("食藥署");

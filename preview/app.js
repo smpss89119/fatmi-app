@@ -649,7 +649,11 @@ function shopBasisG(st, it) {
   if (pp && pp.kind === "w" && pp.g > 0) return pp.g;
   if (shopServings(st, it).pending) return "pending";
   if (portion) return null;
-  if (!it.custom) return SERVING_G[it.group] || 120;
+  if (!it.custom) {
+    const bn = BUILTIN_NUTRI[it.id];
+    if (bn && bn.portionG) return bn.portionG;
+    return SERVING_G[it.group] || 120;
+  }
   const q = parseAmt(shopQtyOf(st, it));
   if (q && q.kind === "w") return SERVING_G[it.group] || 120;
   return null;
@@ -1562,7 +1566,7 @@ const PER_SERVING = { protein: { kcal: PALM_KCAL, protein: PALM_PROTEIN }, starc
 const BUILTIN_NUTRI = {
   chicken: { kcal: 140, protein: 28, source: "食藥署" },
   yam: { kcal: 182, protein: 2, source: "食藥署" },
-  edamame: { kcal: 129, protein: 15, source: "食藥署" },
+  edamame: { kcal: 129, protein: 15, source: "食藥署", portionG: 100 },
 };
 const STARCH_WORDS = ["燕麥", "麥片", "地瓜", "番薯", "馬鈴薯", "南瓜", "玉米", "米", "飯", "麵", "吐司", "麵包", "貝果", "芋頭", "山藥", "冬粉", "粥"];
 const VEG_WORDS = ["菜", "花椰", "菇", "番茄", "小黃瓜", "蘆筍", "青椒", "洋蔥", "蘿蔔"];
@@ -3131,7 +3135,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-20";
+const APP_VERSION = "2026.11.07-preview-21";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
