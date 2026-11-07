@@ -67,7 +67,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     page.once("dialog", (d) => { msg = d.message(); d.accept(); });
     await page.locator("[data-testid=edit-save]").click();
     await page.screenshot(shot("fatmi_r6_edit.png"));
-    expect(msg).toBe("合併成 12 份？");
+    expect(msg).toBe("合併成 12 份（1440g，以 120g/份計）？");
     await expect(page.locator("[data-testid=shop-x-typo]")).toHaveCount(0);
     await expect(page.locator("[data-testid=shop-qty-chicken]")).toHaveText("12 份");
   });
@@ -83,11 +83,11 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await page.locator("[data-tab=shop]").click();
     const qtys = await page.locator(".shop-qty:not(.whey-stock)").allInnerTexts();
     expect(qtys.length).toBeGreaterThan(10);
-    for (const q of qtys) expect(q.trim()).toMatch(/^(\d+|\?) 份$/);
+    for (const q of qtys) expect(q.trim()).toMatch(/^(約 )?(\d+(\.\d)?|\?) 份$/);
     await expect(page.locator("[data-testid=shop-pending-x-old]")).toHaveText("待確認");
     await expect(page.locator("[data-testid=shop-qty-x-old]")).toHaveText("2 份");
     await expect(page.locator("[data-testid=shop-pending-x-w]")).toHaveCount(0);
-    await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("3 份");
+    await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("約 3.3 份");
     const s = await store(page);
     expect(s.shopExtra.find((x) => x.id === "x-old").amount).toBe("一包");
     expect(s.shopExtra.find((x) => x.id === "x-old").palms).toBe(2);
@@ -113,7 +113,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     page.once("dialog", (d) => { msg = d.message(); d.accept(); });
     await page.locator("[data-testid=edit-save]").click();
     await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
-    expect(msg).toBe("合併成 3 份？");
+    expect(msg).toBe("合併成 3 份（450g，以 150g/份計）？");
     await expect(page.locator(".shop-row", { hasText: "雞柳" })).toHaveCount(1);
     await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3 份");
     await page.screenshot(shot("fatmi_r7_merge.png"));
@@ -127,7 +127,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await expect(page.locator("[data-testid=demo-tag]")).toBeVisible();
     await page.locator("[data-tab=shop]").click();
     await expect(page.locator("[data-testid=shop-pending-x-old]")).toHaveText("待確認");
-    await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("3 份");
+    await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("約 3.3 份");
     await expect(page.locator("[data-testid=shop-pending-x-w]")).toHaveCount(0);
     await expect(page.locator("[data-testid=shop-qty-x-veg]")).toHaveText("3 份");
     await page.locator("[data-testid=shop-x-q]").scrollIntoViewIfNeeded();
@@ -151,7 +151,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
       await expect(page.locator("[data-testid=shop-chip-x-b]")).toHaveCount(0);
       await page.locator("[data-testid=shop-edit-x-a]").click();
       await expect(page.locator("[data-testid=edit-n]")).toHaveValue("3");
-      await expect(page.locator("[data-testid=edit-qty]")).toHaveValue("3 份");
+      await expect(page.locator("[data-testid=edit-qty]")).toHaveValue("450 g");
       await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("150 g");
     };
     await check();
@@ -167,7 +167,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await page.locator("[data-testid=shop-edit-x-w]").click();
     await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("150 g");
     await expect(page.locator("[data-testid=edit-orig]")).toHaveText("原 500g");
-    await expect(page.locator("[data-testid=edit-n]")).toHaveValue("3");
+    await expect(page.locator("[data-testid=edit-n]")).toHaveValue("3.3");
     await page.screenshot(shot("fatmi_r8_legacy_basis.png"));
     await page.locator("[data-edit-close]").click();
     await page.locator("[data-testid=shop-edit-x-veg]").click();
@@ -187,8 +187,8 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     page.once("dialog", (d) => { msg = d.message(); d.accept(); });
     await page.locator("[data-testid=edit-save]").click();
     await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
-    expect(msg).toBe("合併成 3.5 份（以 150g/份計）？");
-    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3.5 份");
+    expect(msg).toBe("合併成約 3.7 份（550g，以 150g/份計）？");
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("約 3.7 份");
     await page.screenshot(shot("fatmi_r8_diff_merge.png"));
     await page.locator("[data-testid=shop-edit-x-p]").click();
     await page.locator("[data-testid=edit-name]").fill("燕麥");
@@ -201,7 +201,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await expect(page.locator("[data-testid=shop-x-p]")).toBeVisible();
     await page.reload(); await page.waitForSelector(".ttl");
     await page.locator("[data-tab=shop]").click();
-    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3.5 份");
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("約 3.7 份");
     await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
   });
   test("r9) no size + no weight blocks merge; built-in shows default 一份是多少", async ({ page }) => {
@@ -224,5 +224,39 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await page.locator("[data-testid=shop-edit-chicken]").click();
     await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("120 g");
     await page.screenshot(shot("fatmi_r9_builtin.png"));
+  });
+  test("r10) 150g×1 + 100g×2 = 350g → 約 2.3 份, exact after reload; legacy eat decrements grams", async ({ page }) => {
+    await fresh(page, { shopExtra: [
+      { id: "x-a", group: "starch", name: "燕麥 1 份", custom: true, amount: "1 份", fists: 0 },
+      { id: "x-b", group: "starch", name: "燕麥片 2 份", custom: true, amount: "2 份", fists: 0 },
+    ], shopPortions: { "x-a": "150 g", "x-b": "100 g" } });
+    await page.locator("[data-tab=shop]").click();
+    await page.locator("[data-testid=shop-edit-x-b]").click();
+    await page.locator("[data-testid=edit-name]").fill("燕麥");
+    let msg = "";
+    page.once("dialog", (d) => { msg = d.message(); d.accept(); });
+    await page.locator("[data-testid=edit-save]").click();
+    await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
+    expect(msg).toBe("合併成約 2.3 份（350g，以 150g/份計）？");
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("約 2.3 份");
+    await page.screenshot(shot("fatmi_r10_merge_350g.png"));
+    await page.reload(); await page.waitForSelector(".ttl");
+    await page.locator("[data-tab=shop]").click();
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("約 2.3 份");
+    await page.locator("[data-testid=shop-edit-x-a]").click();
+    await expect(page.locator("[data-testid=edit-qty]")).toHaveValue("350 g");
+    await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("150 g");
+  });
+  test("r10b) legacy 燕麥 500g stays 500g, 約 3.3 份; eating 1 份 leaves 350g (約 2.3 份)", async ({ page }) => {
+    await page.goto(`${P}?demo=legacy&debug=1&sleep=8&now=${encodeURIComponent(TUE_15)}#today`);
+    await page.waitForSelector(".ttl");
+    await page.locator("[data-eat-else=dinner]").click();
+    await page.locator('[data-testid="else-inc-x-w"]').click();
+    await page.locator("[data-testid=else-save]").click();
+    await page.locator("[data-tab=shop]").click();
+    await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("約 2.3 份");
+    const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-demo")));
+    expect(s.shopExtra.find((x) => x.id === "x-w").amount).toBe("500g");
+    await page.screenshot(shot("fatmi_r10_legacy_eat.png"));
   });
 });

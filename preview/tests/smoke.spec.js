@@ -143,12 +143,12 @@ test.describe("NUTRI", () => {
     await page.locator("[data-shop-cat=protein]").click();
     await page.locator("[data-testid=shop-add] [data-shop-add]").click();
     await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸");
-    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸 3 份");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸 約 2.5 份");
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForSelector(".ttl");
     await page.locator("[data-tab=shop]").click();
     await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸");
-    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸 3 份");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸 約 2.5 份");
     await expect(page.locator("[data-testid=shop-frequent-rice]")).toHaveClass(/on/);
   });
 

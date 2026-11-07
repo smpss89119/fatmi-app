@@ -619,6 +619,9 @@ function shopServings(st, it) {
   const r = shopServingsBase(st, it);
   return { n: r.n + adj, pending: r.pending };
 }
+function r1(x) { return Math.round(x * 10) / 10; }
+function fmtServ(l) { if (l.pending && !l.n) return "? 份"; const n = Number(l.n) || 0; return Number.isInteger(r1(n)) && Math.abs(n - r1(n)) < 1e-9 ? `${r1(n)} 份` : `約 ${r1(n)} 份`; }
+function fmtG(g) { return `${Math.round(g * 10) / 10}g`; }
 function shopServingsBase(st, it) {
   const orig = Number(it.group === "starch" ? it.fists : it.palms) || 0;
   const portion = (st.shopPortions || {})[it.id];
@@ -627,13 +630,13 @@ function shopServingsBase(st, it) {
   const ovQty = (st.shopQty || {})[it.id] != null;
   if (portion) {
     const pp = parseAmt(portion);
-    if (q && pp && q.kind === "w" && pp.kind === "w" && pp.g > 0) return { n: Math.round(q.g / pp.g), pending: false };
-    if (q && pp && q.kind === "c" && pp.kind === "c" && pp.n > 0 && (!pp.unit || !q.unit || pp.unit === q.unit)) return { n: Math.round(q.n / pp.n), pending: false };
+    if (q && pp && q.kind === "w" && pp.kind === "w" && pp.g > 0) return { n: q.g / pp.g, pending: false };
+    if (q && pp && q.kind === "c" && pp.kind === "c" && pp.n > 0 && (!pp.unit || !q.unit || pp.unit === q.unit)) return { n: q.n / pp.n, pending: false };
     return { n: orig, pending: true };
   }
   if (!it.custom && !ovQty) return { n: orig || (q && q.kind === "c" ? q.n : 0), pending: false };
   if (it.group === "veg" && q && q.kind === "c") return { n: q.n, pending: false };
-  if (q && q.kind === "w") return { n: Math.round(q.g / (SERVING_G[it.group] || 120)), pending: false };
+  if (q && q.kind === "w") return { n: q.g / (SERVING_G[it.group] || 120), pending: false };
   return { n: orig, pending: true };
 }
 // grams per 份 if known: explicit weight portion, or the auto-convert basis. null = no basis (adopts target's); "pending" = unknown.
@@ -666,7 +669,7 @@ function shopSetCountPatch(st, it, n, base = {}) {
   const bg = shopBasisG(st, it);
   if (!shopPortions[it.id] && typeof bg === "number") shopPortions[it.id] = `${bg} g`;
   Object.assign(patch, { shopAdj, shopUsed, shopOrig, shopPortions });
-  const amt = `${n} 份`;
+  const amt = typeof bg === "number" ? `${Math.round(n * bg * 1000) / 1000} g` : `${n} 份`;
   if (it.custom) patch.shopExtra = (patch.shopExtra || st.shopExtra || []).map((x) => x.id === it.id ? { ...x, amount: amt, name: shopDisplayName(shopLabel(st, it), amt) } : x);
   else patch.shopQty = { ...(patch.shopQty || st.shopQty || {}), [it.id]: amt };
   return patch;
@@ -677,10 +680,10 @@ function shopTryMerge(st, src, dst, srcN) {
   const gS = shopBasisG(st, src), gT = shopBasisG(st, dst);
   if (typeof gS !== "number" || typeof gT !== "number") { window.alert("請先設定「一份是多少」再合併"); return false; }
   const left = srcN != null ? srcN : shopLeft(st, src).n;
-  let add = left, basis = "";
-  if (gS !== gT) { add = round05(left * gS / gT); basis = `（以 ${gT}g/份計）`; }
-  const total = shopLeft(st, dst).n + add;
-  if (!window.confirm(`合併成 ${total} 份${basis}？`)) return false;
+  const grams = left * gS + shopLeft(st, dst).n * gT;
+  const total = grams / gT;
+  const lab = fmtServ({ n: total }).replace(" 份", "");
+  if (!window.confirm(`合併成${lab.startsWith("約") ? lab : " " + lab} 份（${fmtG(grams)}，以 ${gT}g/份計）？`)) return false;
   const base = {};
   if (src.custom) base.shopExtra = (st.shopExtra || []).filter((x) => x.id !== src.id);
   else base.shopHide = { ...(st.shopHide || {}), [src.id]: true };
@@ -1592,7 +1595,7 @@ function renderElse(st) {
   const rows = elseItems(st).map((x) => {
     const n = Number(sel[x.key]) || 0;
     return `<div class="else-row" data-testid="else-${x.key}"><span class="nm">${esc(x.name)}${x.pending ? '<span class="pend">待確認</span>' : ""}</span>
-      <span class="left">剩 ${x.left} 份</span>
+      <span class="left">剩 ${fmtServ({ n: x.left, pending: x.pending })}</span>
       <span class="stp"><button type="button" data-else-dec="${x.key}" aria-label="少一份">−</button><b data-testid="else-n-${x.key}">${n}</b><button type="button" data-else-inc="${x.key}" data-testid="else-inc-${x.key}" aria-label="多一份">+</button></span></div>`;
   }).join("");
   const outs = (OUT_MEALS || []).map((o) => `<button type="button" class="chip${ui.elseOut === o.id ? " on" : ""}" data-else-out="${o.id}" data-testid="else-out-${o.id}">${esc(o.name)}</button>`).join("");
@@ -2027,7 +2030,7 @@ function renderShop(st) {
       const sp = shopSplit(it);
       const qty = it.whey
         ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份</small></span>`
-        : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return l.pending && !l.n ? "? 份" : `${l.n} 份`; })()}</span>`;
+        : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return fmtServ(l); })()}</span>`;
       const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : "";
       const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
       return `<div class="item shop-row${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
@@ -2041,7 +2044,7 @@ function renderShop(st) {
   const extras = (st.shopExtra || []);
   const chips = `<div class="chips shop-chips" data-testid="shop-chips">${extras.map((it) => {
     const on = !!(shop.checked[it.id] || shop.have[it.id]);
-    return `<button type="button" class="chip${on ? " on" : ""}" data-shop-chip="${it.id}" data-testid="shop-chip-${it.id}">${esc(shopLabel(st, it))} ${(() => { const l = shopLeft(st, it); return l.pending && !l.n ? "?" : l.n; })()} 份</button>`;
+    return `<button type="button" class="chip${on ? " on" : ""}" data-shop-chip="${it.id}" data-testid="shop-chip-${it.id}">${esc(shopLabel(st, it))} ${fmtServ(shopLeft(st, it))}</button>`;
   }).join("")}</div>`;
   const knownDraft = matchShopItem(st, ui.shopDraftName);
   const add = ui.shopAdd ? `<div class="shop-add card" data-testid="shop-add">
@@ -2068,10 +2071,10 @@ function renderShop(st) {
           <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
           <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label></div>`; }).join("")
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
-         <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : shopLeft(st, editIt).n}" placeholder="?"></label>
+         <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
          <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || (typeof shopBasisG(st, editIt) === "number" ? `${shopBasisG(st, editIt)} g` : ""))}" placeholder="例如 150 g 或 1 包"></label>${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
-         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : `約 ${shopLeft(st, editIt).n} 份`}</p>`;
+         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : fmtServ(shopLeft(st, editIt))}</p>`;
     const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
     editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
@@ -2567,7 +2570,7 @@ document.getElementById("main").addEventListener("click", (e) => {
       if (nV !== "" && !Number.isNaN(Number(nV))) {
         const s2 = state();
         const l = shopLeft(s2, it);
-        if (Number(nV) !== l.n || l.pending) save(shopSetCountPatch(s2, it, Number(nV)));
+        if (Number(nV) !== r1(l.n) || l.pending) save(shopSetCountPatch(s2, it, Number(nV)));
       }
     }
     ui.shopEdit = null;
