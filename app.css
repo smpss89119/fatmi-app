@@ -318,3 +318,22 @@ body.mode-workout #ptr{display:none!important}
 .whey-add-row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;overflow:visible}
 .whey-add-row span{min-width:2.5em;color:var(--mut);flex:0 0 auto}
 .whey-add-row select{flex:1 1 auto}
+
+.shop-row:has(.whey-bags) .shop-acts{grid-column:4;grid-row:1}
+.shop-row .shop-qty.whey-stock{grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-top:8px}
+.shop-qty.whey-stock button{width:44px;height:44px;flex:0 0 44px}
+.shop-row .whey-bags{grid-column:1/-1;grid-row:3;display:flex;gap:10px;margin-top:10px}
+.shop-row .whey-bags .btn{flex:1;min-height:44px;padding:8px 10px;font-size:14px;margin:0}
+
+.shop-row .whey-flavors{grid-column:1/-1;grid-row:2;margin-top:8px;display:flex;flex-direction:column;gap:10px}
+.whey-frow{background:#FFF7ED;border-radius:12px;padding:8px}
+.whey-frow.low{outline:1px solid #F59E0B}
+.whey-fhead{font-size:14px;margin-bottom:6px}.whey-fhead b{margin-right:8px}
+.whey-fbtns{display:grid;grid-template-columns:44px 44px 1fr 1fr;gap:8px}
+.whey-fbtns .btn{min-height:44px;margin:0;padding:4px 6px;font-size:13px}
+.whey-total{font-weight:800;margin:0}
+.whey-nutri{font-weight:700;color:#9A3412;margin:6px 0}
+
+.restore-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.restore-btn{min-height:44px;padding:8px 14px}
+.restore-btn:disabled{opacity:.5}
