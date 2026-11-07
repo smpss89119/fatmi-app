@@ -242,7 +242,7 @@ function hasPreWorkoutMeal(st, d = now()) {
 }
 function resolveWhey(st, id) {
   const base = (typeof WHEY_OPTIONS !== "undefined" ? WHEY_OPTIONS : []).find((x) => x.id === id) || (WHEY_OPTIONS && WHEY_OPTIONS[0]);
-  if (!base) return { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 170 };
+  if (!base) return { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 183 };
   const ov = ((st.wheyEst || {}).byId || {})[base.id] || {};
   return {
     id: base.id,
@@ -263,7 +263,7 @@ function twoScoopMeal(st, d = now()) {
   const ids = selectedScoops(st, d);
   const a = resolveWhey(st, ids[0] || "sesame");
   const b = resolveWhey(st, ids[1] || "soymilk");
-  const yamKcal = 130;
+  const yamKcal = 182;
   const yamP = 2;
   const kcalUnknown = a.kcal == null || b.kcal == null;
   const kcal = (Number(a.kcal) || 0) + (Number(b.kcal) || 0) + yamKcal;
@@ -1558,6 +1558,12 @@ function openSwap(st, mealId) {
   };
 }
 const PER_SERVING = { protein: { kcal: PALM_KCAL, protein: PALM_PROTEIN }, starch: { kcal: FIST_KCAL, protein: FIST_PROTEIN }, veg: { kcal: 40, protein: 2 } };
+// Nutri official per-份 defaults (食藥署). Custom items without values stay 待確認.
+const BUILTIN_NUTRI = {
+  chicken: { kcal: 140, protein: 28, source: "食藥署" },
+  yam: { kcal: 182, protein: 2, source: "食藥署" },
+  edamame: { kcal: 129, protein: 15, source: "食藥署" },
+};
 const STARCH_WORDS = ["燕麥", "麥片", "地瓜", "番薯", "馬鈴薯", "南瓜", "玉米", "米", "飯", "麵", "吐司", "麵包", "貝果", "芋頭", "山藥", "冬粉", "粥"];
 const VEG_WORDS = ["菜", "花椰", "菇", "番茄", "小黃瓜", "蘆筍", "青椒", "洋蔥", "蘿蔔"];
 function suggestCat(name) {
@@ -1570,8 +1576,16 @@ function suggestCat(name) {
 // per-份 nutrition: explicit (item or override) wins; built-ins fall back to curated group defaults; custom without values = 待確認
 function shopNutri(st, it) {
   const ov = (st.shopNutri || {})[it.id];
-  if (ov && ov.kcal != null && ov.protein != null) return { kcal: Number(ov.kcal), protein: Number(ov.protein), pending: false };
+  if (ov && (ov.kcal != null || ov.protein != null)) {
+    const pending = ov.kcal == null || ov.protein == null;
+    return { kcal: Number(ov.kcal) || 0, protein: Number(ov.protein) || 0, pending, source: ov.source || null };
+  }
   if (it.custom) return { kcal: 0, protein: 0, pending: true };
+  const b = BUILTIN_NUTRI[it.id];
+  if (b) {
+    const pending = b.kcal == null || b.protein == null;
+    return { kcal: Number(b.kcal) || 0, protein: Number(b.protein) || 0, pending, source: b.source || null };
+  }
   const m = PER_SERVING[it.group] || PER_SERVING.protein;
   return { kcal: m.kcal, protein: m.protein, pending: false };
 }
@@ -1581,7 +1595,7 @@ function elseItems(st) {
     if (it.whey) {
       for (const o of WHEY_OPTIONS || []) {
         const w = resolveWhey(st, o.id);
-        out.push({ key: `whey:${o.id}`, name: o.name.replace("樂維根 ", ""), left: shopLeft(st, it).n, kcal: w.kcal == null ? 170 : Number(w.kcal), protein: Number(w.protein), whey: true });
+        out.push({ key: `whey:${o.id}`, name: o.name.replace("樂維根 ", ""), left: shopLeft(st, it).n, kcal: w.kcal == null ? 0 : Number(w.kcal), protein: Number(w.protein), nutriPending: w.kcal == null, whey: true });
       }
       continue;
     }
@@ -2084,16 +2098,18 @@ function renderShop(st) {
   if (editIt) {
     const sp = shopSplit(editIt);
     const body = editIt.whey
-      ? (WHEY_OPTIONS || []).map((o) => { const w = resolveWhey(st, o.id); return `<div class="edit-row"><span>${esc(o.name.replace("樂維根 ", ""))}</span>
+      ? (WHEY_OPTIONS || []).map((o) => { const w = resolveWhey(st, o.id); return `<div class="edit-row" data-testid="whey-edit-${o.id}"><span>${esc(o.name.replace("樂維根 ", ""))}</span>
           <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
-          <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label></div>`; }).join("")
+          <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label>
+          <label>熱量 <input type="number" inputmode="decimal" data-whey-k="${o.id}" data-testid="whey-kcal-${o.id}" value="${w.kcal == null ? "" : w.kcal}" placeholder="?"> kcal</label>
+          ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : ""}</div>`; }).join("")
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
          <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
          <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || (typeof shopBasisG(st, editIt) === "number" ? `${shopBasisG(st, editIt)} g` : ""))}" placeholder="例如 150 g 或 1 包"></label>
          <label class="edit-row"><span>每份熱量</span><input type="number" inputmode="decimal" data-edit-kcal data-testid="edit-kcal" value="${shopNutri(st, editIt).pending ? "" : shopNutri(st, editIt).kcal}" placeholder="kcal"></label>
          <label class="edit-row"><span>每份蛋白</span><input type="number" inputmode="decimal" data-edit-prot data-testid="edit-prot" value="${shopNutri(st, editIt).pending ? "" : shopNutri(st, editIt).protein}" placeholder="g"></label>
-         ${shopNutri(st, editIt).pending ? `<p class="muted" data-testid="edit-nutri-pend">待確認：填每份熱量和蛋白</p>` : ""}${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
+         ${shopNutri(st, editIt).pending ? `<p class="muted" data-testid="edit-nutri-pend">待確認：填每份熱量和蛋白</p>` : (shopNutri(st, editIt).source ? `<small class="muted" data-testid="edit-nutri-src">${esc(shopNutri(st, editIt).source)}</small>` : "")}${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
          <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : fmtServ(shopLeft(st, editIt))}</p>${!shopServings(st, editIt).pending && typeof shopBasisG(st, editIt) === "number" ? `<small class="muted" data-testid="edit-left">剩 ${fmtG(shopLeft(st, editIt).n * shopBasisG(st, editIt))}</small>` : ""}`;
     const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
@@ -2559,6 +2575,10 @@ document.getElementById("main").addEventListener("click", (e) => {
       const byId = { ...(((st.wheyEst || {}).byId) || {}) };
       document.querySelectorAll("[data-whey-g]").forEach((el) => { byId[el.dataset.wheyG] = { ...(byId[el.dataset.wheyG] || {}), scoopG: Number(el.value) || 40 }; });
       document.querySelectorAll("[data-whey-p]").forEach((el) => { byId[el.dataset.wheyP] = { ...(byId[el.dataset.wheyP] || {}), protein: Number(el.value) || 0 }; });
+      document.querySelectorAll("[data-whey-k]").forEach((el) => {
+        const v = String(el.value || "").trim();
+        byId[el.dataset.wheyK] = { ...(byId[el.dataset.wheyK] || {}), kcal: v === "" ? null : Number(v) };
+      });
       save({ wheyEst: { ...(st.wheyEst || {}), byId } });
     } else if (it) {
       const qty = String((document.querySelector("[data-edit-qty]") || {}).value || "").trim();
@@ -3111,7 +3131,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-19";
+const APP_VERSION = "2026.11.07-preview-20";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;

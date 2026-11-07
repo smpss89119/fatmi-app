@@ -254,14 +254,14 @@ test.describe("FITMI", () => {
     await expect(page.locator("[data-testid=rest-quick]")).toContainText("可以練原課表");
   });
 
-  test("unticking 16:00 protein subtracts the 340 kcal", async ({ page }) => {
+  test("unticking 16:00 protein subtracts the 366 kcal", async ({ page }) => {
     await open(page, { now: SAT_10, sleep: "8" });
     const snack = page.locator("[data-testid=meal-snack]");
     await snack.locator("[data-testid=meal-more-snack]").click();
     await snack.locator("[data-testid=whey2-snack]").click();
     await snack.locator("[data-eat]").click();
     const ring = page.locator("[data-testid=eat-card] .ring").first().locator("b");
-    await expect(ring).toHaveText("340");
+    await expect(ring).toHaveText("366");
     await expect(snack).toHaveClass(/eaten/);
     await snack.locator("[data-eat]").click();
     await expect(snack).not.toHaveClass(/eaten/);

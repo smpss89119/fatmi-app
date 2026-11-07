@@ -211,9 +211,9 @@ function startKgFor(name) {
 }
 
 const WHEY_OPTIONS = [
-  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 170 },
-  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 20, kcal: 170 },
-  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 20, kcal: 170 },
+  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 183 },
+  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 20, kcal: 183 },
+  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 20, kcal: 183 },
   { id: "plant", name: "樂維根 極致植物優蛋白 無添加", scoopG: 40, protein: 25, kcal: null },
 ];
 
