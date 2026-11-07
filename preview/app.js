@@ -79,7 +79,7 @@ function addDays(d, n) {
 }
 function tabNow() {
   const t = location.hash.slice(1) || "today";
-  return ["today", "shop", "rules", "workout", "body"].includes(t) ? t : "today";
+  return ["today", "shop", "rules", "workout", "body", "sleep"].includes(t) ? t : "today";
 }
 function state() {
   const s = load();
@@ -112,6 +112,10 @@ function state() {
     shopFrequent: s.shopFrequent || {},
     restTrain: s.restTrain || {},
     backSwap: s.backSwap || {},
+    mealTimes: s.mealTimes || {},
+    extraMeals: s.extraMeals || {},
+    shopPortions: s.shopPortions || {},
+    shopQty: s.shopQty || {},
   };
 }
 
@@ -280,10 +284,20 @@ function wheySettings(st) {
 function wheyMeal(st) {
   return twoScoopMeal(st);
 }
+const DEFAULT_MEAL_TIMES = { snack: "16:00", dinner: "18:30", eggs21: "21:00" };
+function mealTime(st, id, d = now()) {
+  const ex = ((st.extraMeals || {})[todayKey(d)] || []).find((m) => m.id === id);
+  if (ex) return ex.time;
+  return ((st.mealTimes || {})[id]) || DEFAULT_MEAL_TIMES[id] || "";
+}
+function mealIdsFor(st, d = now()) {
+  const ids = MEAL_ORDER.slice().concat(((st.extraMeals || {})[todayKey(d)] || []).map((m) => m.id));
+  return ids.sort((x, y) => String(mealTime(st, x, d)).localeCompare(String(mealTime(st, y, d))));
+}
+function isExtraMeal(id) { return /^m-/.test(String(id)); }
 function mealLabel(id, trainDay, st) {
-  if (id === "snack") return "16:00";
-  if (id === "dinner") return "18:30";
-  if (id === "eggs21") return "21:00";
+  const t = st ? mealTime(st, id) : DEFAULT_MEAL_TIMES[id];
+  if (t) return t;
   return (MEAL_DEFS[id] && MEAL_DEFS[id].label) || id;
 }
 function restTrainPick(st, d = now()) {
@@ -433,7 +447,7 @@ function currentMeal(st, id, d = now()) {
 function mealTotals(st, d = now()) {
   let kcal = 0;
   let protein = 0;
-  const ids = MEAL_ORDER.slice();
+  const ids = mealIdsFor(st, d);
   for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
     if (m && m.eaten === true) {
@@ -452,7 +466,7 @@ function whey2Macros(st, d = now()) {
   return {
     kcal: (Number(a.kcal) || 170) + (Number(b.kcal) || 170),
     protein: Number(a.protein) + Number(b.protein),
-    name: "蛋白粉 2 匙",
+    name: "蛋白粉 2 份",
     scoopIds: [a.id, b.id],
   };
 }
@@ -565,12 +579,48 @@ function isShopFrequent(st, item) {
   if (flag) return true;
   return !!item.frequent;
 }
+const SERVING_G = { protein: 120, starch: 150, veg: 100 };
+function parseAmt(s) {
+  const t = String(s || "").replace(/約/g, "").trim();
+  let m = t.match(/^([\d.]+)\s*(kg|公斤)$/i);
+  if (m) return { kind: "w", g: Number(m[1]) * 1000 };
+  m = t.match(/^([\d.]+)\s*(g|克)$/i);
+  if (m) return { kind: "w", g: Number(m[1]) };
+  m = t.match(/^([\d.]+)\s*([^\d\s.]*)$/);
+  if (m) return { kind: "c", n: Number(m[1]), unit: m[2] || "" };
+  return null;
+}
+function shopQtyOf(st, it) {
+  const ov = (st.shopQty || {})[it.id];
+  if (ov != null) return ov;
+  return shopSplit(it).qty;
+}
+// Servings for nutrition. Only explicit weights auto-convert; ambiguous items keep
+// their original palms/fists and are flagged pending (待確認) until 一份是多少 is set.
+function shopServings(st, it) {
+  const orig = Number(it.group === "starch" ? it.fists : it.palms) || 0;
+  if (it.whey) return { n: orig, pending: false };
+  const portion = (st.shopPortions || {})[it.id];
+  const q = parseAmt(shopQtyOf(st, it));
+  const ovQty = (st.shopQty || {})[it.id] != null;
+  if (portion) {
+    const pp = parseAmt(portion);
+    if (q && pp && q.kind === "w" && pp.kind === "w" && pp.g > 0) return { n: Math.round(q.g / pp.g), pending: false };
+    if (q && pp && q.kind === "c" && pp.kind === "c" && pp.n > 0 && (!pp.unit || !q.unit || pp.unit === q.unit)) return { n: Math.round(q.n / pp.n), pending: false };
+    return { n: orig, pending: true };
+  }
+  if (!it.custom && !ovQty) return { n: orig, pending: false };
+  if (it.group === "veg") return { n: 0, pending: false };
+  if (q && q.kind === "w") return { n: Math.round(q.g / (SERVING_G[it.group] || 120)), pending: false };
+  return { n: orig, pending: true };
+}
 function shopDaysStats(st) {
   const shop = readShop(st);
   let planP = 0, planS = 0, gotP = 0, gotS = 0;
   for (const item of shopAllItems(st)) {
-    const palms = Number(item.palms) || 0;
-    const fists = Number(item.fists) || 0;
+    const sv = shopServings(st, item);
+    const palms = item.group === "protein" ? sv.n : 0;
+    const fists = item.group === "starch" ? sv.n : 0;
     planP += palms;
     planS += fists;
     if (shopAcquired(shop, item.id)) {
@@ -601,6 +651,18 @@ function shopDisplayName(label, amount) {
   if (!amt) return name;
   if (name.includes(amt)) return name;
   return `${name} ${amt}`.trim();
+}
+function shopSplit(it) {
+  if (it && it.label != null) return { label: it.label, qty: it.qty || "" };
+  if (it && it.custom && it.amount != null && String(it.amount).trim()) {
+    const amt = String(it.amount).trim();
+    const nm = String(it.name || "").trim();
+    return { label: (nm.endsWith(amt) ? nm.slice(0, nm.length - amt.length) : nm).trim() || nm, qty: amt.replace(/([\d.])\s*(kg|g|ml|L)$/i, "$1 $2") };
+  }
+  const name = String((it && it.name) || "").trim();
+  const m = name.match(/^(.*?)[\s約]*((?:約\s*)?[\d.]+\s*(?:kg|g|公斤|克|顆|片|包|條|份|盒|罐|ml|L)?)$/i);
+  if (m && m[1]) return { label: m[1].trim(), qty: m[2].replace(/^約\s*/, "").replace(/([\d.])\s*(kg|g|ml|L)$/i, "$1 $2") };
+  return { label: name, qty: "" };
 }
 function shopItemHint(it) {
   const hint = String((it && it.hint) || "");
@@ -642,9 +704,8 @@ function shareCatsText(st) {
   const trainDay = isActiveTrainDay(st, t);
   const kcal = kcalInfo(st, t);
   const totals = mealTotals(st, t);
-  const labels = { snack: "16:00", dinner: "18:30", eggs21: "21:00" };
-  const mealIds = MEAL_ORDER.slice();
-  const mealLines = mealIds.map((id) => `${labels[id] || id}：${mealLineText(st, id)}`).join("\n");
+  const mealIds = mealIdsFor(st, t);
+  const mealLines = mealIds.map((id) => `${mealTime(st, id, t) || id}：${mealLineText(st, id)}`).join("\n");
   const remainK = Math.round(kcal.target - totals.kcal);
   const remainP = Math.round(PROTEIN_TARGET - totals.protein);
   const remain = remainK >= 0
@@ -702,7 +763,7 @@ ${remain}`;
   const shopSection = `■ 採買／家裡
 ${shopLines}
 蔬菜已選 ${vegN} 種（建議 4–5 種）
-蛋白粉剩 ${shop.wheyPacks} 包${shop.wheyPacks < 6 ? "（不到 6 包，該補貨）" : ""}
+蛋白粉剩 ${shop.wheyPacks} 份${shop.wheyPacks < 6 ? "（不到 6 份，該補貨）" : ""}
 ${shopDaysHint(st)}`;
   const trainSection = `■ 今天訓練
 ${trainBlock}`;
@@ -1247,7 +1308,7 @@ function renderMealRow(st, id, trainDay) {
         </div>
       </div>
       <button type="button" class="chip${veg ? " on" : ""}" data-veg="${id}" data-testid="veg-${id}">蔬菜半盤</button>
-      <button type="button" class="btn" data-whey2="${id}" data-testid="whey2-${id}">蛋白粉 2 匙</button>
+      <button type="button" class="btn" data-whey2="${id}" data-testid="whey2-${id}">蛋白粉 2 份</button>
       <div class="out-row">
         <span>外食</span>
         ${(OUT_MEALS || []).map((o) => `<button type="button" class="chip${logged.mode === "out" && outType === o.id ? " on" : ""}" data-out-type="${id}" data-oid="${o.id}">${esc(o.name)}</button>`).join("")}
@@ -1259,8 +1320,8 @@ function renderMealRow(st, id, trainDay) {
       ${hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : ""}
     </div>` : (hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : "");
   return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
-    <div class="who">${esc(mealLabel(id, trainDay, st))} <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span></div>
-    <p class="suggest">建議：${esc(suggestLine)}</p>
+    <div class="who"><input type="time" class="meal-time" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="時間"> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
+    ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}
     ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}` : ""}
     <div class="row-acts">
       <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
@@ -1342,8 +1403,9 @@ function renderHome(st) {
   }
 
   const trainDay = isTrainDay(st);
-  const mealIds = MEAL_ORDER.slice();
-  const meals = mealIds.map((id) => renderMealRow(st, id, trainDay)).join("");
+  const mealIds = mealIdsFor(st);
+  const meals = mealIds.map((id) => renderMealRow(st, id, trainDay)).join("") +
+    `<button type="button" class="btn full add-meal" data-add-meal data-testid="add-meal">＋ 加一餐</button>`;
 
   const chips = MAIN_PARTS.map((p) => {
     const n = week[p] || 0;
@@ -1369,6 +1431,7 @@ function renderHome(st) {
       ${shareCatsBtn()}
     </section>
     <p class="sec">身體趨勢</p>
+    ${sleepHomeCard()}
     <button type="button" class="trend-item" data-go="body">
       <div class="lbl">體重 ${w7.stale ? "（近一次）" : "7 日平均"}</div>
       <div class="val">${w7.value} kg</div>
@@ -1489,6 +1552,112 @@ function renderLogRows(st) {
     return `<div class="stat" data-log-row="${d}" data-testid="log-row-${d}"><span>${fmtMD(d)} ${esc(w ? w.name : "訓練")}</span><span>${n} 組</span></div>`;
   }).join("") + `<p class="muted">長按一筆可刪除</p>`;
 }
+const SLEEP_COLORS = { awake: "#FF7F50", rem: "#3BC5F5", core: "#2F80ED", deep: "#5B4BDB" };
+const SLEEP_NAMES = { awake: "清醒", rem: "REM", core: "核心", deep: "深層" };
+const SLEEP_ORDER = ["awake", "rem", "core", "deep"];
+function hm(min) {
+  const m = Math.round(Number(min) || 0);
+  return { h: Math.floor(m / 60), m: m % 60 };
+}
+function hmHtml(min) {
+  const x = hm(min);
+  return `${x.h}<small>小時</small>${x.m ? ` ${x.m}<small>分</small>` : ""}`;
+}
+function sleepRows() {
+  return (LIVE.garmin.daily || []).filter((r) => r.sleepHours != null).sort((x, y) => x.date.localeCompare(y.date));
+}
+function sleepMinOf(r) {
+  if (r.sleep) return (r.sleep.deepMin || 0) + (r.sleep.coreMin || 0) + (r.sleep.remMin || 0);
+  return Math.round((Number(r.sleepHours) || 0) * 60);
+}
+function sleepHomeCard() {
+  const rows = sleepRows();
+  const last = rows[rows.length - 1];
+  if (!last) return "";
+  return `<button type="button" class="sleep-mini" data-go="sleep" data-testid="sleep-home">
+    <span class="k">睡眠時間</span><span class="v">${hmHtml(sleepMinOf(last))}</span>
+    ${last.sleep ? `<span class="bar">${SLEEP_ORDER.slice().reverse().map((s) => `<i style="flex:${last.sleep[s + "Min"] || 0};background:${SLEEP_COLORS[s]}"></i>`).join("")}</span>` : ""}
+  </button>`;
+}
+function clockOf(iso) { return iso ? String(iso).slice(11, 16) : ""; }
+function renderHypnogram(sl) {
+  const segs = sl.segments || [];
+  if (!segs.length) return "";
+  const total = segs[segs.length - 1][1] || 1;
+  const W = 320, rowH = 22, gap = 8, H = SLEEP_ORDER.length * (rowH + gap);
+  const y = (s) => SLEEP_ORDER.indexOf(s) * (rowH + gap);
+  const rects = segs.map(([a, b, s]) => `<rect x="${(a / total * W).toFixed(1)}" y="${y(s)}" width="${Math.max(1.5, (b - a) / total * W).toFixed(1)}" height="${rowH}" rx="4" fill="${SLEEP_COLORS[s]}"/>`).join("");
+  const grid = SLEEP_ORDER.map((s) => `<line x1="0" x2="${W}" y1="${y(s) + rowH / 2}" y2="${y(s) + rowH / 2}" stroke="#3A3A3C" stroke-dasharray="2 4"/>`).join("");
+  return `<div class="hyp" data-testid="sleep-hypnogram">
+    <div class="hyp-l">${SLEEP_ORDER.map((s) => `<span style="height:${rowH}px;margin-bottom:${gap}px">${SLEEP_NAMES[s]}</span>`).join("")}</div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}${rects}</svg>
+    <div class="hyp-t"><span>${clockOf(sl.start)}</span><span>${clockOf(sl.end)}</span></div>
+  </div>`;
+}
+function renderSleepBars(rows, n) {
+  const list = rows.slice(-n);
+  if (!list.length) return "";
+  const mins = list.map(sleepMinOf);
+  const maxM = Math.max(9 * 60, ...mins);
+  const avg = mins.reduce((s, x) => s + x, 0) / mins.length;
+  const W = 320, H = 160, bw = W / list.length;
+  const bars = list.map((r, i) => {
+    const x = i * bw + bw * 0.2, w = bw * 0.6;
+    if (r.sleep) {
+      let yb = H;
+      return SLEEP_ORDER.slice().reverse().filter((s) => s !== "awake").map((s) => {
+        const h = (r.sleep[s + "Min"] || 0) / maxM * H; yb -= h;
+        return `<rect x="${x.toFixed(1)}" y="${yb.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${SLEEP_COLORS[s]}"/>`;
+      }).join("");
+    }
+    const h = mins[i] / maxM * H;
+    return `<rect x="${x.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${SLEEP_COLORS.core}"/>`;
+  }).join("");
+  const ya = H - avg / maxM * H;
+  const labels = n <= 7
+    ? list.map((r, i) => `<span style="left:${((i + 0.5) * bw / W * 100).toFixed(1)}%">${"日一二三四五六"[parseISO(r.date).getDay()]}</span>`).join("")
+    : [0, Math.floor(list.length / 2), list.length - 1].map((i) => `<span style="left:${((i + 0.5) * bw / W * 100).toFixed(1)}%">${fmtMD(list[i].date)}</span>`).join("");
+  return `<div class="sl-avg"><span class="k">平均睡眠時間</span><span class="v" data-testid="sleep-avg">${hmHtml(avg)}</span><span class="d">${fmtMD(list[0].date)}–${fmtMD(list[list.length - 1].date)}</span></div>
+    <div class="sl-chart" data-testid="sleep-bars"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      ${[3, 6, 9].map((hh) => `<line x1="0" x2="${W}" y1="${H - hh * 60 / maxM * H}" y2="${H - hh * 60 / maxM * H}" stroke="#3A3A3C"/>`).join("")}
+      ${bars}<line x1="0" x2="${W}" y1="${ya.toFixed(1)}" y2="${ya.toFixed(1)}" stroke="#30D158" stroke-width="2" stroke-dasharray="5 4"/></svg>
+      <div class="sl-x">${labels}</div></div>`;
+}
+function renderSleep(st) {
+  const rows = sleepRows();
+  const range = ui.sleepRange || "D";
+  const seg = ["D", "W", "M"].map((r) => `<button type="button" class="${range === r ? "on" : ""}" data-sleep-range="${r}" data-testid="sleep-range-${r}">${{ D: "日", W: "週", M: "月" }[r]}</button>`).join("");
+  const head = `<div class="sl-top"><button type="button" class="sl-back" data-go="today">‹ 今天</button><b>睡眠</b><span></span></div>
+    <div class="sl-seg">${seg}</div>`;
+  if (!rows.length) return `${head}<p class="sl-empty">還沒有睡眠資料</p>`;
+  let body = "";
+  if (range === "D") {
+    const idx = Math.min(rows.length - 1, Math.max(0, ui.sleepIdx != null ? ui.sleepIdx : rows.length - 1));
+    const r = rows[idx];
+    const sl = r.sleep;
+    const total = sleepMinOf(r);
+    const inBed = sl ? total + (sl.awakeMin || 0) : null;
+    const stages = sl ? SLEEP_ORDER.map((s) => {
+      const m = sl[s + "Min"] || 0;
+      const pct = inBed ? Math.round(m / inBed * 100) : 0;
+      return `<div class="sl-stage" data-testid="sleep-stage-${s}"><i style="background:${SLEEP_COLORS[s]}"></i><span>${SLEEP_NAMES[s]}</span><b>${hmHtml(m)}</b><em>${pct}%</em></div>`;
+    }).join("") : `<p class="sl-empty">這天只有總睡眠時數</p>`;
+    body = `<div class="sl-card">
+        <div class="sl-nav"><button type="button" data-sleep-step="-1" aria-label="前一天"${idx === 0 ? " disabled" : ""}>‹</button>
+          <span>${fmtMD(r.date)} 週${DOW[parseISO(r.date).getDay()]}</span>
+          <button type="button" data-sleep-step="1" aria-label="後一天"${idx === rows.length - 1 ? " disabled" : ""}>›</button></div>
+        <div class="sl-k">睡眠時間</div>
+        <div class="sl-big" data-testid="sleep-total">${hmHtml(total)}</div>
+        ${sl ? `<div class="sl-sched" data-testid="sleep-schedule">🛏 ${clockOf(sl.start)} – ${clockOf(sl.end)}${inBed ? ` · 在床 ${hm(inBed).h}:${String(hm(inBed).m).padStart(2, "0")}` : ""}</div>` : ""}
+        ${sl ? renderHypnogram(sl) : ""}
+      </div>
+      <div class="sl-card">${stages}</div>`;
+  } else {
+    body = `<div class="sl-card">${renderSleepBars(rows, range === "W" ? 7 : 30)}</div>
+      <div class="sl-card sl-legend">${SLEEP_ORDER.filter((s) => s !== "awake").map((s) => `<span><i style="background:${SLEEP_COLORS[s]}"></i>${SLEEP_NAMES[s]}</span>`).join("")}<span><i class="avg"></i>平均</span></div>`;
+  }
+  return `<div class="sleep-page" data-testid="sleep-page">${head}${body}</div>`;
+}
 function renderBody(st) {
   const last = lastInbody();
   const daily = LIVE.garmin.daily || [];
@@ -1515,6 +1684,7 @@ function renderBody(st) {
     <div class="card">${lineChart(scans.map((s) => s.pbf), "#9A3412", 320, 140, "chart chart-lg")}</div>
     <p class="sec">骨骼肌</p>
     <div class="card">${lineChart(scans.map((s) => s.smmKg), "#166534", 320, 140, "chart chart-lg")}</div>
+    <button type="button" class="btn full" data-go="sleep">睡眠</button>
     <p class="sec">睡眠（小時）</p>
     <div class="card">${lineChart(sleep, "#7C3AED", 320, 140, "chart chart-lg")}<p class="muted">看有沒有滿 6 小時。不到就改快版，蛋白質照吃。</p></div>
     <p class="sec">靜止心率</p>
@@ -1682,39 +1852,39 @@ function renderShop(st) {
   const visible = shopAllItems(st).filter((it) => !shop.hide[it.id] || isShopFrequent(st, it));
   const hint = shopDaysHint(st);
   const wheyWarn = shop.wheyPacks < 6
-    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 包，不到 6 包，該補貨了。</p>`
+    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 份</p>`
     : "";
   const pPct = stats.proteinPlan ? Math.min(100, Math.round(100 * stats.proteinBought / stats.proteinPlan)) : 0;
   const sPct = stats.starchPlan ? Math.min(100, Math.round(100 * stats.starchBought / stats.starchPlan)) : 0;
   const bars = `<div class="shop-bars" data-testid="shop-bars">
-      <div class="shop-bar">
-        <div class="lab">蛋白質 <b data-testid="shop-protein-days">${stats.proteinBought}</b>/<span data-testid="shop-protein-plan">${stats.proteinPlan}</span> 天</div>
+      <div class="shop-bar"><span class="lab">蛋白質</span>
         <div class="bar" role="progressbar" aria-valuenow="${pPct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pPct}%"></i></div>
+        <span class="val"><b data-testid="shop-protein-days">${stats.proteinBought}</b>/<span data-testid="shop-protein-plan">${stats.proteinPlan}</span> 天</span>
       </div>
-      <div class="shop-bar">
-        <div class="lab">澱粉 <b data-testid="shop-starch-days">${stats.starchBought}</b>/<span data-testid="shop-starch-plan">${stats.starchPlan}</span> 天</div>
+      <div class="shop-bar"><span class="lab">澱粉</span>
         <div class="bar" role="progressbar" aria-valuenow="${sPct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${sPct}%"></i></div>
+        <span class="val"><b data-testid="shop-starch-days">${stats.starchBought}</b>/<span data-testid="shop-starch-plan">${stats.starchPlan}</span> 天</span>
       </div>
     </div>`;
   const groups = (SHOP_GROUPS || []).map((g) => {
     const items = visible.filter((it) => it.group === g.id);
     if (!items.length) return "";
-    const vegNote = g.id === "veg" ? `<p class="muted">本週選 4–5 種，各 1 份。已選 ${shopAllItems(st).filter((it) => it.pick && shopAcquired(shop, it.id)).length} 種。</p>` : "";
-    return `<p class="sec">${esc(g.name)}</p>${vegNote}${items.map((it) => {
+    const vegN = g.id === "veg" ? `<span class="sec-n">${shopAllItems(st).filter((it) => it.pick && shopAcquired(shop, it.id)).length}/4–5</span>` : "";
+    return `<p class="sec shop-sec">${esc(g.name)}${vegN}</p>${items.map((it) => {
       const on = !!shop.checked[it.id];
       const have = !!shop.have[it.id];
       const freq = isShopFrequent(st, it);
-      const whey = it.whey ? `<div class="whey-stock">目前剩 <span data-testid="whey-packs">${shop.wheyPacks}</span> 包
-        <span class="stepper">
-          <button type="button" data-whey-pack="-1">−</button>
-          <button type="button" data-whey-pack="1">+</button>
-        </span></div>` : "";
-      const del = it.custom ? `<button type="button" class="btn ghost short-btn" data-shop-del="${it.id}">刪</button>` : "";
-      return `<div class="item${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
+      const sp = shopSplit(it);
+      const qty = it.whey
+        ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份</small></span>`
+        : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${esc(shopQtyOf(st, it))}</span>`;
+      const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : "";
+      const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
+      return `<div class="item shop-row${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
         <span class="ck${on ? " on" : ""}">${on ? "✓" : ""}</span>
-        <span><b>${esc(it.name)}</b>${shopItemHint(it) ? `<br><span class="muted">${esc(shopItemHint(it))}</span>` : ""}${have ? `<br><span class="have-tag">家裡有${freq ? "" : "（下週隱藏）"}</span>` : ""}${whey}</span>
-        <button type="button" class="chip${freq ? " on" : ""}" data-shop-frequent="${it.id}" data-testid="shop-frequent-${it.id}">常買</button>
-        ${del}
+        <span class="shop-name"><b>${esc(sp.label)}</b>${pend}${have ? `<span class="have-tag">家裡有</span>` : ""}</span>
+        ${qty}
+        <span class="shop-acts"><button type="button" class="star${freq ? " on" : ""}" data-shop-frequent="${it.id}" data-testid="shop-frequent-${it.id}" aria-label="常買">${freq ? "★" : "☆"}</button>${del}</span>
       </div>`;
     }).join("")}`;
   }).join("");
@@ -1739,10 +1909,26 @@ function renderShop(st) {
       </select>
       <button type="button" class="btn primary" data-shop-add>新增</button>
     </div>` : "";
-  return `<section class="card hero">
+  const editIt = ui.shopEdit ? shopAllItems(st).find((x) => x.id === ui.shopEdit) : null;
+  let editSheet = "";
+  if (editIt) {
+    const sp = shopSplit(editIt);
+    const body = editIt.whey
+      ? (WHEY_OPTIONS || []).map((o) => { const w = resolveWhey(st, o.id); return `<div class="edit-row"><span>${esc(o.name.replace("樂維根 ", ""))}</span>
+          <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
+          <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label></div>`; }).join("")
+      : `<label class="edit-row"><span>數量</span><input type="text" data-edit-qty value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
+         <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || "")}" placeholder="例如 150 g 或 1 包"></label>
+         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : `約 ${shopServings(st, editIt).n} 份`}</p>`;
+    editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
+      <div class="k">${esc(sp.label)}</div>${body}
+      <div class="acts"><button type="button" class="btn primary xl" data-edit-save="${editIt.id}" data-testid="edit-save">儲存</button>
+      ${editIt.custom ? `<button type="button" class="btn" data-shop-del="${editIt.id}" data-testid="edit-del">刪除</button>` : ""}
+      <button type="button" class="btn full" data-edit-close>關閉</button></div></div></div>`;
+  }
+  return `${editSheet}<section class="card hero">
       <div class="k">每週補貨</div>
       <div class="big">採買清單</div>
-      <div class="lab">點選＝已買 · 長按＝家裡有 · 常買會記住</div>
     </section>
     <button type="button" class="shop-hint${shop.hintCollapsed ? " collapsed" : ""}" data-toggle-hint data-testid="shop-hint">${shop.hintCollapsed ? "本週存量提示" : esc(hint)}</button>
     ${bars}
@@ -1754,7 +1940,7 @@ function renderShop(st) {
     ${chips}
     ${groups}
     ${add}
-    <p class="muted">長按＝家裡有。常買的項目每週都會留下。點 ＋ 可加入任意食材。</p>
+    <p class="muted shop-legend">點＝已買 · 長按＝家裡有 · ☆＝常買</p>
     ${shareCatsBtn()}`;
 }
 
@@ -2016,7 +2202,9 @@ function render() {
     st.tab = "today";
   }
   document.body.classList.toggle("mode-workout", st.tab === "workout");
-  const tabHi = st.tab === "body" || st.tab === "workout" ? "today" : st.tab;
+  document.body.classList.toggle("mode-sleep", st.tab === "sleep");
+  document.documentElement.classList.toggle("mode-sleep", st.tab === "sleep");
+  const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" ? "today" : st.tab;
   document.querySelectorAll("#tabs button").forEach((b) => {
     b.classList.toggle("on", b.dataset.tab === tabHi);
   });
@@ -2027,6 +2215,7 @@ function render() {
   else if (st.tab === "rules") main.innerHTML = renderRules(st);
   else if (st.tab === "workout") main.innerHTML = renderWorkout(st);
   else if (st.tab === "body") main.innerHTML = renderBody(st);
+  else if (st.tab === "sleep") main.innerHTML = renderSleep(st);
   else main.innerHTML = renderHome(st);
   if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
   if (st.tab !== "workout") main.insertAdjacentHTML("beforeend", `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`);
@@ -2120,9 +2309,12 @@ document.getElementById("main").addEventListener("click", (e) => {
   const whey2 = e.target.closest("[data-whey2]");
   if (whey2) {
     const w = whey2Macros(st);
-    patchMeal(st, whey2.dataset.whey2, {
+    const prev = ((st.mealLogs || {})[todayKey()] || {})[whey2.dataset.whey2] || {};
+    const back = prev.eaten ? Number(prev.wheyUsed) || 0 : 0;
+    save({ wheyPacks: Math.max(0, (st.wheyPacks != null ? Number(st.wheyPacks) : 14) + back - 2) });
+    patchMeal(state(), whey2.dataset.whey2, {
       mode: "whey2", eaten: true, palms: 0, fists: 0, veg: false,
-      name: w.name, kcal: w.kcal, protein: w.protein, scoopIds: w.scoopIds,
+      name: w.name, kcal: w.kcal, protein: w.protein, scoopIds: w.scoopIds, wheyUsed: 2,
     });
     render();
     return;
@@ -2172,8 +2364,77 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const shopEdit = e.target.closest("[data-shop-edit]");
+  if (shopEdit) { ui.shopEdit = shopEdit.dataset.shopEdit; render(); return; }
+  if (e.target.closest("[data-edit-close]")) { ui.shopEdit = null; render(); return; }
+  const editSave = e.target.closest("[data-edit-save]");
+  if (editSave) {
+    const id = editSave.dataset.editSave;
+    const it = shopAllItems(st).find((x) => x.id === id);
+    if (it && it.whey) {
+      const byId = { ...(((st.wheyEst || {}).byId) || {}) };
+      document.querySelectorAll("[data-whey-g]").forEach((el) => { byId[el.dataset.wheyG] = { ...(byId[el.dataset.wheyG] || {}), scoopG: Number(el.value) || 40 }; });
+      document.querySelectorAll("[data-whey-p]").forEach((el) => { byId[el.dataset.wheyP] = { ...(byId[el.dataset.wheyP] || {}), protein: Number(el.value) || 0 }; });
+      save({ wheyEst: { ...(st.wheyEst || {}), byId } });
+    } else if (it) {
+      const qty = String((document.querySelector("[data-edit-qty]") || {}).value || "").trim();
+      const portion = String((document.querySelector("[data-edit-portion]") || {}).value || "").trim();
+      const shopPortions = { ...(st.shopPortions || {}) };
+      if (portion) shopPortions[id] = portion; else delete shopPortions[id];
+      const patch = { shopPortions };
+      if (it.custom) {
+        const label = shopSplit(it).label;
+        patch.shopExtra = (st.shopExtra || []).map((x) => x.id === id ? { ...x, amount: qty, name: shopDisplayName(label, qty) } : x);
+      } else {
+        const shopQty = { ...(st.shopQty || {}) };
+        if (qty && qty !== shopSplit(it).qty) shopQty[id] = qty; else delete shopQty[id];
+        patch.shopQty = shopQty;
+      }
+      save(patch);
+    }
+    ui.shopEdit = null;
+    render();
+    return;
+  }
+  const sr = e.target.closest("[data-sleep-range]");
+  if (sr) { ui.sleepRange = sr.dataset.sleepRange; render(); return; }
+  const ss = e.target.closest("[data-sleep-step]");
+  if (ss) {
+    const rows = sleepRows();
+    const cur = ui.sleepIdx != null ? ui.sleepIdx : rows.length - 1;
+    ui.sleepIdx = Math.min(rows.length - 1, Math.max(0, cur + Number(ss.dataset.sleepStep)));
+    render();
+    return;
+  }
+  if (e.target.closest("[data-add-meal]")) {
+    const n = now();
+    const time = `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`;
+    const day = todayKey();
+    const id = "m-" + Date.now();
+    const list = ((st.extraMeals || {})[day] || []).concat([{ id, time }]);
+    save({ extraMeals: { ...(st.extraMeals || {}), [day]: list } });
+    ui.mealMore = id;
+    render();
+    return;
+  }
+  const mealDel = e.target.closest("[data-meal-del]");
+  if (mealDel) {
+    const id = mealDel.dataset.mealDel;
+    const day = todayKey();
+    const meals = { ...((st.mealLogs || {})[day] || {}) };
+    const packs = (st.wheyPacks != null ? Number(st.wheyPacks) : 14) + (meals[id] && meals[id].eaten ? Number(meals[id].wheyUsed) || 0 : 0);
+    delete meals[id];
+    save({
+      extraMeals: { ...(st.extraMeals || {}), [day]: ((st.extraMeals || {})[day] || []).filter((m) => m.id !== id) },
+      mealLogs: { ...st.mealLogs, [day]: meals },
+      wheyPacks: packs,
+    });
+    render();
+    return;
+  }
   const shopDel = e.target.closest("[data-shop-del]");
   if (shopDel) {
+    ui.shopEdit = null;
     const id = shopDel.dataset.shopDel;
     save({ shopExtra: (st.shopExtra || []).filter((it) => it.id !== id) });
     render();
@@ -2229,7 +2490,7 @@ document.getElementById("main").addEventListener("click", (e) => {
     return;
   }
   const shopItem = e.target.closest("[data-shop]");
-  if (shopItem && !e.target.closest("[data-whey-pack]") && !e.target.closest("[data-shop-frequent]") && !e.target.closest("[data-shop-del]")) {
+  if (shopItem && !e.target.closest("[data-whey-pack]") && !e.target.closest("[data-shop-frequent]") && !e.target.closest("[data-shop-del]") && !e.target.closest("[data-shop-edit]")) {
     if (window.__shopHaveLock) { window.__shopHaveLock = false; return; }
     const shop = persistShopWeek(st);
     const id = shopItem.dataset.shop;
@@ -2276,13 +2537,17 @@ document.getElementById("main").addEventListener("click", (e) => {
     const id = eat.dataset.eat;
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
+    let packs = st.wheyPacks != null ? Number(st.wheyPacks) : 14;
     if (meals[id] && meals[id].eaten) {
+      packs += Number(meals[id].wheyUsed) || 0;
       meals[id] = { eaten: false };
     } else {
       const est = mealEstimate(st, id);
-      meals[id] = { ...(meals[id] || {}), ...est, eaten: true };
+      const used = Array.isArray(est.scoopIds) ? est.scoopIds.length : 0;
+      packs = Math.max(0, packs - used);
+      meals[id] = { ...(meals[id] || {}), ...est, eaten: true, wheyUsed: used };
     }
-    save({ mealLogs: { ...st.mealLogs, [day]: meals } });
+    save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyPacks: packs });
     render();
     return;
   }
@@ -2522,7 +2787,7 @@ window.__fatmiDeleteLog = deleteLog;
   const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
   main.addEventListener("pointerdown", (e) => {
     const item = e.target.closest("[data-shop]");
-    if (!item || e.target.closest("[data-whey-pack],[data-shop-frequent],[data-shop-del],[data-shop-add],[data-shop-plus],[data-shop-chip],[data-shop-cat],input,select,button")) return;
+    if (!item || e.target.closest("[data-whey-pack],[data-shop-frequent],[data-shop-del],[data-shop-edit],[data-shop-add],[data-shop-plus],[data-shop-chip],[data-shop-cat],input,select,button")) return;
     fired = false;
     timer = setTimeout(() => {
       fired = true;
@@ -2568,7 +2833,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-8";
+const APP_VERSION = "2026.11.07-preview-9";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -2762,3 +3027,18 @@ if ("serviceWorker" in navigator) {
 tick();
 setInterval(tick, 500);
 boot();
+
+document.getElementById("main").addEventListener("change", (e) => {
+  const el = e.target.closest && e.target.closest("[data-meal-time]");
+  if (!el || !el.value) return;
+  const st = state();
+  const id = el.dataset.mealTime;
+  if (isExtraMeal(id)) {
+    const day = todayKey();
+    const list = ((st.extraMeals || {})[day] || []).map((m) => m.id === id ? { ...m, time: el.value } : m);
+    save({ extraMeals: { ...(st.extraMeals || {}), [day]: list } });
+  } else {
+    save({ mealTimes: { ...(st.mealTimes || {}), [id]: el.value } });
+  }
+  render();
+});

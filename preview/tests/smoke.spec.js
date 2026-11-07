@@ -105,9 +105,9 @@ test.describe("NUTRI", () => {
   test("2) only 16:00, 18:30, 21:00 meal slots", async ({ page }) => {
     await open(page, { now: TUE_15, sleep: "8" });
     const eat = page.locator("[data-testid=eat-card]");
-    await expect(eat.locator("[data-testid=meal-snack]")).toContainText("16:00");
-    await expect(eat.locator("[data-testid=meal-dinner]")).toContainText("18:30");
-    await expect(eat.locator("[data-testid=meal-eggs21]")).toContainText("21:00");
+    await expect(eat.locator("[data-testid=meal-time-snack]")).toHaveValue("16:00");
+    await expect(eat.locator("[data-testid=meal-time-dinner]")).toHaveValue("18:30");
+    await expect(eat.locator("[data-testid=meal-time-eggs21]")).toHaveValue("21:00");
     await expect(eat.locator(".meal-row")).toHaveCount(3);
     await expect(eat).not.toContainText("早餐");
     await expect(eat).not.toContainText("午餐");
@@ -436,40 +436,40 @@ test.describe("FITMI2", () => {
     await page.locator("[data-shop-add]").click();
     const chip = page.locator("[data-testid=shop-chips]");
     await expect(chip).toContainText("雞胸 600g");
-    await expect(chip).not.toContainText("600g600g");
-    const chipText = await chip.innerText();
-    expect(chipText.split("600g").length - 1).toBe(1);
-    const row = page.locator(".item", { hasText: "雞胸 600g" }).first();
-    await expect(row).toBeVisible();
-    const rowText = await row.innerText();
-    expect(rowText).not.toContain("600g600g");
-    expect((rowText.match(/600g/g) || []).length).toBe(1);
-    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("14");
+    expect((await chip.innerText()).split("600g").length - 1).toBe(1);
+    const row = page.locator(".shop-row", { has: page.locator("[data-shop-del], [data-shop-edit]") }).filter({ hasText: "600 g" });
+    await expect(row).toHaveCount(1);
+    const rowText = (await row.innerText()).replace(/\s+/g, " ");
+    expect((rowText.match(/600/g) || []).length).toBe(1);
+    // 600 g of protein = 5 servings (120 g each) -> (29 + 5) / 2 = 17 days, never 314
+    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("17");
     await expect(page.locator("[data-testid=shop-bars]")).not.toContainText("314");
   });
 });
 
 test.describe("ROUND3", () => {
   const gymA = (extra = {}) => withBreakfast("2026-11-10", extra);
-  test("0) pantry from 3/14 stays X/14 after adding 雞胸 600g", async ({ page }) => {
-    await open(page, { now: TUE_10, sleep: "8" });
+  test("0) pantry from 3/14: 600g adds real servings, ambiguous stays 待確認", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" }, { shopExtra: [{ id: "x-old", group: "protein", name: "雞柳 一包", custom: true, amount: "一包", palms: 2, fists: 0 }] });
     await page.locator("[data-tab=shop]").click();
-    for (const id of ["shop-item-chicken", "shop-item-seafood"]) {
-      const el = page.locator(`[data-testid=${id}]`);
-      if (await el.count()) await el.first().click();
-    }
-    const before = await page.locator("[data-testid=shop-bars]").innerText();
+    await expect(page.locator("[data-testid=shop-pending-x-old]")).toHaveText("待確認");
+    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("15");
     await page.locator("[data-testid=shop-plus]").click();
     await page.locator("[data-shop-new-name]").fill("雞胸");
     await page.locator("[data-shop-new-amount]").fill("600g");
     if (await page.locator("[data-testid=shop-cats]").isVisible()) await page.locator("[data-shop-cat=protein]").click();
     await page.locator("[data-shop-add]").click();
-    const after = await page.locator("[data-testid=shop-bars]").innerText();
-    expect(after).toMatch(/蛋白質 \d+\/14 天/);
-    expect(after).not.toContain("314");
-    expect(after.match(/蛋白質 (\d+)/)[1]).toBe(before.match(/蛋白質 (\d+)/)[1]);
+    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("18");
     expect(await page.getByText("600g600g").count()).toBe(0);
-    expect(await page.locator(".item").filter({ hasText: "雞胸 600g" }).count()).toBe(1);
+    // set 一份是多少 on the ambiguous item via edit sheet
+    await page.locator("[data-testid=shop-edit-x-old]").click();
+    await page.locator("[data-edit-qty]").fill("300 g");
+    await page.locator("[data-testid=edit-portion]").fill("100 g");
+    await page.locator("[data-testid=edit-save]").click();
+    await expect(page.locator("[data-testid=shop-pending-x-old]")).toHaveCount(0);
+    await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("18");
+    const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
+    expect(s.shopPortions["x-old"]).toBe("100 g");
   });
   test("1) training-day share puts workout first even before training", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, gymA());
@@ -555,5 +555,73 @@ test.describe("ROUND3", () => {
     await open(page, { now: TUE_10, sleep: "8" }, gymA());
     const v = await (await page.request.get(`${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/preview/"}version.json?t=${Date.now()}`)).json();
     await expect(page.locator("[data-testid=app-version]")).toHaveText(`v${v.version}`);
+  });
+});
+
+test.describe("ROUND4", () => {
+  test("pantry columns align (name / qty / actions)", async ({ page }) => {
+    await open(page, { now: TUE_10, sleep: "8" });
+    await page.locator("[data-tab=shop]").click();
+    const xs = await page.evaluate(() => [...document.querySelectorAll(".shop-row")].map((r) => {
+      const q = r.querySelector(".shop-qty").getBoundingClientRect();
+      const a = r.querySelector(".shop-acts").getBoundingClientRect();
+      const n = r.querySelector(".shop-name").getBoundingClientRect();
+      return [Math.round(n.left), Math.round(q.right), Math.round(a.left)];
+    }));
+    expect(xs.length).toBeGreaterThan(8);
+    for (const k of [0, 1, 2]) expect(new Set(xs.map((x) => x[k])).size).toBe(1);
+    const units = await page.locator("[data-testid=shop-chicken]").innerText();
+    expect((units.match(/kg/g) || []).length).toBe(1);
+  });
+  test("whey counted in 份; logging 2 份 lowers stock and uneat restores", async ({ page }) => {
+    await open(page, { now: TUE_15, sleep: "8" });
+    await page.locator("[data-testid=meal-more-dinner]").click();
+    await page.locator("[data-testid=whey2-dinner]").click();
+    let s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
+    expect(s.wheyPacks).toBe(12);
+    await page.locator("[data-eat=dinner]").click();
+    s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
+    expect(s.wheyPacks).toBe(14);
+    await page.locator("[data-tab=shop]").click();
+    await expect(page.locator("[data-testid=shop-whey]")).toContainText("份");
+    await page.locator("[data-testid=shop-edit-whey]").click();
+    await page.locator("[data-whey-p=plant]").fill("26");
+    await page.locator("[data-testid=edit-save]").click();
+    s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
+    expect(s.wheyEst.byId.plant.protein).toBe(26);
+  });
+  test("add a meal, edit its time, totals include it, delete it", async ({ page }) => {
+    await open(page, { now: TUE_15, sleep: "8" });
+    await page.locator("[data-testid=add-meal]").click();
+    const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
+    const id = s.extraMeals["2026-11-10"][0].id;
+    expect(s.extraMeals["2026-11-10"][0].time).toBe("15:00");
+    await page.locator(`[data-testid=meal-time-${id}]`).fill("13:30");
+    await page.locator(`[data-testid=meal-time-${id}]`).dispatchEvent("change");
+    await expect(page.locator(".meal-row").first()).toHaveAttribute("data-testid", `meal-${id}`);
+    await page.locator(`[data-palm=${id}][data-delta="1"]`).click();
+    await page.locator(`[data-eat=${id}]`).click();
+    await expect(page.locator("[data-testid=remain]")).toContainText("1990");
+    await page.locator("[data-testid=meal-time-dinner]").fill("19:00");
+    await page.locator("[data-testid=meal-time-dinner]").dispatchEvent("change");
+    await expect(page.locator("[data-testid=meal-time-dinner]")).toHaveValue("19:00");
+    await page.locator(`[data-testid=meal-del-${id}]`).click();
+    await expect(page.locator(`[data-testid=meal-${id}]`)).toHaveCount(0);
+    await expect(page.locator("[data-testid=remain]")).toContainText("2150");
+  });
+  test("sleep page: Apple-style day view with stages, W/M bars with average", async ({ page }) => {
+    await open(page, { now: "2026-11-07T10:00:00+07:00", sleep: "8" });
+    await page.locator("[data-testid=sleep-home]").click();
+    await expect(page.locator("[data-testid=sleep-page]")).toBeVisible();
+    await expect(page.locator("[data-testid=sleep-total]")).toContainText(/\d+小時/);
+    for (const s of ["awake", "rem", "core", "deep"]) await expect(page.locator(`[data-testid=sleep-stage-${s}]`)).toBeVisible();
+    await expect(page.locator("[data-testid=sleep-stage-core]")).toContainText("核心");
+    await expect(page.locator("[data-testid=sleep-hypnogram]")).toBeVisible();
+    await expect(page.locator("[data-testid=sleep-schedule]")).toContainText("–");
+    await page.locator("[data-testid=sleep-range-W]").click();
+    await expect(page.locator("[data-testid=sleep-bars]")).toBeVisible();
+    await expect(page.locator("[data-testid=sleep-avg]")).toContainText("小時");
+    await page.locator("[data-testid=sleep-range-M]").click();
+    await expect(page.locator("[data-testid=sleep-bars]")).toBeVisible();
   });
 });
