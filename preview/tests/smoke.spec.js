@@ -8,7 +8,7 @@ const SAT_10 = "2026-11-07T10:00:00+07:00";
 
 function url(extra = {}) {
   const q = new URLSearchParams({ debug: "1", rest: "1", ...extra });
-  return `/preview/?${q.toString()}`;
+  return `${process.env.FATMI_PREFIX || ""}/preview/?${q.toString()}`;
 }
 
 function withBreakfast(day, extra = {}) {
@@ -553,7 +553,7 @@ test.describe("ROUND3", () => {
   });
   test("7) version shown on screen", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, gymA());
-    const v = await (await page.request.get("/preview/version.json")).json();
+    const v = await (await page.request.get(`${process.env.FATMI_PREFIX || ""}/preview/version.json?t=${Date.now()}`)).json();
     await expect(page.locator("[data-testid=app-version]")).toHaveText(`v${v.version}`);
   });
 });
