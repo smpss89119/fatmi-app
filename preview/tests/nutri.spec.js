@@ -135,4 +135,73 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     const real = await page.evaluate(() => localStorage.getItem("fatcat-v2"));
     expect(JSON.parse(real)).toEqual({ mine: 1 });
   });
+  test("r8-1) after merge, edit sheet + chip show current count; persists after reload", async ({ page }) => {
+    await fresh(page, { shopExtra: [
+      { id: "x-a", group: "protein", name: "雞柳 1 份", custom: true, amount: "1 份", palms: 0 },
+      { id: "x-b", group: "protein", name: "雞六 2 份", custom: true, amount: "2 份", palms: 0 },
+    ], shopPortions: { "x-a": "150 g" } });
+    await page.locator("[data-tab=shop]").click();
+    await page.locator("[data-testid=shop-edit-x-b]").click();
+    await page.locator("[data-testid=edit-name]").fill("雞柳");
+    page.once("dialog", (d) => d.accept());
+    await page.locator("[data-testid=edit-save]").click();
+    const check = async () => {
+      await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3 份");
+      await expect(page.locator("[data-testid=shop-chip-x-a]")).toHaveText("雞柳 3 份");
+      await expect(page.locator("[data-testid=shop-chip-x-b]")).toHaveCount(0);
+      await page.locator("[data-testid=shop-edit-x-a]").click();
+      await expect(page.locator("[data-testid=edit-n]")).toHaveValue("3");
+      await expect(page.locator("[data-testid=edit-qty]")).toHaveValue("3 份");
+      await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("150 g");
+    };
+    await check();
+    await page.screenshot(shot("fatmi_r8_merged_sheet.png"));
+    await page.reload(); await page.waitForSelector(".ttl");
+    await page.locator("[data-tab=shop]").click();
+    await check();
+  });
+  test("r8-2) legacy auto-converted items prefill 一份是多少 with basis and show 原 500g", async ({ page }) => {
+    await page.goto(`${P}?demo=legacy&debug=1&sleep=8&now=${encodeURIComponent(TUE_15)}#shop`);
+    await page.waitForSelector(".ttl");
+    await page.locator("[data-tab=shop]").click();
+    await page.locator("[data-testid=shop-edit-x-w]").click();
+    await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("150 g");
+    await expect(page.locator("[data-testid=edit-orig]")).toHaveText("原 500g");
+    await expect(page.locator("[data-testid=edit-n]")).toHaveValue("3");
+    await page.screenshot(shot("fatmi_r8_legacy_basis.png"));
+    await page.locator("[data-edit-close]").click();
+    await page.locator("[data-testid=shop-edit-x-veg]").click();
+    await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("100 g");
+    await expect(page.locator("[data-testid=edit-orig]")).toHaveText("原 300g");
+  });
+  test("r8-3) merge with different portion sizes converts via grams; pending blocks", async ({ page }) => {
+    await fresh(page, { shopExtra: [
+      { id: "x-a", group: "starch", name: "燕麥 3 份", custom: true, amount: "3 份", palms: 0 },
+      { id: "x-b", group: "starch", name: "燕麥片 100 g", custom: true, amount: "100 g", palms: 0 },
+      { id: "x-p", group: "starch", name: "麥片 一包", custom: true, amount: "一包", fists: 2 },
+    ], shopPortions: { "x-a": "150 g", "x-b": "100 g" } });
+    await page.locator("[data-tab=shop]").click();
+    await page.locator("[data-testid=shop-edit-x-b]").click();
+    await page.locator("[data-testid=edit-name]").fill("燕麥");
+    let msg = "";
+    page.once("dialog", (d) => { msg = d.message(); d.accept(); });
+    await page.locator("[data-testid=edit-save]").click();
+    await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
+    expect(msg).toBe("合併成 3.5 份（以 150g/份計）？");
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3.5 份");
+    await page.screenshot(shot("fatmi_r8_diff_merge.png"));
+    await page.locator("[data-testid=shop-edit-x-p]").click();
+    await page.locator("[data-testid=edit-name]").fill("燕麥");
+    let blocked = "";
+    page.once("dialog", (d) => { blocked = d.message(); d.accept(); });
+    await page.locator("[data-testid=edit-save]").click();
+    await expect.poll(() => blocked).toBe("請先設定「一份是多少」再合併");
+    await expect(page.locator("[data-testid=shop-edit-sheet]")).toBeVisible();
+    await page.locator("[data-edit-close]").click();
+    await expect(page.locator("[data-testid=shop-x-p]")).toBeVisible();
+    await page.reload(); await page.waitForSelector(".ttl");
+    await page.locator("[data-tab=shop]").click();
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3.5 份");
+    await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
+  });
 });

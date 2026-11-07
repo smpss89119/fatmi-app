@@ -143,12 +143,12 @@ test.describe("NUTRI", () => {
     await page.locator("[data-shop-cat=protein]").click();
     await page.locator("[data-testid=shop-add] [data-shop-add]").click();
     await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸");
-    await expect(page.locator("[data-testid=shop-chips]")).toContainText("300g");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸 3 份");
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForSelector(".ttl");
     await page.locator("[data-tab=shop]").click();
     await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸");
-    await expect(page.locator("[data-testid=shop-chips]")).toContainText("300g");
+    await expect(page.locator("[data-testid=shop-chips]")).toContainText("自製雞胸 3 份");
     await expect(page.locator("[data-testid=shop-frequent-rice]")).toHaveClass(/on/);
   });
 
@@ -436,8 +436,8 @@ test.describe("FITMI2", () => {
     if (await cats.isVisible()) await page.locator("[data-shop-cat=protein]").click();
     await page.locator("[data-shop-add]").click();
     const chip = page.locator("[data-testid=shop-chips]");
-    await expect(chip).toContainText("雞胸 600g");
-    expect((await chip.innerText()).split("600g").length - 1).toBe(1);
+    await expect(chip).toContainText("雞胸 5 份");
+    expect((await chip.innerText()).split("600g").length - 1).toBe(0);
     const row = page.locator(".shop-row").filter({ hasText: "5 份" }).filter({ hasText: "雞胸" });
     await expect(row).toHaveCount(1);
     expect(await page.getByText("600g600g").count()).toBe(0);

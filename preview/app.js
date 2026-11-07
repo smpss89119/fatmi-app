@@ -636,6 +636,57 @@ function shopServingsBase(st, it) {
   if (q && q.kind === "w") return { n: Math.round(q.g / (SERVING_G[it.group] || 120)), pending: false };
   return { n: orig, pending: true };
 }
+// grams per 份 if known: explicit weight portion, or the auto-convert basis. null = no basis (adopts target's); "pending" = unknown.
+function shopBasisG(st, it) {
+  if (it.whey) return null;
+  const portion = (st.shopPortions || {})[it.id];
+  const pp = portion ? parseAmt(portion) : null;
+  if (pp && pp.kind === "w" && pp.g > 0) return pp.g;
+  if (shopServings(st, it).pending) return "pending";
+  if (portion) return null;
+  const q = parseAmt(shopQtyOf(st, it));
+  const ovQty = (st.shopQty || {})[it.id] != null;
+  if ((it.custom || ovQty) && q && q.kind === "w") return SERVING_G[it.group] || 120;
+  return null;
+}
+function shopOrigWeight(st, it) {
+  const o = (st.shopOrig || {})[it.id];
+  if (o) return o;
+  const q = parseAmt(shopQtyOf(st, it));
+  return q && q.kind === "w" ? String(shopQtyOf(st, it)).replace(/\s+/g, "") : "";
+}
+// single source of truth: write the current count as "N 份" everywhere (qty/name), clear adj/used.
+function shopSetCountPatch(st, it, n, base = {}) {
+  const patch = { ...base };
+  const shopAdj = { ...(patch.shopAdj || st.shopAdj || {}) }; delete shopAdj[it.id];
+  const shopUsed = { ...(patch.shopUsed || st.shopUsed || {}) }; delete shopUsed[it.id];
+  const shopOrig = { ...(patch.shopOrig || st.shopOrig || {}) };
+  const ow = shopOrigWeight(st, it); if (ow && !shopOrig[it.id]) shopOrig[it.id] = ow;
+  const shopPortions = { ...(patch.shopPortions || st.shopPortions || {}) };
+  const bg = shopBasisG(st, it);
+  if (!shopPortions[it.id] && typeof bg === "number") shopPortions[it.id] = `${bg} g`;
+  Object.assign(patch, { shopAdj, shopUsed, shopOrig, shopPortions });
+  const amt = `${n} 份`;
+  if (it.custom) patch.shopExtra = (patch.shopExtra || st.shopExtra || []).map((x) => x.id === it.id ? { ...x, amount: amt, name: shopDisplayName(shopLabel(st, it), amt) } : x);
+  else patch.shopQty = { ...(patch.shopQty || st.shopQty || {}), [it.id]: amt };
+  return patch;
+}
+function round05(x) { return Math.round(x * 2) / 2; }
+// returns true when merged (or user cancelled handled); shows confirm/alert per rules
+function shopTryMerge(st, src, dst, srcN) {
+  const gS = shopBasisG(st, src), gT = shopBasisG(st, dst);
+  if (gS === "pending" || gT === "pending") { window.alert("請先設定「一份是多少」再合併"); return false; }
+  const left = srcN != null ? srcN : shopLeft(st, src).n;
+  let add = left, basis = "";
+  if (typeof gS === "number" && typeof gT === "number" && gS !== gT) { add = round05(left * gS / gT); basis = `（以 ${gT}g/份計）`; }
+  const total = shopLeft(st, dst).n + add;
+  if (!window.confirm(`合併成 ${total} 份${basis}？`)) return false;
+  const base = {};
+  if (src.custom) base.shopExtra = (st.shopExtra || []).filter((x) => x.id !== src.id);
+  else base.shopHide = { ...(st.shopHide || {}), [src.id]: true };
+  save(shopSetCountPatch(st, dst, total, base));
+  return true;
+}
 function shopDaysStats(st) {
   const shop = readShop(st);
   let planP = 0, planS = 0, gotP = 0, gotS = 0;
@@ -1990,7 +2041,7 @@ function renderShop(st) {
   const extras = (st.shopExtra || []);
   const chips = `<div class="chips shop-chips" data-testid="shop-chips">${extras.map((it) => {
     const on = !!(shop.checked[it.id] || shop.have[it.id]);
-    return `<button type="button" class="chip${on ? " on" : ""}" data-shop-chip="${it.id}" data-testid="shop-chip-${it.id}">${esc(it.name)}</button>`;
+    return `<button type="button" class="chip${on ? " on" : ""}" data-shop-chip="${it.id}" data-testid="shop-chip-${it.id}">${esc(shopLabel(st, it))} ${(() => { const l = shopLeft(st, it); return l.pending && !l.n ? "?" : l.n; })()} 份</button>`;
   }).join("")}</div>`;
   const knownDraft = matchShopItem(st, ui.shopDraftName);
   const add = ui.shopAdd ? `<div class="shop-add card" data-testid="shop-add">
@@ -2017,10 +2068,10 @@ function renderShop(st) {
           <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
           <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label></div>`; }).join("")
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
-         <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopServings(st, editIt).pending && !shopServings(st, editIt).n ? "" : shopServings(st, editIt).n}" placeholder="?"></label>
-         <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
-         <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || "")}" placeholder="例如 150 g 或 1 包"></label>
-         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : `約 ${shopServings(st, editIt).n} 份`}</p>`;
+         <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : shopLeft(st, editIt).n}" placeholder="?"></label>
+         <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
+         <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || (typeof shopBasisG(st, editIt) === "number" ? `${shopBasisG(st, editIt)} g` : ""))}" placeholder="例如 150 g 或 1 包"></label>${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
+         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : `約 ${shopLeft(st, editIt).n} 份`}</p>`;
     const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
     editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
@@ -2472,15 +2523,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (merge) {
     const src = shopAllItems(st).find((x) => x.id === merge.dataset.shopMerge);
     const dst = shopAllItems(st).find((x) => x.id === merge.dataset.mergeInto);
-    if (src && dst) {
-      const add = shopLeft(st, src).n;
-      const shopAdj = { ...(st.shopAdj || {}) };
-      shopAdj[dst.id] = (Number(shopAdj[dst.id]) || 0) + add;
-      const patch = { shopAdj };
-      if (src.custom) patch.shopExtra = (st.shopExtra || []).filter((x) => x.id !== src.id);
-      else patch.shopHide = { ...(st.shopHide || {}), [src.id]: true };
-      save(patch);
-    }
+    if (src && dst && !shopTryMerge(st, src, dst)) return;
     ui.shopEdit = null;
     render();
     return;
@@ -2501,15 +2544,8 @@ document.getElementById("main").addEventListener("click", (e) => {
       const nV = String((document.querySelector("[data-edit-n]") || {}).value || "").trim();
       const dupT = nameV && shopAllItems(st).find((x) => x.id !== id && !x.whey && x.group === it.group && normName(shopLabel(st, x)) === normName(nameV));
       if (dupT) {
-        const add = nV !== "" && !Number.isNaN(Number(nV)) ? Number(nV) : shopLeft(st, it).n;
-        const total = shopLeft(st, dupT).n + add;
-        if (!window.confirm(`合併成 ${total} 份？`)) return;
-        const shopAdj = { ...(st.shopAdj || {}) };
-        shopAdj[dupT.id] = (Number(shopAdj[dupT.id]) || 0) + add;
-        const patch = { shopAdj };
-        if (it.custom) patch.shopExtra = (st.shopExtra || []).filter((x) => x.id !== id);
-        else patch.shopHide = { ...(st.shopHide || {}), [id]: true };
-        save(patch);
+        const srcN = nV !== "" && !Number.isNaN(Number(nV)) ? Number(nV) : null;
+        if (!shopTryMerge(st, it, dupT, srcN)) return;
         ui.shopEdit = null;
         render();
         return;
@@ -2518,9 +2554,7 @@ document.getElementById("main").addEventListener("click", (e) => {
       if (portion) shopPortions[id] = portion; else delete shopPortions[id];
       const shopNames = { ...(st.shopNames || {}) };
       if (nameV && nameV !== shopSplit(it).label) shopNames[id] = nameV; else delete shopNames[id];
-      const shopAdj = { ...(st.shopAdj || {}) };
-      delete shopAdj[id];
-      const patch = { shopPortions, shopNames, shopAdj };
+      const patch = { shopPortions, shopNames };
       if (it.custom) {
         const label = shopSplit(it).label;
         patch.shopExtra = (st.shopExtra || []).map((x) => x.id === id ? { ...x, amount: qty, name: shopDisplayName(label, qty) } : x);
@@ -2531,14 +2565,9 @@ document.getElementById("main").addEventListener("click", (e) => {
       }
       save(patch);
       if (nV !== "" && !Number.isNaN(Number(nV))) {
-        const cur = shopServings(state(), it).n;
-        const want = Number(nV);
-        if (want !== cur || shopServings(state(), it).pending) {
-          const s2 = state();
-          const sq = { ...(s2.shopQty || {}) };
-          if (it.custom) save({ shopExtra: (s2.shopExtra || []).map((x) => x.id === id ? { ...x, amount: `${want} 份`, name: shopDisplayName(shopLabel(s2, it), `${want} 份`) } : x) });
-          else { sq[id] = `${want} 份`; save({ shopQty: sq }); }
-        }
+        const s2 = state();
+        const l = shopLeft(s2, it);
+        if (Number(nV) !== l.n || l.pending) save(shopSetCountPatch(s2, it, Number(nV)));
       }
     }
     ui.shopEdit = null;
@@ -3033,7 +3062,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-13";
+const APP_VERSION = "2026.11.07-preview-14";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
