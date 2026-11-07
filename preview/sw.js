@@ -1,4 +1,4 @@
-const C = "fatcat-preview-20261107y";
+const C = "fatcat-preview-20261107aa";
 const F = [
   "./",
   "index.html",
@@ -8,9 +8,9 @@ const F = [
   "data.json",
   "body-svg.js",
   "version.json",
-  "manifest.webmanifest",
-  "icon-180.png",
-  "icon-512.png",
+  "manifest.webmanifest?v=preview-25",
+  "icon-180-20261107p25.png",
+  "icon-512-20261107p25.png",
 ];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(C).then((c) => c.addAll(F)).then(() => self.skipWaiting()));
@@ -43,7 +43,7 @@ self.addEventListener("fetch", (e) => {
   const u = new URL(e.request.url);
   if (u.origin !== location.origin) return;
   const path = u.pathname;
-  const netFirst = path.endsWith("data.json") || path.endsWith("version.json");
+  const netFirst = path.endsWith("data.json") || path.endsWith("version.json") || path.endsWith("manifest.webmanifest") || /icon-\d+/.test(path);
   if (netFirst) {
     e.respondWith(
       fetch(e.request, { cache: "no-store" })
