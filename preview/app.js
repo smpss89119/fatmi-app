@@ -116,6 +116,9 @@ function state() {
     extraMeals: s.extraMeals || {},
     shopPortions: s.shopPortions || {},
     shopQty: s.shopQty || {},
+    shopUsed: s.shopUsed || {},
+    shopNames: s.shopNames || {},
+    shopAdj: s.shopAdj || {},
   };
 }
 
@@ -510,6 +513,7 @@ function suggestionOf(st, id, d = now()) {
 function hasCustomPortions(m) {
   if (!m) return false;
   if (m.mode === "whey2" || m.mode === "out") return true;
+  if (m.mode === "else") return false;
   return !!(Number(m.palms) || Number(m.fists) || m.veg);
 }
 function mealEstimate(st, id, d = now()) {
@@ -598,10 +602,16 @@ function shopQtyOf(st, it) {
 // Servings for nutrition. Only explicit weights auto-convert; ambiguous items keep
 // their original palms/fists and are flagged pending (待確認) until 一份是多少 is set.
 function shopServings(st, it) {
+  if (it.whey) return { n: st.wheyPacks != null ? Number(st.wheyPacks) : 14, pending: false };
+  const adj = Number((st.shopAdj || {})[it.id]) || 0;
+  const r = shopServingsBase(st, it);
+  return { n: r.n + adj, pending: r.pending };
+}
+function shopServingsBase(st, it) {
   const orig = Number(it.group === "starch" ? it.fists : it.palms) || 0;
-  if (it.whey) return { n: orig, pending: false };
   const portion = (st.shopPortions || {})[it.id];
   const q = parseAmt(shopQtyOf(st, it));
+  if (q && q.kind === "c" && q.unit === "份") return { n: q.n, pending: false };
   const ovQty = (st.shopQty || {})[it.id] != null;
   if (portion) {
     const pp = parseAmt(portion);
@@ -609,8 +619,8 @@ function shopServings(st, it) {
     if (q && pp && q.kind === "c" && pp.kind === "c" && pp.n > 0 && (!pp.unit || !q.unit || pp.unit === q.unit)) return { n: Math.round(q.n / pp.n), pending: false };
     return { n: orig, pending: true };
   }
-  if (!it.custom && !ovQty) return { n: orig, pending: false };
-  if (it.group === "veg") return { n: 0, pending: false };
+  if (!it.custom && !ovQty) return { n: orig || (q && q.kind === "c" ? q.n : 0), pending: false };
+  if (it.group === "veg" && q && q.kind === "c") return { n: q.n, pending: false };
   if (q && q.kind === "w") return { n: Math.round(q.g / (SERVING_G[it.group] || 120)), pending: false };
   return { n: orig, pending: true };
 }
@@ -618,7 +628,7 @@ function shopDaysStats(st) {
   const shop = readShop(st);
   let planP = 0, planS = 0, gotP = 0, gotS = 0;
   for (const item of shopAllItems(st)) {
-    const sv = shopServings(st, item);
+    const sv = item.whey ? { n: Number(item.palms) || 0 } : shopServings(st, item);
     const palms = item.group === "protein" ? sv.n : 0;
     const fists = item.group === "starch" ? sv.n : 0;
     planP += palms;
@@ -651,6 +661,14 @@ function shopDisplayName(label, amount) {
   if (!amt) return name;
   if (name.includes(amt)) return name;
   return `${name} ${amt}`.trim();
+}
+function shopLabel(st, it) {
+  return ((st && st.shopNames) || {})[it.id] || shopSplit(it).label;
+}
+function shopLeft(st, it) {
+  const sv = shopServings(st, it);
+  if (it.whey) return sv;
+  return { n: Math.max(0, sv.n - (Number((st.shopUsed || {})[it.id]) || 0)), pending: sv.pending };
 }
 function shopSplit(it) {
   if (it && it.label != null) return { label: it.label, qty: it.qty || "" };
@@ -1470,18 +1488,70 @@ function openSwap(st, mealId) {
     elseMode: false,
   };
 }
+const PER_SERVING = { protein: { kcal: PALM_KCAL, protein: PALM_PROTEIN }, starch: { kcal: FIST_KCAL, protein: FIST_PROTEIN }, veg: { kcal: 40, protein: 2 } };
+function elseItems(st) {
+  const out = [];
+  for (const it of shopAllItems(st)) {
+    if (it.whey) {
+      for (const o of WHEY_OPTIONS || []) {
+        const w = resolveWhey(st, o.id);
+        out.push({ key: `whey:${o.id}`, name: o.name.replace("樂維根 ", ""), left: shopLeft(st, it).n, kcal: w.kcal == null ? 170 : Number(w.kcal), protein: Number(w.protein), whey: true });
+      }
+      continue;
+    }
+    const l = shopLeft(st, it);
+    const m = PER_SERVING[it.group] || PER_SERVING.protein;
+    out.push({ key: it.id, name: shopLabel(st, it), left: l.n, pending: l.pending, kcal: m.kcal, protein: m.protein });
+  }
+  return out;
+}
+function elseTotals(st) {
+  const sel = (ui.elseSel || {});
+  let kcal = 0, protein = 0;
+  const names = [];
+  for (const x of elseItems(st)) {
+    const n = Number(sel[x.key]) || 0;
+    if (!n) continue;
+    kcal += n * x.kcal; protein += n * x.protein; names.push(`${x.name} ${n} 份`);
+  }
+  if (ui.elseOut) {
+    const base = (OUT_MEALS || []).find((o) => o.id === ui.elseOut);
+    const size = (OUT_SIZES || []).find((s) => s.id === (ui.elseOutSize || "normal")) || { mult: 1, name: "" };
+    if (base) { kcal += Math.round(base.kcal * size.mult); protein += Math.round(base.protein * size.mult); names.push(`外食${base.name}${size.name ? "／" + size.name : ""}`); }
+  }
+  for (const f of ui.elseFree || []) { kcal += Number(f.kcal) || 0; protein += Number(f.protein) || 0; names.push(f.name); }
+  return { kcal: Math.round(kcal), protein: Math.round(protein), name: names.join("＋") };
+}
 function renderElse(st) {
   const id = ui.elseMeal;
   if (!id) return renderHome(st);
-  const items = (typeof BENTO_ELSE !== "undefined" ? BENTO_ELSE : []).filter((x) => !/罐頭/.test(x.name));
+  const sel = ui.elseSel || {};
+  const rows = elseItems(st).map((x) => {
+    const n = Number(sel[x.key]) || 0;
+    return `<div class="else-row" data-testid="else-${x.key}"><span class="nm">${esc(x.name)}${x.pending ? '<span class="pend">待確認</span>' : ""}</span>
+      <span class="left">剩 ${x.left} 份</span>
+      <span class="stp"><button type="button" data-else-dec="${x.key}" aria-label="少一份">−</button><b data-testid="else-n-${x.key}">${n}</b><button type="button" data-else-inc="${x.key}" data-testid="else-inc-${x.key}" aria-label="多一份">+</button></span></div>`;
+  }).join("");
+  const outs = (OUT_MEALS || []).map((o) => `<button type="button" class="chip${ui.elseOut === o.id ? " on" : ""}" data-else-out="${o.id}" data-testid="else-out-${o.id}">${esc(o.name)}</button>`).join("");
+  const sizes = ui.elseOut ? (OUT_SIZES || []).map((s) => `<button type="button" class="chip${(ui.elseOutSize || "normal") === s.id ? " on" : ""}" data-else-size="${s.id}">${esc(s.name)}</button>`).join("") : "";
+  const free = (ui.elseFree || []).map((f, i) => `<div class="else-row"><span class="nm">${esc(f.name)}</span><span class="left">${f.kcal} kcal</span><span class="stp"><button type="button" data-else-free-del="${i}" aria-label="移除">✕</button></span></div>`).join("");
+  const tot = elseTotals(st);
   return `<button type="button" class="btn" data-go="today">← 回到今天</button>
-    <h2 class="sheet-title">吃了別的</h2>
-    <p class="note">便當估算熱量與蛋白質，選完會給下一餐建議。只列家常便當與自煮組合。</p>
-    <div class="swap-list" data-testid="else-list">
-      ${items.map((it) => `<button type="button" data-else-pick="${esc(it.id)}">
-        ${esc(it.name)}<small>${it.kcal} kcal · 蛋白 ${it.protein} g</small>
-      </button>`).join("")}
-    </div>`;
+    <h2 class="sheet-title">吃了別的 · ${esc(mealTime(st, id))}</h2>
+    <p class="sec">家裡有的</p>
+    <div class="card else-list" data-testid="else-list">${rows}</div>
+    <p class="sec">外食</p>
+    <div class="chips" data-testid="else-out">${outs}</div>${sizes ? `<div class="chips">${sizes}</div>` : ""}
+    <p class="sec">其他</p>
+    ${free}
+    ${ui.elseFreeOpen ? `<div class="card shop-add" data-testid="else-free-form">
+        <input type="text" data-else-free-name placeholder="名稱" aria-label="名稱">
+        <input type="number" inputmode="numeric" data-else-free-kcal placeholder="kcal" aria-label="kcal">
+        <input type="number" inputmode="numeric" data-else-free-protein placeholder="蛋白 g" aria-label="蛋白">
+        <button type="button" class="btn primary" data-else-free-add data-testid="else-free-add">加入</button></div>`
+      : `<button type="button" class="btn full" data-else-free-open data-testid="else-free-open">＋ 其他</button>`}
+    <div class="else-total" data-testid="else-total">${tot.kcal} kcal · 蛋白 ${tot.protein} g</div>
+    <button type="button" class="btn primary xl" data-else-save data-testid="else-save"${tot.kcal || tot.protein ? "" : " disabled"}>✓ 吃了</button>`;
 }
 function renderSwap(st) {
   if (ui.elseMeal) return renderElse(st);
@@ -1894,12 +1964,12 @@ function renderShop(st) {
       const sp = shopSplit(it);
       const qty = it.whey
         ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份</small></span>`
-        : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${esc(shopQtyOf(st, it))}</span>`;
+        : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return l.pending && !l.n ? "? 份" : `${l.n} 份`; })()}</span>`;
       const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : "";
       const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
       return `<div class="item shop-row${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
         <span class="ck${on ? " on" : ""}">${on ? "✓" : ""}</span>
-        <span class="shop-name"><b>${esc(sp.label)}</b>${pend}${have ? `<span class="have-tag">家裡有</span>` : ""}</span>
+        <span class="shop-name"><b>${esc(shopLabel(st, it))}</b>${pend}${have ? `<span class="have-tag">家裡有</span>` : ""}</span>
         ${qty}
         <span class="shop-acts"><button type="button" class="star${freq ? " on" : ""}" data-shop-frequent="${it.id}" data-testid="shop-frequent-${it.id}" aria-label="常買">${freq ? "★" : "☆"}</button>${del}</span>
       </div>`;
@@ -1934,11 +2004,15 @@ function renderShop(st) {
       ? (WHEY_OPTIONS || []).map((o) => { const w = resolveWhey(st, o.id); return `<div class="edit-row"><span>${esc(o.name.replace("樂維根 ", ""))}</span>
           <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
           <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label></div>`; }).join("")
-      : `<label class="edit-row"><span>數量</span><input type="text" data-edit-qty value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
+      : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
+         <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopServings(st, editIt).pending && !shopServings(st, editIt).n ? "" : shopServings(st, editIt).n}" placeholder="?"></label>
+         <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
          <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || "")}" placeholder="例如 150 g 或 1 包"></label>
          <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : `約 ${shopServings(st, editIt).n} 份`}</p>`;
+    const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && shopLabel(st, x) === shopLabel(st, editIt));
+    const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
     editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
-      <div class="k">${esc(sp.label)}</div>${body}
+      <div class="k">${esc(shopLabel(st, editIt))}</div>${body}${mergeBtn}
       <div class="acts"><button type="button" class="btn primary xl" data-edit-save="${editIt.id}" data-testid="edit-save">儲存</button>
       ${editIt.custom ? `<button type="button" class="btn" data-shop-del="${editIt.id}" data-testid="edit-del">刪除</button>` : ""}
       <button type="button" class="btn full" data-edit-close>關閉</button></div></div></div>`;
@@ -2327,11 +2401,9 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (whey2) {
     const w = whey2Macros(st);
     const prev = ((st.mealLogs || {})[todayKey()] || {})[whey2.dataset.whey2] || {};
-    const back = prev.eaten ? Number(prev.wheyUsed) || 0 : 0;
-    save({ wheyPacks: Math.max(0, (st.wheyPacks != null ? Number(st.wheyPacks) : 14) + back - 2) });
-    patchMeal(state(), whey2.dataset.whey2, {
-      mode: "whey2", eaten: true, palms: 0, fists: 0, veg: false,
-      name: w.name, kcal: w.kcal, protein: w.protein, scoopIds: w.scoopIds, wheyUsed: 2,
+    patchMeal(st, whey2.dataset.whey2, {
+      mode: "whey2", eaten: !!prev.eaten, palms: 0, fists: 0, veg: false,
+      name: w.name, kcal: w.kcal, protein: w.protein, scoopIds: w.scoopIds,
     });
     render();
     return;
@@ -2384,6 +2456,23 @@ document.getElementById("main").addEventListener("click", (e) => {
   const shopEdit = e.target.closest("[data-shop-edit]");
   if (shopEdit) { ui.shopEdit = shopEdit.dataset.shopEdit; render(); return; }
   if (e.target.closest("[data-edit-close]")) { ui.shopEdit = null; render(); return; }
+  const merge = e.target.closest("[data-shop-merge]");
+  if (merge) {
+    const src = shopAllItems(st).find((x) => x.id === merge.dataset.shopMerge);
+    const dst = shopAllItems(st).find((x) => x.id === merge.dataset.mergeInto);
+    if (src && dst) {
+      const add = shopLeft(st, src).n;
+      const shopAdj = { ...(st.shopAdj || {}) };
+      shopAdj[dst.id] = (Number(shopAdj[dst.id]) || 0) + add;
+      const patch = { shopAdj };
+      if (src.custom) patch.shopExtra = (st.shopExtra || []).filter((x) => x.id !== src.id);
+      else patch.shopHide = { ...(st.shopHide || {}), [src.id]: true };
+      save(patch);
+    }
+    ui.shopEdit = null;
+    render();
+    return;
+  }
   const editSave = e.target.closest("[data-edit-save]");
   if (editSave) {
     const id = editSave.dataset.editSave;
@@ -2396,9 +2485,15 @@ document.getElementById("main").addEventListener("click", (e) => {
     } else if (it) {
       const qty = String((document.querySelector("[data-edit-qty]") || {}).value || "").trim();
       const portion = String((document.querySelector("[data-edit-portion]") || {}).value || "").trim();
+      const nameV = String((document.querySelector("[data-edit-name]") || {}).value || "").trim();
+      const nV = String((document.querySelector("[data-edit-n]") || {}).value || "").trim();
       const shopPortions = { ...(st.shopPortions || {}) };
       if (portion) shopPortions[id] = portion; else delete shopPortions[id];
-      const patch = { shopPortions };
+      const shopNames = { ...(st.shopNames || {}) };
+      if (nameV && nameV !== shopSplit(it).label) shopNames[id] = nameV; else delete shopNames[id];
+      const shopAdj = { ...(st.shopAdj || {}) };
+      delete shopAdj[id];
+      const patch = { shopPortions, shopNames, shopAdj };
       if (it.custom) {
         const label = shopSplit(it).label;
         patch.shopExtra = (st.shopExtra || []).map((x) => x.id === id ? { ...x, amount: qty, name: shopDisplayName(label, qty) } : x);
@@ -2408,6 +2503,16 @@ document.getElementById("main").addEventListener("click", (e) => {
         patch.shopQty = shopQty;
       }
       save(patch);
+      if (nV !== "" && !Number.isNaN(Number(nV))) {
+        const cur = shopServings(state(), it).n;
+        const want = Number(nV);
+        if (want !== cur || shopServings(state(), it).pending) {
+          const s2 = state();
+          const sq = { ...(s2.shopQty || {}) };
+          if (it.custom) save({ shopExtra: (s2.shopExtra || []).map((x) => x.id === id ? { ...x, amount: `${want} 份`, name: shopDisplayName(shopLabel(s2, it), `${want} 份`) } : x) });
+          else { sq[id] = `${want} 份`; save({ shopQty: sq }); }
+        }
+      }
     }
     ui.shopEdit = null;
     render();
@@ -2555,16 +2660,20 @@ document.getElementById("main").addEventListener("click", (e) => {
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
     let packs = st.wheyPacks != null ? Number(st.wheyPacks) : 14;
+    let shopUsed = { ...(st.shopUsed || {}) };
     if (meals[id] && meals[id].eaten) {
       packs += Number(meals[id].wheyUsed) || 0;
-      meals[id] = { eaten: false };
+      for (const [k, n] of Object.entries(meals[id].pantryUsed || {})) shopUsed[k] = Math.max(0, (shopUsed[k] || 0) - n);
+      const keep = meals[id].mode ? { ...meals[id] } : {};
+      delete keep.wheyUsed; delete keep.pantryUsed;
+      meals[id] = { ...keep, eaten: false };
     } else {
       const est = mealEstimate(st, id);
       const used = Array.isArray(est.scoopIds) ? est.scoopIds.length : 0;
       packs = Math.max(0, packs - used);
       meals[id] = { ...(meals[id] || {}), ...est, eaten: true, wheyUsed: used };
     }
-    save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyPacks: packs });
+    save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyPacks: packs, shopUsed });
     render();
     return;
   }
@@ -2588,9 +2697,56 @@ document.getElementById("main").addEventListener("click", (e) => {
   const eatElse = e.target.closest("[data-eat-else]");
   if (eatElse) {
     ui.elseMeal = eatElse.dataset.eatElse;
+    ui.elseSel = {}; ui.elseOut = null; ui.elseOutSize = null; ui.elseFree = []; ui.elseFreeOpen = false;
     ui.swap = null;
     render();
     window.scrollTo(0, 0);
+    return;
+  }
+  const eInc = e.target.closest("[data-else-inc]");
+  const eDec = e.target.closest("[data-else-dec]");
+  if ((eInc || eDec) && ui.elseMeal) {
+    const k = (eInc || eDec).dataset[eInc ? "elseInc" : "elseDec"];
+    const sel = { ...(ui.elseSel || {}) };
+    sel[k] = Math.max(0, (Number(sel[k]) || 0) + (eInc ? 1 : -1));
+    ui.elseSel = sel; render(); return;
+  }
+  const eOut = e.target.closest("[data-else-out]");
+  if (eOut && ui.elseMeal) { ui.elseOut = ui.elseOut === eOut.dataset.elseOut ? null : eOut.dataset.elseOut; render(); return; }
+  const eSize = e.target.closest("[data-else-size]");
+  if (eSize && ui.elseMeal) { ui.elseOutSize = eSize.dataset.elseSize; render(); return; }
+  if (e.target.closest("[data-else-free-open]")) { ui.elseFreeOpen = true; render(); return; }
+  if (e.target.closest("[data-else-free-add]")) {
+    const nm = String((document.querySelector("[data-else-free-name]") || {}).value || "").trim();
+    const kc = Number((document.querySelector("[data-else-free-kcal]") || {}).value) || 0;
+    const pr = Number((document.querySelector("[data-else-free-protein]") || {}).value) || 0;
+    if (nm || kc || pr) ui.elseFree = (ui.elseFree || []).concat([{ name: nm || "其他", kcal: kc, protein: pr }]);
+    ui.elseFreeOpen = false; render(); return;
+  }
+  const eFreeDel = e.target.closest("[data-else-free-del]");
+  if (eFreeDel) { ui.elseFree = (ui.elseFree || []).filter((_, i) => i !== Number(eFreeDel.dataset.elseFreeDel)); render(); return; }
+  if (e.target.closest("[data-else-save]") && ui.elseMeal) {
+    const tot = elseTotals(st);
+    const day = todayKey();
+    const meals = { ...((st.mealLogs || {})[day] || {}) };
+    const prev = meals[ui.elseMeal] || {};
+    let packs = (st.wheyPacks != null ? Number(st.wheyPacks) : 14) + (prev.eaten ? Number(prev.wheyUsed) || 0 : 0);
+    const shopUsed = { ...(st.shopUsed || {}) };
+    for (const [k, n] of Object.entries(prev.eaten ? prev.pantryUsed || {} : {})) shopUsed[k] = Math.max(0, (shopUsed[k] || 0) - n);
+    const pantryUsed = {};
+    let wheyUsed = 0;
+    for (const [k, n0] of Object.entries(ui.elseSel || {})) {
+      const n = Number(n0) || 0;
+      if (!n) continue;
+      if (k.startsWith("whey:")) { wheyUsed += n; continue; }
+      pantryUsed[k] = n;
+      shopUsed[k] = (shopUsed[k] || 0) + n;
+    }
+    packs = Math.max(0, packs - wheyUsed);
+    meals[ui.elseMeal] = { mode: "else", name: tot.name, kcal: tot.kcal, protein: tot.protein, eaten: true, pantryUsed, wheyUsed };
+    save({ mealLogs: { ...st.mealLogs, [day]: meals }, shopUsed, wheyPacks: packs });
+    ui.elseMeal = null; ui.elseSel = {}; ui.elseOut = null; ui.elseOutSize = null; ui.elseFree = []; ui.elseFreeOpen = false;
+    go("today");
     return;
   }
   const elsePick = e.target.closest("[data-else-pick]");
@@ -2850,7 +3006,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-10";
+const APP_VERSION = "2026.11.07-preview-11";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;

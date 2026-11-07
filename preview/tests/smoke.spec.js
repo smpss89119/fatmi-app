@@ -259,6 +259,7 @@ test.describe("FITMI", () => {
     const snack = page.locator("[data-testid=meal-snack]");
     await snack.locator("[data-testid=meal-more-snack]").click();
     await snack.locator("[data-testid=whey2-snack]").click();
+    await snack.locator("[data-eat]").click();
     const ring = page.locator("[data-testid=eat-card] .ring").first().locator("b");
     await expect(ring).toHaveText("340");
     await expect(snack).toHaveClass(/eaten/);
@@ -437,10 +438,9 @@ test.describe("FITMI2", () => {
     const chip = page.locator("[data-testid=shop-chips]");
     await expect(chip).toContainText("雞胸 600g");
     expect((await chip.innerText()).split("600g").length - 1).toBe(1);
-    const row = page.locator(".shop-row", { has: page.locator("[data-shop-del], [data-shop-edit]") }).filter({ hasText: "600 g" });
+    const row = page.locator(".shop-row").filter({ hasText: "5 份" }).filter({ hasText: "雞胸" });
     await expect(row).toHaveCount(1);
-    const rowText = (await row.innerText()).replace(/\s+/g, " ");
-    expect((rowText.match(/600/g) || []).length).toBe(1);
+    expect(await page.getByText("600g600g").count()).toBe(0);
     // 600 g of protein = 5 servings (120 g each) -> (29 + 5) / 2 = 17 days, never 314
     await expect(page.locator("[data-testid=shop-protein-plan]")).toHaveText("17");
     await expect(page.locator("[data-testid=shop-bars]")).not.toContainText("314");
@@ -571,12 +571,13 @@ test.describe("ROUND4", () => {
     expect(xs.length).toBeGreaterThan(8);
     for (const k of [0, 1, 2]) expect(new Set(xs.map((x) => x[k])).size).toBe(1);
     const units = await page.locator("[data-testid=shop-chicken]").innerText();
-    expect((units.match(/kg/g) || []).length).toBe(1);
+    expect((units.match(/份/g) || []).length).toBe(1);
   });
   test("whey counted in 份; logging 2 份 lowers stock and uneat restores", async ({ page }) => {
     await open(page, { now: TUE_15, sleep: "8" });
     await page.locator("[data-testid=meal-more-dinner]").click();
     await page.locator("[data-testid=whey2-dinner]").click();
+    await page.locator("[data-eat=dinner]").click();
     let s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
     expect(s.wheyPacks).toBe(12);
     await page.locator("[data-eat=dinner]").click();
