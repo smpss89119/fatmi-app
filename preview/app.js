@@ -580,6 +580,12 @@ function wheyPowderMacros(st, d = now()) {
 }
 // Snack = chosen powder + the other component (default 地瓜 150g, or 外食/掌拳 portions; whey2 = powder only)
 // false when the logged snack is a non-powder meal (吃了別的 / 換成雞胸飯) — then its own logged numbers count
+function mealCustomized(m) {
+  if (!m) return false;
+  if (m.mode) return true; // out / whey2 / else
+  if (hasCustomPortions(m)) return true;
+  return false;
+}
 function snackIsPowder(logged) {
   if (!logged) return true;
   if (logged.mode === "else") return false;
@@ -1599,6 +1605,7 @@ function renderMealRow(st, id, trainDay) {
     <div class="who"><input type="time" class="meal-time" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="時間"> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
     ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}${elsePick}
     ${id === "snack" ? (snackIsPowder(logged) ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}${wheyNutriLine(st)}` : `<p class="muted" data-testid="snack-nonpowder">已記：${esc(est.name || "")}（非蛋白粉，取消「吃了」後可再選口味）</p>`) : ""}
+    ${mealCustomized(logged) ? `<div class="restore-row"><button type="button" class="btn restore-btn" data-meal-restore="${id}" data-testid="meal-restore-${id}"${eaten ? " disabled" : ""}>↺ 恢復原菜單</button>${eaten ? `<small class="muted" data-testid="meal-restore-hint-${id}">先取消「吃了」</small>` : ""}</div>` : ""}
     <div class="row-acts">
       <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
       <button type="button" class="btn xl" data-eat-else="${id}">吃了別的</button>
@@ -2732,6 +2739,18 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const restore = e.target.closest("[data-meal-restore]");
+  if (restore) {
+    const id = restore.dataset.mealRestore;
+    const day = todayKey();
+    const meals = { ...((st.mealLogs || {})[day] || {}) };
+    if (meals[id] && meals[id].eaten) return; // must un-log first (button is disabled)
+    delete meals[id];
+    if (ui.mealMore === id) ui.mealMore = null;
+    save({ mealLogs: { ...(st.mealLogs || {}), [day]: meals } });
+    render();
+    return;
+  }
   const wheyAdj = e.target.closest("[data-whey-adj]");
   if (wheyAdj) {
     const id = wheyAdj.dataset.wheyAdj;
@@ -3370,7 +3389,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-37";
+const APP_VERSION = "2026.11.07-preview-38";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
