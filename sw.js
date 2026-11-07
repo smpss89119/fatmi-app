@@ -1,4 +1,4 @@
-const C = "fatcat-2-20261107l";
+const C = "fatcat-2-20261107m";
 const F = [
   "./",
   "index.html",
@@ -8,7 +8,7 @@ const F = [
   "data.json",
   "body-svg.js",
   "version.json",
-  "manifest.webmanifest?v=preview-25",
+  "manifest.webmanifest?v=preview-27",
   "icon-180-20261107p25.png",
   "icon-512-20261107p25.png",
 ];

@@ -3137,9 +3137,9 @@ window.addEventListener("hashchange", () => {
 });
 
 
-const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-25", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
+const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-27", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-11";
+const APP_VERSION = "2026.11.07-12";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3228,30 +3228,44 @@ function maybeApplyDeferredUpdate() {
   }
 }
 
+// Pull-to-refresh: high threshold; disabled during workout / busy (set/rest/forms).
+const PTR_HINT = 140;
+const PTR_FIRE = 200;
+function ptrAllowed() {
+  if (isBusy()) return false;
+  if (document.body.classList.contains("mode-workout")) return false;
+  const s = (typeof load === "function" ? load() : {}).session;
+  if (s && s.phase && s.phase !== "done") return false;
+  if (window.scrollY > 2) return false;
+  return true;
+}
 let ptrY = null;
 window.addEventListener("touchstart", (e) => {
-  if (window.scrollY > 2) { ptrY = null; return; }
+  if (!ptrAllowed()) { ptrY = null; return; }
   ptrY = e.touches[0].clientY;
 }, { passive: true });
 window.addEventListener("touchmove", (e) => {
   if (ptrY == null) return;
+  if (!ptrAllowed()) { ptrY = null; const b = document.getElementById("ptr"); if (b) b.classList.remove("on"); return; }
   const dy = e.touches[0].clientY - ptrY;
   let bar = document.getElementById("ptr");
   if (!bar) {
     bar = document.createElement("div");
     bar.id = "ptr";
-    bar.textContent = "放開以重新整理全部";
+    bar.textContent = "繼續下拉以重新整理";
     document.body.appendChild(bar);
   }
-  bar.classList.toggle("on", dy > 56);
+  bar.textContent = dy > PTR_FIRE ? "放開以重新整理全部" : "繼續下拉以重新整理";
+  bar.classList.toggle("on", dy > PTR_HINT);
 }, { passive: true });
 window.addEventListener("touchend", (e) => {
   if (ptrY == null) return;
   const dy = e.changedTouches[0].clientY - ptrY;
+  const ok = ptrAllowed() && dy > PTR_FIRE;
   ptrY = null;
   const bar = document.getElementById("ptr");
   if (bar) bar.classList.remove("on");
-  if (dy > 80) hardRefresh();
+  if (ok) hardRefresh();
 }, { passive: true });
 
 document.addEventListener("visibilitychange", () => {
