@@ -112,6 +112,7 @@ function state() {
     wheyEst: s.wheyEst || {},
     scoopPick: s.scoopPick || {},
     wheyHave: s.wheyHave || null,
+    wheyStockG: s.wheyStockG || null,
     dinnerAlt: s.dinnerAlt || {},
     lastAdvice: s.lastAdvice || "",
     shopWeek: s.shopWeek || null,
@@ -255,6 +256,35 @@ function resolveWhey(st, id) {
     note: base.note || null,
     chip: base.chip || null,
   };
+}
+function wheyStock(st) {
+  if (st && st.wheyStockG && typeof st.wheyStockG === "object") return { ...st.wheyStockG };
+  const raw = st && st.wheyHave;
+  const first = (Array.isArray(raw) && raw[0]) || "plantAlmond";
+  const packs = st && st.wheyPacks != null ? Number(st.wheyPacks) : 14;
+  return { [first]: Math.round(packs * (Number(resolveWhey(st || {}, first).scoopG) || 40)) };
+}
+function wheyG(st, id) { return Number(resolveWhey(st, id).scoopG) || 40; }
+function wheyServ(st, id, stock) { return Math.round(((stock || wheyStock(st))[id] || 0) / wheyG(st, id) * 10) / 10; }
+function wheyTotalG(st) { return Object.values(wheyStock(st)).reduce((a, b) => a + (Number(b) || 0), 0); }
+function wheyTotalServ(st) { const sk = wheyStock(st); return Math.round(Object.keys(sk).reduce((a, id) => a + (sk[id] || 0) / wheyG(st, id), 0) * 10) / 10; }
+function wheyLowList(st) { const sk = wheyStock(st); return wheyHaveIds(st).filter((id) => (sk[id] || 0) / wheyG(st, id) < 15); }
+function wheyLowText(st) {
+  const sk = wheyStock(st);
+  return wheyLowList(st).map((id) => `${wheyChip(resolveWhey(st, id))} 剩 ${wheyServ(st, id, sk)} 份≈${Math.round(sk[id] || 0)}g（15 份=${15 * wheyG(st, id)}g）`).join("；");
+}
+// deduct up to `scoops` scoops of id; returns grams actually taken (never below 0)
+function wheyTake(st, stock, id, scoops) {
+  const want = wheyG(st, id) * scoops;
+  const g = Math.min(Number(stock[id]) || 0, want);
+  if (g > 0) stock[id] = Math.round(((Number(stock[id]) || 0) - g) * 10) / 10;
+  return g;
+}
+function wheyRefund(st, stock, m) {
+  if (!m || !m.eaten) return;
+  if (Array.isArray(m.wheyDed)) { for (const d of m.wheyDed) if (d && d.id && d.g) stock[d.id] = Math.round(((Number(stock[d.id]) || 0) + Number(d.g)) * 10) / 10; return; }
+  const n = Number(m.wheyUsed) || 0;
+  if (n) { const id = wheyHaveIds(st)[0] || "plantAlmond"; stock[id] = (Number(stock[id]) || 0) + n * wheyG(st, id); }
 }
 function wheyScoopG(st) {
   const id = wheyHaveIds(st)[0] || "plantAlmond";
@@ -566,7 +596,7 @@ function readShop(st) {
       checked: st.shopChecked || {},
       have: st.shopHave || {},
       hide: st.shopHide || {},
-      wheyPacks: st.wheyPacks != null ? Number(st.wheyPacks) : 14,
+      wheyPacks: wheyTotalServ(st),
       hintCollapsed: !!st.shopHintCollapsed,
     };
   }
@@ -575,7 +605,7 @@ function readShop(st) {
     checked: {},
     have: {},
     hide: st.shopHave || {},
-    wheyPacks: st.wheyPacks != null ? Number(st.wheyPacks) : 14,
+    wheyPacks: wheyTotalServ(st),
     hintCollapsed: !!st.shopHintCollapsed,
   };
 }
@@ -628,7 +658,7 @@ function shopQtyOf(st, it) {
 // Servings for nutrition. Only explicit weights auto-convert; ambiguous items keep
 // their original palms/fists and are flagged pending (待確認) until 一份是多少 is set.
 function shopServings(st, it) {
-  if (it.whey) return { n: st.wheyPacks != null ? Number(st.wheyPacks) : 14, pending: false };
+  if (it.whey) return { n: wheyTotalServ(st), pending: false };
   const adj = Number((st.shopAdj || {})[it.id]) || 0;
   const r = shopServingsBase(st, it);
   return { n: r.n + adj, pending: r.pending };
@@ -865,7 +895,7 @@ ${remain}`;
   const shopSection = `■ 採買／家裡
 ${shopLines}
 蔬菜已選 ${vegN} 種（建議 4–5 種）
-蛋白粉剩 ${shop.wheyPacks} 份${shop.wheyPacks < 15 ? "（不到 15 份≈${15*wheyScoopG(st)}g，該補貨）" : ""}
+蛋白粉剩 ${shop.wheyPacks} 份≈${Math.round(wheyTotalG(st))}g${wheyLowList(st).length ? "（該補貨：" + wheyLowText(st) + "）" : ""}
 ${shopDaysHint(st)}`;
   const trainSection = `■ 今天訓練
 ${trainBlock}`;
@@ -1395,8 +1425,13 @@ function wheyHaveIds(st) {
   const raw = st && st.wheyHave;
   if (Array.isArray(raw)) {
     // explicit [] = no stock flavors (show empty hint); null/undefined = default 純淨杏仁
-    return raw.filter((id) => (WHEY_OPTIONS || []).some((o) => o.id === id));
+    const sk = st.wheyStockG || {};
+    const ids = raw.filter((id) => (WHEY_OPTIONS || []).some((o) => o.id === id));
+    for (const id of Object.keys(sk)) if (sk[id] > 0 && !ids.includes(id) && (WHEY_OPTIONS || []).some((o) => o.id === id)) ids.push(id);
+    return ids;
   }
+  const sk = (st && st.wheyStockG) || null;
+  if (sk) { const ids = Object.keys(sk).filter((id) => (WHEY_OPTIONS || []).some((o) => o.id === id)); if (ids.length) return ids; }
   return ["plantAlmond"];
 }
 function wheyHaveOptions(st) {
@@ -1417,6 +1452,18 @@ function wheySelectHtml(st, slot, selectedId, attrs) {
   }
   return `<select class="whey-select" data-scoop-slot="${slot}" data-testid="scoop-select-${slot}" aria-label="蛋白粉口味"${attrs || ""}>${html}</select>`;
 }
+function wheyStockRows(st) {
+  const sk = wheyStock(st);
+  const rows = wheyHaveOptions(st).map((o) => {
+    const g = wheyG(st, o.id), cur = Math.round((sk[o.id] || 0) * 10) / 10;
+    const low = cur / g < 15;
+    return `<div class="whey-frow${low ? " low" : ""}" data-testid="whey-row-${o.id}">
+      <div class="whey-fhead"><b>${esc(wheyChip(o))}</b><span data-testid="whey-serv-${o.id}">${wheyServ(st, o.id, sk)}</span> 份 · <span data-testid="whey-g-${o.id}">${cur}</span>g${low ? ` <small class="pend">不到15份(${15 * g}g)</small>` : ""}</div>
+      <div class="whey-fbtns"><button type="button" class="btn" data-whey-adj="${o.id}" data-g="${-g}" data-testid="whey-minus-${o.id}" aria-label="少一份">−</button><button type="button" class="btn" data-whey-adj="${o.id}" data-g="${g}" data-testid="whey-plus-${o.id}" aria-label="多一份">+</button><button type="button" class="btn" data-whey-adj="${o.id}" data-g="1000" data-testid="whey-1kg-${o.id}">+1kg袋 (+${Math.round(1000 / g * 10) / 10}份)</button><button type="button" class="btn" data-whey-adj="${o.id}" data-g="2500" data-testid="whey-25kg-${o.id}">+2.5kg袋 (+${Math.round(2500 / g * 10) / 10}份)</button></div>
+    </div>`;
+  }).join("");
+  return `<div class="whey-flavors" data-testid="whey-flavors">${rows || `<p class="muted">尚未加入口味</p>`}<p class="whey-total" data-testid="whey-total-g">合計 ${Math.round(wheyTotalG(st))}g · ${wheyTotalServ(st)} 份</p></div>`;
+}
 function wheyCatalogSelects(prefix) {
   const by = wheyBySeries();
   const seriesOpts = WHEY_SERIES.map((s) => `<option value="${s.id}">${esc(s.title)}</option>`).join("");
@@ -1431,6 +1478,13 @@ function wheyCatalogSelects(prefix) {
       <select data-whey-add-flavor data-testid="whey-add-flavor">${flav}</select></div>
     <button type="button" class="btn" data-whey-add-have data-testid="whey-add-have">加入庫存口味</button>
   </div>`;
+}
+function wheyNutriLine(st) {
+  const ids = selectedScoops(st);
+  const ws = [0, 1].map((i) => resolveWhey(st, ids[i] || "plantAlmond"));
+  const k = ws.some((w) => w.kcal == null) ? "?" : Math.round(ws.reduce((a, w) => a + Number(w.kcal), 0));
+  const pr = Math.round(ws.reduce((a, w) => a + Number(w.protein), 0));
+  return `<p class="whey-nutri" data-testid="whey-nutri">蛋白粉 ${k} kcal / ${pr} g</p>`;
 }
 function scoopPicker(st, slot) {
   const ids = selectedScoops(st);
@@ -1516,7 +1570,7 @@ function renderMealRow(st, id, trainDay) {
   return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
     <div class="who"><input type="time" class="meal-time" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="時間"> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
     ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}${elsePick}
-    ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}` : ""}
+    ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}${wheyNutriLine(st)}` : ""}
     <div class="row-acts">
       <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
       <button type="button" class="btn xl" data-eat-else="${id}">吃了別的</button>
@@ -2151,8 +2205,8 @@ function renderShop(st) {
   const stats = shopDaysStats(st);
   const visible = shopAllItems(st).filter((it) => !shop.hide[it.id] || isShopFrequent(st, it));
   const hint = shopDaysHint(st);
-  const wheyWarn = shop.wheyPacks < 15
-    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 份（≈${Math.round(shop.wheyPacks*wheyScoopG(st))}g，15 份≈${15*wheyScoopG(st)}g 該補貨）</p>`
+  const wheyWarn = wheyLowList(st).length
+    ? `<p class="note warn" data-testid="whey-low">蛋白粉該補貨：${esc(wheyLowText(st))}</p>`
     : "";
   const pPct = stats.proteinPlan ? Math.min(100, Math.round(100 * stats.proteinBought / stats.proteinPlan)) : 0;
   const sPct = stats.starchPlan ? Math.min(100, Math.round(100 * stats.starchBought / stats.starchPlan)) : 0;
@@ -2176,7 +2230,7 @@ function renderShop(st) {
       const freq = isShopFrequent(st, it);
       const sp = shopSplit(it);
       const qty = it.whey
-        ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small data-testid="whey-grams">份 ≈ ${Math.round(shop.wheyPacks*wheyScoopG(st))}g</small></span><span class="whey-bags"><button type="button" class="btn" data-whey-bag-g="1000" data-testid="whey-bag-1kg">+1kg袋 (+${wheyBagServ(st,1000)}份)</button><button type="button" class="btn" data-whey-bag-g="2500" data-testid="whey-bag-25kg">+2.5kg袋 (+${wheyBagServ(st,2500)}份)</button></span>`
+        ? `<span class="shop-qty" data-testid="whey-total">${shop.wheyPacks} 份</span>${wheyStockRows(st)}`
         : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return fmtServ(l); })()}</span>`;
       const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : (!it.whey && shopNutri(st, it).pending ? `<span class="pend" data-testid="shop-nutri-pend-${it.id}">待確認</span>` : "");
       const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
@@ -2218,7 +2272,7 @@ function renderShop(st) {
           <button type="button" class="btn" data-whey-have-del="${o.id}" data-testid="whey-have-del-${o.id}">移出庫存</button>
           ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : (w.source ? `<small class="muted" data-testid="whey-src-${o.id}">${esc(w.source)}${w.note ? " · " + esc(w.note) : ""}</small>` : "")}</div>`; }).join("");
         return `<div class="sheet-scroll" data-testid="whey-edit-scroll">
-          <p class="muted">庫存口味（記吃只顯示這些）</p>${haveRows || "<p class=\"muted\">尚未加入口味</p>"}
+          <p class="muted">各口味庫存</p>${wheyStockRows(st)}<p class="muted">庫存口味（記吃只顯示這些）</p>${haveRows || "<p class=\"muted\">尚未加入口味</p>"}
         </div>
         <div class="sheet-pin" data-testid="whey-edit-pin">
           <p class="muted">從目錄加入</p>${wheyCatalogSelects()}
@@ -2650,17 +2704,13 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
-  const wheyBag = e.target.closest("[data-whey-bag-g]");
-  if (wheyBag) {
-    const shop = persistShopWeek(st);
-    save({ wheyPacks: Math.round((Number(shop.wheyPacks) + wheyBagServ(st, Number(wheyBag.dataset.wheyBagG))) * 10) / 10, shopWeek: shop.week });
-    render();
-    return;
-  }
-  const wheyPack = e.target.closest("[data-whey-pack]");
-  if (wheyPack) {
-    const shop = persistShopWeek(st);
-    save({ wheyPacks: Math.max(0, shop.wheyPacks + Number(wheyPack.dataset.wheyPack)), shopWeek: shop.week });
+  const wheyAdj = e.target.closest("[data-whey-adj]");
+  if (wheyAdj) {
+    const id = wheyAdj.dataset.wheyAdj;
+    const stock = wheyStock(st);
+    stock[id] = Math.max(0, Math.round(((Number(stock[id]) || 0) + Number(wheyAdj.dataset.g)) * 10) / 10);
+    const have = wheyHaveIds(st);
+    save({ wheyStockG: stock, wheyHave: have.includes(id) ? have : have.concat([id]) });
     render();
     return;
   }
@@ -2780,12 +2830,13 @@ document.getElementById("main").addEventListener("click", (e) => {
     const id = mealDel.dataset.mealDel;
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
-    const packs = (st.wheyPacks != null ? Number(st.wheyPacks) : 14) + (meals[id] && meals[id].eaten ? Number(meals[id].wheyUsed) || 0 : 0);
+    const stockD = wheyStock(st);
+    wheyRefund(st, stockD, meals[id]);
     delete meals[id];
     save({
       extraMeals: { ...(st.extraMeals || {}), [day]: ((st.extraMeals || {})[day] || []).filter((m) => m.id !== id) },
       mealLogs: { ...st.mealLogs, [day]: meals },
-      wheyPacks: packs,
+      wheyStockG: stockD,
     });
     render();
     return;
@@ -2897,14 +2948,14 @@ document.getElementById("main").addEventListener("click", (e) => {
     const id = eat.dataset.eat;
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
-    let packs = st.wheyPacks != null ? Number(st.wheyPacks) : 14;
+    const stock = wheyStock(st);
     let shopUsed = { ...(st.shopUsed || {}) };
     if (meals[id] && meals[id].eaten) {
-      packs += Number(meals[id].wheyUsed) || 0;
+      wheyRefund(st, stock, meals[id]);
       for (const [k, n] of Object.entries(meals[id].pantryUsed || {})) shopUsed[k] = Math.max(0, (shopUsed[k] || 0) - n);
       const keep = meals[id].mode ? { ...meals[id] } : {};
       if (keep.mode === "else") { keep.pantryPlan = keep.pantryUsed || {}; keep.wheyPlan = Number(keep.wheyUsed) || 0; }
-      delete keep.wheyUsed; delete keep.pantryUsed;
+      delete keep.wheyUsed; delete keep.pantryUsed; delete keep.wheyDed;
       meals[id] = { ...keep, eaten: false };
     } else {
       const prevM = meals[id] || {};
@@ -2912,18 +2963,19 @@ document.getElementById("main").addEventListener("click", (e) => {
         const pantryUsed = { ...(prevM.pantryPlan || {}) };
         for (const [k, n] of Object.entries(pantryUsed)) shopUsed[k] = (shopUsed[k] || 0) + n;
         const wu = Number(prevM.wheyPlan) || 0;
-        packs = Math.max(0, packs - wu);
-        const m2 = { ...prevM, eaten: true, pantryUsed, wheyUsed: wu };
+        const wheyDed = [];
+        for (const [k, n] of Object.entries(prevM.sel || {})) if (k.startsWith("whey:") && Number(n)) { const wid = k.slice(5); wheyDed.push({ id: wid, g: wheyTake(st, stock, wid, Number(n)) }); }
+        const m2 = { ...prevM, eaten: true, pantryUsed, wheyUsed: wu, wheyDed };
         delete m2.pantryPlan; delete m2.wheyPlan;
         meals[id] = m2;
       } else {
       const est = mealEstimate(st, id);
       const used = Array.isArray(est.scoopIds) ? est.scoopIds.length : 0;
-      packs = Math.max(0, packs - used);
-      meals[id] = { ...(meals[id] || {}), ...est, eaten: true, wheyUsed: used };
+      const wheyDed = (est.scoopIds || []).map((wid) => ({ id: wid, g: wheyTake(st, stock, wid, 1) }));
+      meals[id] = { ...(meals[id] || {}), ...est, eaten: true, wheyUsed: used, wheyDed };
       }
     }
-    save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyPacks: packs, shopUsed });
+    save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyStockG: stock, shopUsed });
     render();
     return;
   }
@@ -2939,7 +2991,9 @@ document.getElementById("main").addEventListener("click", (e) => {
     const flav = (document.querySelector("[data-whey-add-flavor]") || {}).value;
     if (flav) {
       const have = wheyHaveIds(st);
-      if (!have.includes(flav)) save({ wheyHave: have.concat([flav]) });
+      const stock = wheyStock(st);
+      if (stock[flav] == null) stock[flav] = 0;
+      save({ wheyHave: have.includes(flav) ? have : have.concat([flav]), wheyStockG: stock });
     }
     render();
     return;
@@ -2947,7 +3001,8 @@ document.getElementById("main").addEventListener("click", (e) => {
   const wheyHaveDel = e.target.closest("[data-whey-have-del]");
   if (wheyHaveDel) {
     const id = wheyHaveDel.dataset.wheyHaveDel;
-    save({ wheyHave: wheyHaveIds(st).filter((x) => x !== id) });
+    const stock = wheyStock(st); delete stock[id];
+    save({ wheyHave: wheyHaveIds(st).filter((x) => x !== id), wheyStockG: stock });
     render();
     return;
   }
@@ -3003,7 +3058,9 @@ document.getElementById("main").addEventListener("click", (e) => {
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
     const prev = meals[ui.elseMeal] || {};
-    let packs = (st.wheyPacks != null ? Number(st.wheyPacks) : 14) + (prev.eaten ? Number(prev.wheyUsed) || 0 : 0);
+    const stock = wheyStock(st);
+    wheyRefund(st, stock, prev);
+    const wheyDed = [];
     const shopUsed = { ...(st.shopUsed || {}) };
     for (const [k, n] of Object.entries(prev.eaten ? prev.pantryUsed || {} : {})) shopUsed[k] = Math.max(0, (shopUsed[k] || 0) - n);
     const pantryUsed = {};
@@ -3011,13 +3068,12 @@ document.getElementById("main").addEventListener("click", (e) => {
     for (const [k, n0] of Object.entries(ui.elseSel || {})) {
       const n = Number(n0) || 0;
       if (!n) continue;
-      if (k.startsWith("whey:")) { wheyUsed += n; continue; }
+      if (k.startsWith("whey:")) { wheyUsed += n; wheyDed.push({ id: k.slice(5), g: wheyTake(st, stock, k.slice(5), n) }); continue; }
       pantryUsed[k] = n;
       shopUsed[k] = (shopUsed[k] || 0) + n;
     }
-    packs = Math.max(0, packs - wheyUsed);
-    meals[ui.elseMeal] = { mode: "else", name: tot.name, kcal: tot.kcal, protein: tot.protein, eaten: true, pantryUsed, wheyUsed, nutriPending: tot.pendingNames, sel: { ...(ui.elseSel || {}) }, out: ui.elseOut || null, outSize: ui.elseOutSize || null, free: [...(ui.elseFree || [])] };
-    save({ mealLogs: { ...st.mealLogs, [day]: meals }, shopUsed, wheyPacks: packs });
+    meals[ui.elseMeal] = { mode: "else", name: tot.name, kcal: tot.kcal, protein: tot.protein, eaten: true, pantryUsed, wheyUsed, wheyDed, nutriPending: tot.pendingNames, sel: { ...(ui.elseSel || {}) }, out: ui.elseOut || null, outSize: ui.elseOutSize || null, free: [...(ui.elseFree || [])] };
+    save({ mealLogs: { ...st.mealLogs, [day]: meals }, shopUsed, wheyStockG: stock });
     ui.elseMeal = null; ui.elseSel = {}; ui.elseOut = null; ui.elseOutSize = null; ui.elseFree = []; ui.elseFreeOpen = false;
     go("today");
     return;
@@ -3283,7 +3339,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-34";
+const APP_VERSION = "2026.11.07-preview-35";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3549,6 +3605,15 @@ document.getElementById("main").addEventListener("change", (e) => {
     // Root cause fix: a logged snack's scoopIds overrode scoopPick, so the select snapped back.
     const meals = { ...((st2.mealLogs || {})[day] || {}) };
     if (meals.snack && Array.isArray(meals.snack.scoopIds)) {
+      if (meals.snack.eaten) {
+        const stock = wheyStock(st2);
+        const ded = Array.isArray(meals.snack.wheyDed) ? meals.snack.wheyDed.slice() : meals.snack.scoopIds.map((x) => ({ id: x, g: 0 }));
+        const old = ded[slot];
+        if (old && old.g) stock[old.id] = Math.round(((Number(stock[old.id]) || 0) + Number(old.g)) * 10) / 10;
+        ded[slot] = { id, g: wheyTake(st2, stock, id, 1) };
+        meals.snack = { ...meals.snack, wheyDed: ded };
+        patch.wheyStockG = stock;
+      }
       meals.snack = { ...meals.snack, scoopIds: cur.slice() };
       const est = twoScoopMeal({ ...st2, mealLogs: { ...(st2.mealLogs || {}), [day]: meals } });
       meals.snack = { ...meals.snack, name: est.name, kcal: est.kcal, protein: est.protein, hasPlant: est.hasPlant, chickenG: est.chickenG, kcalUnknown: est.kcalUnknown };
