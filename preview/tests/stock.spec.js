@@ -56,6 +56,8 @@ test("r11) 燕麥 500g/150g: eat 1 → 350g persists; cancel restores 500g", asy
 test("r12) 吃了別的 logs chosen items' nutrition; cancel/re-tick exact; persists after reload", async ({ page }) => {
   await page.goto(url); await page.waitForSelector(".ttl");
   const rings = async () => (await page.locator("[data-testid=eat-card] .ring b").allInnerTexts()).map((x) => Number(x.replace(/[^\d.]/g, "")));
+  await page.locator("[data-testid=eat-card] .ring b").first().waitFor();
+  await expect.poll(async () => (await rings()).every((x) => !Number.isNaN(x))).toBe(true);
   const base = await rings();
   await page.locator("[data-tab=shop]").click();
   await page.locator("[data-testid=shop-plus]").click();
@@ -76,8 +78,8 @@ test("r12) 吃了別的 logs chosen items' nutrition; cancel/re-tick exact; pers
   const eatenState = async (tag) => {
     await expect(row).toHaveClass(/eaten/);
     await expect(row.locator(".nums")).toHaveText("180 · 蛋白 4g");
+    await expect.poll(async () => (await rings())[0]).toBe(base[0] + 180);
     const r = await rings();
-    expect(r[0]).toBe(base[0] + 180);
     if (r.length > 1) expect(r[1]).toBe(base[1] + 4);
     await page.screenshot(shot(`fatmi_r12_${tag}.png`));
   };
@@ -88,7 +90,7 @@ test("r12) 吃了別的 logs chosen items' nutrition; cancel/re-tick exact; pers
   await expect(row).not.toHaveClass(/eaten/);
   await expect(row.locator(".nums")).toHaveText("180 · 蛋白 4g");
   await page.reload(); await page.waitForSelector(".ttl");
-  expect(await rings()).toEqual(base);
+  await expect.poll(rings).toEqual(base);
   await page.screenshot(shot("fatmi_r12_cancel_reload.png"));
   await page.locator("[data-tab=shop]").click();
   await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 3.3 份");
