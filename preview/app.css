@@ -318,3 +318,9 @@ body.mode-workout #ptr{display:none!important}
 .whey-add-row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;overflow:visible}
 .whey-add-row span{min-width:2.5em;color:var(--mut);flex:0 0 auto}
 .whey-add-row select{flex:1 1 auto}
+
+.shop-row:has(.whey-bags) .shop-acts{grid-column:4;grid-row:1}
+.shop-row .shop-qty.whey-stock{grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-top:8px}
+.shop-qty.whey-stock button{width:44px;height:44px;flex:0 0 44px}
+.shop-row .whey-bags{grid-column:1/-1;grid-row:3;display:flex;gap:10px;margin-top:10px}
+.shop-row .whey-bags .btn{flex:1;min-height:44px;padding:8px 10px;font-size:14px;margin:0}

@@ -256,10 +256,17 @@ function resolveWhey(st, id) {
     chip: base.chip || null,
   };
 }
+function wheyScoopG(st) {
+  const id = wheyHaveIds(st)[0] || "plantAlmond";
+  return Number(resolveWhey(st, id).scoopG) || 40;
+}
+function wheyBagServ(st, grams) {
+  return Math.round((grams / wheyScoopG(st)) * 10) / 10;
+}
 function selectedScoops(st, d = now()) {
   const day = todayKey(d);
   const logged = ((st.mealLogs || {})[day] || {}).snack;
-  if (logged && Array.isArray(logged.scoopIds) && logged.scoopIds.length === 2) return logged.scoopIds.slice();
+  if (logged && logged.eaten && Array.isArray(logged.scoopIds) && logged.scoopIds.length === 2) return logged.scoopIds.slice();
   if ((st.scoopPick || {})[day]) return (st.scoopPick[day] || []).slice();
   return ["plantAlmond", "plantAlmond"];
 }
@@ -858,7 +865,7 @@ ${remain}`;
   const shopSection = `■ 採買／家裡
 ${shopLines}
 蔬菜已選 ${vegN} 種（建議 4–5 種）
-蛋白粉剩 ${shop.wheyPacks} 份${shop.wheyPacks < 15 ? "（不到 15 份≈600g，該補貨）" : ""}
+蛋白粉剩 ${shop.wheyPacks} 份${shop.wheyPacks < 15 ? "（不到 15 份≈${15*wheyScoopG(st)}g，該補貨）" : ""}
 ${shopDaysHint(st)}`;
   const trainSection = `■ 今天訓練
 ${trainBlock}`;
@@ -2145,7 +2152,7 @@ function renderShop(st) {
   const visible = shopAllItems(st).filter((it) => !shop.hide[it.id] || isShopFrequent(st, it));
   const hint = shopDaysHint(st);
   const wheyWarn = shop.wheyPacks < 15
-    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 份（≈${Math.round(shop.wheyPacks*40)}g）</p>`
+    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 份（≈${Math.round(shop.wheyPacks*wheyScoopG(st))}g，15 份≈${15*wheyScoopG(st)}g 該補貨）</p>`
     : "";
   const pPct = stats.proteinPlan ? Math.min(100, Math.round(100 * stats.proteinBought / stats.proteinPlan)) : 0;
   const sPct = stats.starchPlan ? Math.min(100, Math.round(100 * stats.starchBought / stats.starchPlan)) : 0;
@@ -2169,7 +2176,7 @@ function renderShop(st) {
       const freq = isShopFrequent(st, it);
       const sp = shopSplit(it);
       const qty = it.whey
-        ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份 ≈ ${Math.round(shop.wheyPacks*40)}g</small><button type="button" class="btn" data-whey-bag="25" data-testid="whey-bag-1kg">+1kg袋</button><button type="button" class="btn" data-whey-bag="62.5" data-testid="whey-bag-25kg">+2.5kg袋</button></span>`
+        ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small data-testid="whey-grams">份 ≈ ${Math.round(shop.wheyPacks*wheyScoopG(st))}g</small></span><span class="whey-bags"><button type="button" class="btn" data-whey-bag-g="1000" data-testid="whey-bag-1kg">+1kg袋 (+${wheyBagServ(st,1000)}份)</button><button type="button" class="btn" data-whey-bag-g="2500" data-testid="whey-bag-25kg">+2.5kg袋 (+${wheyBagServ(st,2500)}份)</button></span>`
         : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return fmtServ(l); })()}</span>`;
       const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : (!it.whey && shopNutri(st, it).pending ? `<span class="pend" data-testid="shop-nutri-pend-${it.id}">待確認</span>` : "");
       const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
@@ -2556,7 +2563,7 @@ document.getElementById("tabs").addEventListener("click", (e) => {
 
 document.getElementById("main").addEventListener("click", (e) => {
   // Never re-render on native <select>/option taps (iOS picker dies if DOM is replaced)
-  if (e.target && (e.target.closest("select") || e.target.tagName === "OPTION")) return;
+  if (e.target && (e.target.closest("select,input[type=text],input[type=number],input[type=time],textarea") || e.target.tagName === "OPTION")) return;
   const st = state();
   const goBtn = e.target.closest("[data-go]");
   if (goBtn) {
@@ -2643,10 +2650,10 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
-  const wheyBag = e.target.closest("[data-whey-bag]");
+  const wheyBag = e.target.closest("[data-whey-bag-g]");
   if (wheyBag) {
     const shop = persistShopWeek(st);
-    save({ wheyPacks: Math.round((shop.wheyPacks + Number(wheyBag.dataset.wheyBag)) * 10) / 10, shopWeek: shop.week });
+    save({ wheyPacks: Math.round((Number(shop.wheyPacks) + wheyBagServ(st, Number(wheyBag.dataset.wheyBagG))) * 10) / 10, shopWeek: shop.week });
     render();
     return;
   }
@@ -3276,7 +3283,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-33";
+const APP_VERSION = "2026.11.07-preview-34";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3537,7 +3544,17 @@ document.getElementById("main").addEventListener("change", (e) => {
     const st2 = state();
     const cur = selectedScoops(st2);
     cur[slot] = id;
-    save({ scoopPick: { ...(st2.scoopPick || {}), [todayKey()]: cur } });
+    const day = todayKey();
+    const patch = { scoopPick: { ...(st2.scoopPick || {}), [day]: cur } };
+    // Root cause fix: a logged snack's scoopIds overrode scoopPick, so the select snapped back.
+    const meals = { ...((st2.mealLogs || {})[day] || {}) };
+    if (meals.snack && Array.isArray(meals.snack.scoopIds)) {
+      meals.snack = { ...meals.snack, scoopIds: cur.slice() };
+      const est = twoScoopMeal({ ...st2, mealLogs: { ...(st2.mealLogs || {}), [day]: meals } });
+      meals.snack = { ...meals.snack, name: est.name, kcal: est.kcal, protein: est.protein, hasPlant: est.hasPlant, chickenG: est.chickenG, kcalUnknown: est.kcalUnknown };
+      patch.mealLogs = { ...(st2.mealLogs || {}), [day]: meals };
+    }
+    save(patch);
     render();
     return;
   }
