@@ -644,9 +644,9 @@ function shopBasisG(st, it) {
   if (pp && pp.kind === "w" && pp.g > 0) return pp.g;
   if (shopServings(st, it).pending) return "pending";
   if (portion) return null;
+  if (!it.custom) return SERVING_G[it.group] || 120;
   const q = parseAmt(shopQtyOf(st, it));
-  const ovQty = (st.shopQty || {})[it.id] != null;
-  if ((it.custom || ovQty) && q && q.kind === "w") return SERVING_G[it.group] || 120;
+  if (q && q.kind === "w") return SERVING_G[it.group] || 120;
   return null;
 }
 function shopOrigWeight(st, it) {
@@ -675,10 +675,10 @@ function round05(x) { return Math.round(x * 2) / 2; }
 // returns true when merged (or user cancelled handled); shows confirm/alert per rules
 function shopTryMerge(st, src, dst, srcN) {
   const gS = shopBasisG(st, src), gT = shopBasisG(st, dst);
-  if (gS === "pending" || gT === "pending") { window.alert("請先設定「一份是多少」再合併"); return false; }
+  if (typeof gS !== "number" || typeof gT !== "number") { window.alert("請先設定「一份是多少」再合併"); return false; }
   const left = srcN != null ? srcN : shopLeft(st, src).n;
   let add = left, basis = "";
-  if (typeof gS === "number" && typeof gT === "number" && gS !== gT) { add = round05(left * gS / gT); basis = `（以 ${gT}g/份計）`; }
+  if (gS !== gT) { add = round05(left * gS / gT); basis = `（以 ${gT}g/份計）`; }
   const total = shopLeft(st, dst).n + add;
   if (!window.confirm(`合併成 ${total} 份${basis}？`)) return false;
   const base = {};
@@ -3062,7 +3062,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-14";
+const APP_VERSION = "2026.11.07-preview-15";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
