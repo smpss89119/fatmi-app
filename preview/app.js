@@ -1386,8 +1386,10 @@ function wheyOpenSeries(st, selectedIds) {
 
 function wheyHaveIds(st) {
   const raw = st && st.wheyHave;
-  if (Array.isArray(raw) && raw.length) return raw.filter((id) => (WHEY_OPTIONS || []).some((o) => o.id === id));
-  // default stock: 建毅常用純淨杏仁
+  if (Array.isArray(raw)) {
+    // explicit [] = no stock flavors (show empty hint); null/undefined = default 純淨杏仁
+    return raw.filter((id) => (WHEY_OPTIONS || []).some((o) => o.id === id));
+  }
   return ["plantAlmond"];
 }
 function wheyHaveOptions(st) {
@@ -1420,6 +1422,11 @@ function scoopPicker(st, slot) {
   const have = wheyHaveOptions(st);
   let cur = ids[slot];
   if (!have.some((o) => o.id === cur)) cur = (have[0] && have[0].id) || "plantAlmond";
+  if (!have.length) {
+    return `<div class="whey-pick" data-scoop-row="${slot}" data-testid="scoop-row-${slot}">
+      <p class="note warn" data-testid="whey-empty">庫存尚無蛋白粉口味 — 請到採買 → 蛋白粉 → 從目錄加入</p>
+    </div>`;
+  }
   return `<div class="whey-pick" data-scoop-row="${slot}" data-testid="scoop-row-${slot}">
     <label class="whey-pick-label">第 ${slot + 1} 份 ${wheySelectHtml(st, slot, cur)}</label>
   </div>`;
@@ -2918,10 +2925,12 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
-  const scoopPick = e.target.closest("[data-scoop-slot]");
-  if (scoopPick) {
+  // Only chip/button scoop picks — never <select> (click would re-render and kill the native picker)
+  const scoopPick = e.target.closest("[data-scoop-slot][data-scoop-id]");
+  if (scoopPick && scoopPick.tagName !== "SELECT") {
     const slot = Number(scoopPick.dataset.scoopSlot);
     const id = scoopPick.dataset.scoopId;
+    if (!id) return;
     const cur = selectedScoops(st);
     cur[slot] = id;
     save({ scoopPick: { ...(st.scoopPick || {}), [todayKey()]: cur } });
@@ -3224,7 +3233,7 @@ window.__fatmiDeleteLog = deleteLog;
 
 let touchX = null;
 document.getElementById("main").addEventListener("touchstart", (e) => {
-  if (e.target.closest("button,a,input")) {
+  if (e.target.closest("button,a,input,select,label,textarea")) {
     touchX = null;
     return;
   }
@@ -3246,9 +3255,9 @@ window.addEventListener("hashchange", () => {
 });
 
 
-const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-28", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
+const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-29", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-28";
+const APP_VERSION = "2026.11.07-preview-29";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3393,9 +3402,13 @@ function ptrLoading() {
   bar.classList.remove("ready");
   bar.style.setProperty("--ptr-y", "44px");
 }
+function ptrTouchOnControl(t) {
+  return !!(t && t.closest && t.closest("select,input,textarea,button,label,a,.whey-select,.whey-add"));
+}
 let ptrY = null;
 window.addEventListener("touchstart", (e) => {
-  if (!ptrAllowed()) { ptrY = null; return; }
+  const t = e.target;
+  if (ptrTouchOnControl(t) || !ptrAllowed()) { ptrY = null; return; }
   ptrY = e.touches[0].clientY;
 }, { passive: true });
 window.addEventListener("touchmove", (e) => {
