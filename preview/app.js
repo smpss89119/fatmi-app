@@ -858,7 +858,7 @@ ${remain}`;
   const shopSection = `■ 採買／家裡
 ${shopLines}
 蔬菜已選 ${vegN} 種（建議 4–5 種）
-蛋白粉剩 ${shop.wheyPacks} 份${shop.wheyPacks < 6 ? "（不到 6 份，該補貨）" : ""}
+蛋白粉剩 ${shop.wheyPacks} 份${shop.wheyPacks < 15 ? "（不到 15 份≈600g，該補貨）" : ""}
 ${shopDaysHint(st)}`;
   const trainSection = `■ 今天訓練
 ${trainBlock}`;
@@ -2144,8 +2144,8 @@ function renderShop(st) {
   const stats = shopDaysStats(st);
   const visible = shopAllItems(st).filter((it) => !shop.hide[it.id] || isShopFrequent(st, it));
   const hint = shopDaysHint(st);
-  const wheyWarn = shop.wheyPacks < 6
-    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 份</p>`
+  const wheyWarn = shop.wheyPacks < 15
+    ? `<p class="note warn" data-testid="whey-low">蛋白粉剩 ${shop.wheyPacks} 份（≈${Math.round(shop.wheyPacks*40)}g）</p>`
     : "";
   const pPct = stats.proteinPlan ? Math.min(100, Math.round(100 * stats.proteinBought / stats.proteinPlan)) : 0;
   const sPct = stats.starchPlan ? Math.min(100, Math.round(100 * stats.starchBought / stats.starchPlan)) : 0;
@@ -2169,7 +2169,7 @@ function renderShop(st) {
       const freq = isShopFrequent(st, it);
       const sp = shopSplit(it);
       const qty = it.whey
-        ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份</small></span>`
+        ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份 ≈ ${Math.round(shop.wheyPacks*40)}g</small><button type="button" class="btn" data-whey-bag="25" data-testid="whey-bag-1kg">+1kg袋</button><button type="button" class="btn" data-whey-bag="62.5" data-testid="whey-bag-25kg">+2.5kg袋</button></span>`
         : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return fmtServ(l); })()}</span>`;
       const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : (!it.whey && shopNutri(st, it).pending ? `<span class="pend" data-testid="shop-nutri-pend-${it.id}">待確認</span>` : "");
       const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
@@ -2640,6 +2640,13 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (outSize) {
     const prev = ((st.mealLogs || {})[todayKey()] || {})[outSize.dataset.outSize] || {};
     patchMeal(st, outSize.dataset.outSize, { mode: "out", outType: prev.outType || "bento", outSize: outSize.dataset.sid });
+    render();
+    return;
+  }
+  const wheyBag = e.target.closest("[data-whey-bag]");
+  if (wheyBag) {
+    const shop = persistShopWeek(st);
+    save({ wheyPacks: Math.round((shop.wheyPacks + Number(wheyBag.dataset.wheyBag)) * 10) / 10, shopWeek: shop.week });
     render();
     return;
   }
@@ -3269,7 +3276,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-32";
+const APP_VERSION = "2026.11.07-preview-33";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
