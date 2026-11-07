@@ -51,6 +51,19 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavor
   await expectW("tieguanyin", 157, 22);
   await expectW("coffeeSweet", 160, 23);
   await expectW("oatMilk", 159, 21);
+  await expectW("hfStrawberry", 122, 18);
+  await expectW("hfPeach", 121, 18);
+  await expectW("hfMelon", 122, 18);
+  await expect(page.locator("[data-whey-g=hfStrawberry]")).toHaveValue("35");
+  await expect(page.locator("[data-whey-g=hfPeach]")).toHaveValue("35");
+  await expect(page.locator("[data-whey-g=hfMelon]")).toHaveValue("35");
+  await expectW("hcSoymilk", 176, 20);
+  await expectW("hcOatMilk", 165, 17);
+  await expectW("hcAlmond", 170, 19);
+  await expect(page.locator("[data-whey-g=hcSoymilk]")).toHaveValue("40");
+  // classics not overwritten
+  await expectW("soymilk", 172, 26);
+  await expectW("almond", 172, 21);
   await expect(page.locator("[data-testid=whey-edit-sesame]")).toContainText("無糖芝麻");
   await expect(page.locator("[data-testid=whey-edit-sesameSweet]")).toContainText("芝麻（有糖）");
   await expect(page.locator("[data-testid=whey-edit-coffeeUS]")).toContainText("無糖咖啡");
@@ -80,4 +93,11 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavor
   await page.locator("[data-testid=else-save]").click();
   await expect(page.locator("[data-testid=meal-snack] .nums")).toHaveText("176 · 蛋白 24g");
   await page.screenshot(shot("fatmi_r17_peanut_log.png"));
+  await page.locator("[data-eat-else=eggs21]").click();
+  await page.locator('[data-testid="else-inc-whey:hfStrawberry"]').click();
+  await expect(page.locator("[data-testid=else-total]")).toHaveText("122 kcal · 蛋白 18 g");
+  await expect(page.locator('[data-testid="else-whey:hfStrawberry"]')).toContainText("高纖草莓35g");
+  await page.locator("[data-testid=else-save]").click();
+  await expect(page.locator("[data-testid=meal-eggs21] .nums")).toHaveText("122 · 蛋白 18g");
+  await page.screenshot(shot("fatmi_r18_hifiber_log.png"));
 });

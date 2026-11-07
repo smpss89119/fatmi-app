@@ -231,6 +231,14 @@ const WHEY_OPTIONS = [
   { id: "tieguanyin", name: "樂維根 鐵觀音", scoopG: 40, protein: 22, kcal: 157, source: "樂維根標示", chip: "鐵觀音" },
   { id: "coffeeSweet", name: "樂維根 咖啡（有糖）", scoopG: 40, protein: 23, kcal: 160, source: "樂維根標示", chip: "咖啡有糖" },
   { id: "oatMilk", name: "樂維根 燕麥奶", scoopG: 40, protein: 21, kcal: 159, source: "樂維根標示", chip: "燕麥奶" },
+  // 高纖（每份 35g；scoopG 必須 35）
+  { id: "hfStrawberry", name: "樂維根 高纖 草莓", scoopG: 35, protein: 18, kcal: 122, source: "樂維根標示", chip: "高纖草莓35g", line: "hiFiber" },
+  { id: "hfPeach", name: "樂維根 高纖 水蜜桃", scoopG: 35, protein: 18, kcal: 121, source: "樂維根標示", chip: "高纖水蜜桃35g", line: "hiFiber" },
+  { id: "hfMelon", name: "樂維根 高纖 哈密瓜", scoopG: 35, protein: 18, kcal: 122, source: "樂維根標示", chip: "高纖哈密瓜35g", line: "hiFiber" },
+  // 高鈣（每份 40g；與經典豆漿／燕麥奶／杏仁分開）
+  { id: "hcSoymilk", name: "樂維根 高鈣 無糖豆漿", scoopG: 40, protein: 20, kcal: 176, source: "樂維根標示", chip: "高鈣無糖豆漿", line: "hiCalcium" },
+  { id: "hcOatMilk", name: "樂維根 高鈣 燕麥奶", scoopG: 40, protein: 17, kcal: 165, source: "樂維根標示", chip: "高鈣燕麥奶", line: "hiCalcium" },
+  { id: "hcAlmond", name: "樂維根 高鈣 無糖杏仁", scoopG: 40, protein: 19, kcal: 170, source: "樂維根標示", chip: "高鈣無糖杏仁", line: "hiCalcium" },
   // 極致／純淨（數字勿改；建毅常用 = plantAlmond）
   { id: "plant", name: "樂維根 極致／純淨 原味", scoopG: 40, protein: 27, kcal: 164, source: "樂維根標示", chip: "極致原味" },
   { id: "plantChoco", name: "樂維根 極致／純淨 巧克力", scoopG: 40, protein: 23, kcal: 148, source: "樂維根標示", chip: "極致巧克力" },
