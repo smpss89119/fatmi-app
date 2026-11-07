@@ -1397,10 +1397,18 @@ function wheyHaveOptions(st) {
   return wheySorted((WHEY_OPTIONS || []).filter((o) => ids.has(o.id)));
 }
 function wheySelectHtml(st, slot, selectedId, attrs) {
-  const opts = wheyHaveOptions(st);
-  const cur = opts.some((o) => o.id === selectedId) ? selectedId : (opts[0] && opts[0].id) || "";
-  const options = opts.map((o) => `<option value="${esc(o.id)}"${o.id === cur ? " selected" : ""}>${esc(wheyChip(o))}</option>`).join("");
-  return `<select class="whey-select" data-scoop-slot="${slot}" data-testid="scoop-select-${slot}" aria-label="蛋白粉口味"${attrs || ""}>${options || "<option value=\"\">（庫存無口味）</option>"}</select>`;
+  const have = wheyHaveOptions(st);
+  const haveIds = new Set(have.map((o) => o.id));
+  const all = WHEY_OPTIONS || [];
+  const cur = all.some((o) => o.id === selectedId) ? selectedId : (have[0] && have[0].id) || "plantAlmond";
+  const opt = (o) => `<option value="${esc(o.id)}"${o.id === cur ? " selected" : ""}>${esc(wheyChip(o))}</option>`;
+  let html = have.length ? `<optgroup label="📦 庫存">${have.map(opt).join("")}</optgroup>` : "";
+  const by = wheyBySeries();
+  for (const s of WHEY_SERIES) {
+    const rest = (by[s.id] || []).filter((o) => !haveIds.has(o.id));
+    if (rest.length) html += `<optgroup label="${esc(s.title)}">${rest.map(opt).join("")}</optgroup>`;
+  }
+  return `<select class="whey-select" data-scoop-slot="${slot}" data-testid="scoop-select-${slot}" aria-label="蛋白粉口味"${attrs || ""}>${html}</select>`;
 }
 function wheyCatalogSelects(prefix) {
   const by = wheyBySeries();
@@ -1421,16 +1429,9 @@ function scoopPicker(st, slot) {
   const ids = selectedScoops(st);
   const have = wheyHaveOptions(st);
   let cur = ids[slot];
-  if (!have.some((o) => o.id === cur)) cur = (have[0] && have[0].id) || "plantAlmond";
-  if (!have.length) {
-    return `<div class="whey-pick" data-scoop-row="${slot}" data-testid="scoop-row-${slot}">
-      <p class="note warn" data-testid="whey-empty">庫存尚無蛋白粉口味 — 請到採買 → 蛋白粉 → 從目錄加入</p>
-    </div>`;
-  }
-  const solo = have.length === 1;
+  if (!(WHEY_OPTIONS || []).some((o) => o.id === cur)) cur = (have[0] && have[0].id) || "plantAlmond";
   return `<div class="whey-pick" data-scoop-row="${slot}" data-testid="scoop-row-${slot}">
     <div class="whey-pick-label"><span class="whey-pick-cap">第 ${slot + 1} 份</span> ${wheySelectHtml(st, slot, cur)}</div>
-    ${solo ? `<p class="note" data-testid="whey-solo">僅此一口味 · 採買 → 蛋白粉 → 從目錄加入第二款</p>` : ""}
   </div>`;
 }
 function proteinShortfall(st) {
@@ -3268,7 +3269,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-30";
+const APP_VERSION = "2026.11.07-preview-31";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
