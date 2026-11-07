@@ -107,7 +107,7 @@ const GROCERY = [
   { id: "veg", name: "冷凍蔬菜", hint: "大量蔬菜、少油" },
   { id: "carb", name: "白米或地瓜", hint: "訓練日半碗～大半碗；休息日減半" },
   { id: "banana", name: "香蕉", hint: "練前 1–2 小時可加半根" },
-  { id: "whey", name: "樂維根蛋白粉", hint: "16:00 兩份：無糖芝麻／豆漿／杏仁各約 20 g 蛋白，極致約 25 g" },
+  { id: "whey", name: "樂維根蛋白粉", hint: "16:00 兩份：無糖芝麻／豆漿／杏仁各約 20 g 蛋白，極致／純淨各口味約 23–27 g" },
   { id: "tea", name: "無糖茶／黑咖啡", hint: "飲料改無糖" },
 ];
 
@@ -211,10 +211,15 @@ function startKgFor(name) {
 }
 
 const WHEY_OPTIONS = [
-  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 183 },
-  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 20, kcal: 183 },
-  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 20, kcal: 183 },
-  { id: "plant", name: "樂維根 極致植物優蛋白 無添加", scoopG: 40, protein: 25, kcal: null },
+  // 經典無糖（Nutri 標示，每份 40g）
+  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 24, kcal: 158, source: "樂維根標示", chip: "芝麻" },
+  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 26, kcal: 172, source: "樂維根標示", chip: "豆漿" },
+  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 21, kcal: 172, source: "樂維根標示", chip: "杏仁" },
+  // 極致／純淨（分開預填；建毅常用 = plantAlmond 純淨杏仁）
+  { id: "plant", name: "樂維根 極致／純淨 原味", scoopG: 40, protein: 27, kcal: 164, source: "樂維根標示", chip: "極致原味" },
+  { id: "plantChoco", name: "樂維根 極致／純淨 巧克力", scoopG: 40, protein: 23, kcal: 148, source: "樂維根標示", chip: "極致巧克力" },
+  { id: "plantOat", name: "樂維根 極致／純淨 燕麥", scoopG: 40, protein: 25, kcal: 152, source: "樂維根標示", chip: "極致燕麥" },
+  { id: "plantAlmond", name: "樂維根 純淨蛋白杏仁", scoopG: 40, protein: 26, kcal: 183, source: "樂維根標示", note: "標示細值 182.6 kcal／25.9 g", chip: "純淨杏仁" },
 ];
 
 const PROTEIN_SWAPS = [

@@ -11,16 +11,16 @@ async function fresh(page, seed) {
 const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2") || "{}"));
 
 test.describe("NUTRI r6 (UI clicks)", () => {
-  test("1) 蛋白粉 2 份 then 吃了 logs 366/40 and pantry 14 -> 12", async ({ page }) => {
+  test("1) 蛋白粉 2 份 then 吃了 logs 330/50 and pantry 14 -> 12", async ({ page }) => {
     await fresh(page);
     const row = page.locator("[data-testid=meal-dinner]");
     await page.locator("[data-testid=meal-more-dinner]").click();
     await page.locator("[data-testid=whey2-dinner]").click();
-    await expect(row.locator(".nums")).toHaveText("366 · 蛋白 40g");
+    await expect(row.locator(".nums")).toHaveText("330 · 蛋白 50g");
     await page.locator("[data-eat=dinner]").click();
     await expect(row).toHaveClass(/eaten/);
-    await expect(row.locator(".nums")).toHaveText("366 · 蛋白 40g");
-    await expect(page.locator("[data-testid=remain]")).toContainText("1784");
+    await expect(row.locator(".nums")).toHaveText("330 · 蛋白 50g");
+    await expect(page.locator("[data-testid=remain]")).toContainText("1820");
     await page.screenshot(shot("fatmi_r6_whey_eaten.png"));
     await page.locator("[data-tab=shop]").click();
     await expect(page.locator("[data-testid=whey-packs]")).toHaveText("12");
@@ -43,10 +43,10 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await page.locator("[data-else-free-kcal]").fill("90");
     await page.locator("[data-else-free-protein]").fill("1");
     await page.locator("[data-testid=else-free-add]").click();
-    await expect(page.locator("[data-testid=else-total]")).toHaveText("1203 kcal · 蛋白 112 g");
+    await expect(page.locator("[data-testid=else-total]")).toHaveText("1178 kcal · 蛋白 116 g");
     await page.screenshot(shot("fatmi_r6_else.png"));
     await page.locator("[data-testid=else-save]").click();
-    await expect(page.locator("[data-testid=meal-dinner] .nums")).toHaveText("1203 · 蛋白 112g");
+    await expect(page.locator("[data-testid=meal-dinner] .nums")).toHaveText("1178 · 蛋白 116g");
     await page.locator("[data-tab=shop]").click();
     await expect(page.locator("[data-testid=shop-qty-chicken]")).toHaveText("5 份");
     await expect(page.locator("[data-testid=whey-packs]")).toHaveText("13");

@@ -242,7 +242,7 @@ function hasPreWorkoutMeal(st, d = now()) {
 }
 function resolveWhey(st, id) {
   const base = (typeof WHEY_OPTIONS !== "undefined" ? WHEY_OPTIONS : []).find((x) => x.id === id) || (WHEY_OPTIONS && WHEY_OPTIONS[0]);
-  if (!base) return { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 20, kcal: 183 };
+  if (!base) return { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 24, kcal: 158, source: "樂維根標示" };
   const ov = ((st.wheyEst || {}).byId || {})[base.id] || {};
   return {
     id: base.id,
@@ -250,6 +250,9 @@ function resolveWhey(st, id) {
     scoopG: ov.scoopG != null ? Number(ov.scoopG) : base.scoopG,
     protein: ov.protein != null ? Number(ov.protein) : base.protein,
     kcal: ov.kcal !== undefined ? ov.kcal : base.kcal,
+    source: ov.source !== undefined ? ov.source : (base.source || null),
+    note: base.note || null,
+    chip: base.chip || null,
   };
 }
 function selectedScoops(st, d = now()) {
@@ -268,7 +271,8 @@ function twoScoopMeal(st, d = now()) {
   const kcalUnknown = a.kcal == null || b.kcal == null;
   const kcal = (Number(a.kcal) || 0) + (Number(b.kcal) || 0) + yamKcal;
   const protein = Number(a.protein) + Number(b.protein) + yamP;
-  const hasPlant = a.id === "plant" || b.id === "plant";
+  const isPlant = (id) => String(id || "").startsWith("plant");
+  const hasPlant = isPlant(a.id) || isPlant(b.id);
   return {
     id: "loveigen2",
     name: `${a.name}＋${b.name}`,
@@ -1333,7 +1337,7 @@ function renderSunday(st) {
 
 function scoopPicker(st, slot) {
   const ids = selectedScoops(st);
-  const label = (o) => o.id === "plant" ? "極致" : String(o.name || "").replace("樂維根 ", "").replace("無糖", "").trim();
+  const label = (o) => o.chip || String(o.name || "").replace("樂維根 ", "").replace("無糖", "").trim();
   return `<div class="chips" data-scoop-row="${slot}">${WHEY_OPTIONS.map((o) =>
     `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(label(o))}</button>`
   ).join("")}</div>`;
@@ -1599,7 +1603,7 @@ function elseItems(st) {
     if (it.whey) {
       for (const o of WHEY_OPTIONS || []) {
         const w = resolveWhey(st, o.id);
-        out.push({ key: `whey:${o.id}`, name: o.name.replace("樂維根 ", ""), left: shopLeft(st, it).n, kcal: w.kcal == null ? 0 : Number(w.kcal), protein: Number(w.protein), nutriPending: w.kcal == null, whey: true });
+        out.push({ key: `whey:${o.id}`, name: o.chip || o.name.replace("樂維根 ", ""), left: shopLeft(st, it).n, kcal: w.kcal == null ? 0 : Number(w.kcal), protein: Number(w.protein), nutriPending: w.kcal == null, whey: true });
       }
       continue;
     }
@@ -2106,7 +2110,7 @@ function renderShop(st) {
           <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
           <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label>
           <label>熱量 <input type="number" inputmode="decimal" data-whey-k="${o.id}" data-testid="whey-kcal-${o.id}" value="${w.kcal == null ? "" : w.kcal}" placeholder="?"> kcal</label>
-          ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : ""}</div>`; }).join("")
+          ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : (w.source ? `<small class="muted" data-testid="whey-src-${o.id}">${esc(w.source)}${w.note ? " · " + esc(w.note) : ""}</small>` : "")}</div>`; }).join("")
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
          <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
@@ -2166,7 +2170,7 @@ function renderRules(st) {
     <p class="sec">今天怎麼決定課表</p>
     <div class="card prose">
       <p>睡滿 6 小時、心率正常、Body Battery ≥ 30 就練原課表，否則改 25 分鐘快版。Garmin 有重訓也算一堂；錯過就延後，不跳過。熱量只看有吃飯紀錄的日子，用兩週體重平均。</p>
-      <p>訓練日建議 16:00 喝兩份樂維根（芝麻／豆漿／杏仁各約 20 g 蛋白，極致約 25 g）加地瓜。一份極致則 18:30 雞胸 150g；兩份 20 g 則雞胸 200g 或 21:00 加蛋 2 顆。</p>
+      <p>訓練日建議 16:00 喝兩份樂維根（芝麻／豆漿／杏仁各約 20 g 蛋白，極致／純淨各口味約 23–27 g）加地瓜。一份極致／純淨則 18:30 雞胸 150g；兩份經典無糖則雞胸 200g 或 21:00 加蛋 2 顆。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
       <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
@@ -3135,7 +3139,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-21";
+const APP_VERSION = "2026.11.07-preview-22";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
