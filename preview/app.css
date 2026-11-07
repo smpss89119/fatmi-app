@@ -281,4 +281,4 @@ html.mode-sleep{background:#000}
 .else-row .stp b{font-variant-numeric:tabular-nums}
 .else-total{text-align:center;font-weight:900;font-size:20px;margin:14px 0 8px}
 
-.demo-tag{font-size:12px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}
+.demo-tag{display:block;text-align:center;font-size:12px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}

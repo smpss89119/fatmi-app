@@ -3033,7 +3033,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-12";
+const APP_VERSION = "2026.11.07-preview-13";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3186,7 +3186,7 @@ function migrateGrocery() {
   } catch (_) {}
 }
 async function boot() {
-  if (DEMO) { const h = document.querySelector(".ttl"); if (h) h.insertAdjacentHTML("afterend", `<span class="demo-tag" data-testid="demo-tag">示範舊資料（不影響你的資料）</span>`); }
+  if (DEMO) { const h = document.querySelector(".ttl"); if (h) h.parentElement.insertAdjacentHTML("afterend", `<span class="demo-tag" data-testid="demo-tag">示範舊資料（不影響你的資料）</span>`); }
   migrateGrocery();
   try {
     const v = await fetch("./version.json", { cache: "no-store" });

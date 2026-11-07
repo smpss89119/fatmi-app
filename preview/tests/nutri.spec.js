@@ -130,7 +130,8 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("3 份");
     await expect(page.locator("[data-testid=shop-pending-x-w]")).toHaveCount(0);
     await expect(page.locator("[data-testid=shop-qty-x-veg]")).toHaveText("3 份");
-    await page.screenshot(shot("fatmi_r7_legacy.png"), { fullPage: true });
+    await page.locator("[data-testid=shop-x-q]").scrollIntoViewIfNeeded();
+    await page.screenshot(shot("fatmi_r7_legacy.png"));
     const real = await page.evaluate(() => localStorage.getItem("fatcat-v2"));
     expect(JSON.parse(real)).toEqual({ mine: 1 });
   });
