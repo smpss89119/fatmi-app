@@ -509,7 +509,7 @@ function mealTotals(st, d = now()) {
   for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
     if (m && m.eaten === true) {
-      const v = id === "snack" && m.mode !== "else" ? mealEstimate(st, id, d) : m;
+      const v = id === "snack" && snackIsPowder(m) ? mealEstimate(st, id, d) : m;
       kcal += Number(v.kcal) || 0;
       protein += Number(v.protein) || 0;
     }
@@ -579,6 +579,13 @@ function wheyPowderMacros(st, d = now()) {
   return { kcal: ws.reduce((a, w) => a + (Number(w.kcal) || 0), 0), protein: ws.reduce((a, w) => a + (Number(w.protein) || 0), 0), kcalUnknown: ws.some((w) => w.kcal == null), scoopIds: ws.map((w) => w.id) };
 }
 // Snack = chosen powder + the other component (default 地瓜 150g, or 外食/掌拳 portions; whey2 = powder only)
+// false when the logged snack is a non-powder meal (吃了別的 / 換成雞胸飯) — then its own logged numbers count
+function snackIsPowder(logged) {
+  if (!logged) return true;
+  if (logged.mode === "else") return false;
+  if (logged.eaten && !hasCustomPortions(logged) && !Array.isArray(logged.scoopIds) && (logged.kcal || logged.protein)) return false;
+  return true;
+}
 function snackMacros(st, d = now()) {
   const logged = ((st.mealLogs || {})[todayKey(d)] || {}).snack || {};
   const w = wheyPowderMacros(st, d);
@@ -589,7 +596,7 @@ function snackMacros(st, d = now()) {
 }
 function mealEstimate(st, id, d = now()) {
   const logged = ((st.mealLogs || {})[todayKey(d)] || {})[id];
-  if (id === "snack" && !(logged && logged.mode === "else")) {
+  if (id === "snack" && snackIsPowder(logged)) {
     const sug = suggestionOf(st, id, d);
     const m = snackMacros(st, d);
     const base = logged && hasCustomPortions(logged) ? { ...sug, ...logged, name: [m.otherName, "蛋白粉 2 份"].filter(Boolean).join("＋") } : { ...sug, ...(logged || {}), name: sug.name };
@@ -1591,7 +1598,7 @@ function renderMealRow(st, id, trainDay) {
   return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
     <div class="who"><input type="time" class="meal-time" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="時間"> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
     ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}${elsePick}
-    ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}${wheyNutriLine(st)}` : ""}
+    ${id === "snack" ? (snackIsPowder(logged) ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}${wheyNutriLine(st)}` : `<p class="muted" data-testid="snack-nonpowder">已記：${esc(est.name || "")}（非蛋白粉，取消「吃了」後可再選口味）</p>`) : ""}
     <div class="row-acts">
       <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
       <button type="button" class="btn xl" data-eat-else="${id}">吃了別的</button>
@@ -3170,8 +3177,11 @@ document.getElementById("main").addEventListener("click", (e) => {
       : composeSwapMeal(ui.swap.proteinId, ui.swap.starchId);
     const day = todayKey();
     const meals = { ...((st.mealLogs || {})[day] || {}) };
-    meals[ui.swap.meal] = { ...preview, eaten: true };
-    save({ mealLogs: { ...st.mealLogs, [day]: meals } });
+    const stock = wheyStock(st);
+    wheyRefund(st, stock, meals[ui.swap.meal]);
+    const wheyDed = (preview.scoopIds || []).map((wid) => ({ id: wid, g: wheyTake(st, stock, wid, 1) }));
+    meals[ui.swap.meal] = { ...preview, eaten: true, wheyUsed: wheyDed.length, wheyDed };
+    save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyStockG: stock });
     ui.swap = null;
     go("today");
     return;
@@ -3360,7 +3370,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-36";
+const APP_VERSION = "2026.11.07-preview-37";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3625,10 +3635,10 @@ document.getElementById("main").addEventListener("change", (e) => {
     const patch = { scoopPick: { ...(st2.scoopPick || {}), [day]: cur } };
     // Root cause fix: a logged snack's scoopIds overrode scoopPick, so the select snapped back.
     const meals = { ...((st2.mealLogs || {})[day] || {}) };
-    if (meals.snack && Array.isArray(meals.snack.scoopIds)) {
+    if (meals.snack && snackIsPowder(meals.snack) && (Array.isArray(meals.snack.scoopIds) || meals.snack.eaten)) {
       if (meals.snack.eaten) {
         const stock = wheyStock(st2);
-        const ded = Array.isArray(meals.snack.wheyDed) ? meals.snack.wheyDed.slice() : meals.snack.scoopIds.map((x) => ({ id: x, g: 0 }));
+        const ded = Array.isArray(meals.snack.wheyDed) ? meals.snack.wheyDed.slice() : (meals.snack.scoopIds || []).map((x) => ({ id: x, g: 0 }));
         const old = ded[slot];
         if (old && old.g) stock[old.id] = Math.round(((Number(stock[old.id]) || 0) + Number(old.g)) * 10) / 10;
         ded[slot] = { id, g: wheyTake(st2, stock, id, 1) };
