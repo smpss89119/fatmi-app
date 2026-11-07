@@ -35,6 +35,26 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavor
   await expectW("sesame", 158, 24);
   await expectW("soymilk", 172, 26);
   await expectW("almond", 172, 21);
+  // 15 new classics; sesameSweet must not overwrite sesame
+  await expectW("peanut", 176, 24);
+  await expectW("coffeeUS", 152, 23);
+  await expectW("choco", 162, 22);
+  await expectW("milkTea", 162, 20);
+  await expectW("teaSoy", 160, 25);
+  await expectW("matchaMilk", 154, 22);
+  await expectW("vanilla", 172, 24);
+  await expectW("jasmine", 167, 22);
+  await expectW("miencha", 170, 22);
+  await expectW("yuanyang", 162, 23);
+  await expectW("brownSugar", 164, 21);
+  await expectW("sesameSweet", 170, 21);
+  await expectW("tieguanyin", 157, 22);
+  await expectW("coffeeSweet", 160, 23);
+  await expectW("oatMilk", 159, 21);
+  await expect(page.locator("[data-testid=whey-edit-sesame]")).toContainText("無糖芝麻");
+  await expect(page.locator("[data-testid=whey-edit-sesameSweet]")).toContainText("芝麻（有糖）");
+  await expect(page.locator("[data-testid=whey-edit-coffeeUS]")).toContainText("無糖咖啡");
+  await expect(page.locator("[data-testid=whey-edit-coffeeSweet]")).toContainText("咖啡（有糖）");
   await expectW("plant", 164, 27);
   await expectW("plantChoco", 148, 23);
   await expectW("plantOat", 152, 25);
@@ -53,4 +73,11 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavor
   await expect(page.locator("[data-testid=meal-dinner] .nums")).toHaveText("183 · 蛋白 26g");
   await expect(page.locator("[data-testid=meal-pick-dinner]")).toContainText("純淨杏仁");
   await page.screenshot(shot("fatmi_r16_plant_almond_log.png"));
+  // spot-check a new classic on a fresh meal (snack)
+  await page.locator("[data-eat-else=snack]").click();
+  await page.locator('[data-testid="else-inc-whey:peanut"]').click();
+  await expect(page.locator("[data-testid=else-total]")).toHaveText("176 kcal · 蛋白 24 g");
+  await page.locator("[data-testid=else-save]").click();
+  await expect(page.locator("[data-testid=meal-snack] .nums")).toHaveText("176 · 蛋白 24g");
+  await page.screenshot(shot("fatmi_r17_peanut_log.png"));
 });

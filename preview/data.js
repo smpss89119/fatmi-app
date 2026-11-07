@@ -211,11 +211,27 @@ function startKgFor(name) {
 }
 
 const WHEY_OPTIONS = [
-  // 經典無糖（Nutri 標示，每份 40g）
-  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 24, kcal: 158, source: "樂維根標示", chip: "芝麻" },
-  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 26, kcal: 172, source: "樂維根標示", chip: "豆漿" },
-  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 21, kcal: 172, source: "樂維根標示", chip: "杏仁" },
-  // 極致／純淨（分開預填；建毅常用 = plantAlmond 純淨杏仁）
+  // 經典無糖（數字勿改；chip 標無糖以區分有糖）
+  { id: "sesame", name: "樂維根 無糖芝麻", scoopG: 40, protein: 24, kcal: 158, source: "樂維根標示", chip: "無糖芝麻" },
+  { id: "soymilk", name: "樂維根 無糖豆漿", scoopG: 40, protein: 26, kcal: 172, source: "樂維根標示", chip: "無糖豆漿" },
+  { id: "almond", name: "樂維根 無糖杏仁", scoopG: 40, protein: 21, kcal: 172, source: "樂維根標示", chip: "無糖杏仁" },
+  // 經典其餘口味（Nutri，每份 40g）
+  { id: "peanut", name: "樂維根 無糖花生", scoopG: 40, protein: 24, kcal: 176, source: "樂維根標示", chip: "無糖花生" },
+  { id: "coffeeUS", name: "樂維根 無糖咖啡", scoopG: 40, protein: 23, kcal: 152, source: "樂維根標示", chip: "無糖咖啡" },
+  { id: "choco", name: "樂維根 巧克力", scoopG: 40, protein: 22, kcal: 162, source: "樂維根標示", chip: "巧克力" },
+  { id: "milkTea", name: "樂維根 經典奶茶", scoopG: 40, protein: 20, kcal: 162, source: "樂維根標示", chip: "經典奶茶" },
+  { id: "teaSoy", name: "樂維根 紅茶豆漿", scoopG: 40, protein: 25, kcal: 160, source: "樂維根標示", chip: "紅茶豆漿" },
+  { id: "matchaMilk", name: "樂維根 抹茶牛奶", scoopG: 40, protein: 22, kcal: 154, source: "樂維根標示", chip: "抹茶牛奶" },
+  { id: "vanilla", name: "樂維根 香草", scoopG: 40, protein: 24, kcal: 172, source: "樂維根標示", chip: "香草" },
+  { id: "jasmine", name: "樂維根 茉莉綠茶", scoopG: 40, protein: 22, kcal: 167, source: "樂維根標示", chip: "茉莉綠茶" },
+  { id: "miencha", name: "樂維根 麵茶", scoopG: 40, protein: 22, kcal: 170, source: "樂維根標示", chip: "麵茶" },
+  { id: "yuanyang", name: "樂維根 鴛鴦奶茶", scoopG: 40, protein: 23, kcal: 162, source: "樂維根標示", chip: "鴛鴦奶茶" },
+  { id: "brownSugar", name: "樂維根 黑糖奶茶", scoopG: 40, protein: 21, kcal: 164, source: "樂維根標示", chip: "黑糖奶茶" },
+  { id: "sesameSweet", name: "樂維根 芝麻（有糖）", scoopG: 40, protein: 21, kcal: 170, source: "樂維根標示", chip: "芝麻有糖" },
+  { id: "tieguanyin", name: "樂維根 鐵觀音", scoopG: 40, protein: 22, kcal: 157, source: "樂維根標示", chip: "鐵觀音" },
+  { id: "coffeeSweet", name: "樂維根 咖啡（有糖）", scoopG: 40, protein: 23, kcal: 160, source: "樂維根標示", chip: "咖啡有糖" },
+  { id: "oatMilk", name: "樂維根 燕麥奶", scoopG: 40, protein: 21, kcal: 159, source: "樂維根標示", chip: "燕麥奶" },
+  // 極致／純淨（數字勿改；建毅常用 = plantAlmond）
   { id: "plant", name: "樂維根 極致／純淨 原味", scoopG: 40, protein: 27, kcal: 164, source: "樂維根標示", chip: "極致原味" },
   { id: "plantChoco", name: "樂維根 極致／純淨 巧克力", scoopG: 40, protein: 23, kcal: 148, source: "樂維根標示", chip: "極致巧克力" },
   { id: "plantOat", name: "樂維根 極致／純淨 燕麥", scoopG: 40, protein: 25, kcal: 152, source: "樂維根標示", chip: "極致燕麥" },
