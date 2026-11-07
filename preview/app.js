@@ -22,7 +22,7 @@ const HIGH_STEPS = 15000;
 const REST_SEC = 90;
 
 let LIVE = { garmin: { daily: [], activities: [] }, inbody: [], exportedAt: null, ok: {} };
-let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null, wantTrain: false, shopAdd: false, shopCat: "protein", shopDraftName: "", shopDraftAmount: "" };
+let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null, wantTrain: false, shopAdd: false, shopCat: null, shopDraftName: "", shopDraftAmount: "" };
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -128,6 +128,7 @@ function state() {
     extraMeals: s.extraMeals || {},
     shopPortions: s.shopPortions || {},
     shopQty: s.shopQty || {},
+    shopNutri: s.shopNutri || {},
     shopUsed: s.shopUsed || {},
     shopNames: s.shopNames || {},
     shopAdj: s.shopAdj || {},
@@ -1374,7 +1375,8 @@ function renderMealRow(st, id, trainDay) {
   const veg = !!logged.veg;
   const outType = logged.outType || "";
   const outSize = logged.outSize || "normal";
-  const suggestLine = [sug.name || est.suggestName || "", sug.extraLine].filter(Boolean).join("＋");
+  const suggestLine = logged.mode === "else" ? "" : [sug.name || est.suggestName || "", sug.extraLine].filter(Boolean).join("＋");
+  const elsePick = logged.mode === "else" ? `<p class="now-pick" data-testid="meal-pick-${id}">${esc(logged.name || "")}${(logged.nutriPending || []).length ? ` <span class="pend" data-testid="meal-pend-${id}">待確認</span>` : ""}</p>` : "";
   const more = ui.mealMore === id;
   const portionPane = more ? `
     <div class="portion-pane" data-testid="portion-${id}">
@@ -1406,7 +1408,7 @@ function renderMealRow(st, id, trainDay) {
     </div>` : (hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : "");
   return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
     <div class="who"><input type="time" class="meal-time" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="時間"> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
-    ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}
+    ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}${elsePick}
     ${id === "snack" ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}` : ""}
     <div class="row-acts">
       <button type="button" class="btn primary xl eat-toggle${eaten ? " yes" : ""}" data-eat="${id}">✓ 吃了</button>
@@ -1556,6 +1558,23 @@ function openSwap(st, mealId) {
   };
 }
 const PER_SERVING = { protein: { kcal: PALM_KCAL, protein: PALM_PROTEIN }, starch: { kcal: FIST_KCAL, protein: FIST_PROTEIN }, veg: { kcal: 40, protein: 2 } };
+const STARCH_WORDS = ["燕麥", "麥片", "地瓜", "番薯", "馬鈴薯", "南瓜", "玉米", "米", "飯", "麵", "吐司", "麵包", "貝果", "芋頭", "山藥", "冬粉", "粥"];
+const VEG_WORDS = ["菜", "花椰", "菇", "番茄", "小黃瓜", "蘆筍", "青椒", "洋蔥", "蘿蔔"];
+function suggestCat(name) {
+  const n = String(name || "");
+  if (!n.trim()) return null;
+  if (STARCH_WORDS.some((w) => n.includes(w))) return "starch";
+  if (VEG_WORDS.some((w) => n.includes(w))) return "veg";
+  return null;
+}
+// per-份 nutrition: explicit (item or override) wins; built-ins fall back to curated group defaults; custom without values = 待確認
+function shopNutri(st, it) {
+  const ov = (st.shopNutri || {})[it.id];
+  if (ov && ov.kcal != null && ov.protein != null) return { kcal: Number(ov.kcal), protein: Number(ov.protein), pending: false };
+  if (it.custom) return { kcal: 0, protein: 0, pending: true };
+  const m = PER_SERVING[it.group] || PER_SERVING.protein;
+  return { kcal: m.kcal, protein: m.protein, pending: false };
+}
 function elseItems(st) {
   const out = [];
   for (const it of shopAllItems(st)) {
@@ -1567,8 +1586,8 @@ function elseItems(st) {
       continue;
     }
     const l = shopLeft(st, it);
-    const m = PER_SERVING[it.group] || PER_SERVING.protein;
-    out.push({ key: it.id, name: shopLabel(st, it), left: l.n, pending: l.pending, kcal: m.kcal, protein: m.protein });
+    const m = shopNutri(st, it);
+    out.push({ key: it.id, name: shopLabel(st, it), left: l.n, pending: l.pending, nutriPending: m.pending, kcal: m.kcal, protein: m.protein });
   }
   return out;
 }
@@ -1576,10 +1595,12 @@ function elseTotals(st) {
   const sel = (ui.elseSel || {});
   let kcal = 0, protein = 0;
   const names = [];
+  const pendingNames = [];
   for (const x of elseItems(st)) {
     const n = Number(sel[x.key]) || 0;
     if (!n) continue;
     kcal += n * x.kcal; protein += n * x.protein; names.push(`${x.name} ${n} 份`);
+    if (x.nutriPending) pendingNames.push(x.name);
   }
   if (ui.elseOut) {
     const base = (OUT_MEALS || []).find((o) => o.id === ui.elseOut);
@@ -1587,7 +1608,7 @@ function elseTotals(st) {
     if (base) { kcal += Math.round(base.kcal * size.mult); protein += Math.round(base.protein * size.mult); names.push(`外食${base.name}${size.name ? "／" + size.name : ""}`); }
   }
   for (const f of ui.elseFree || []) { kcal += Number(f.kcal) || 0; protein += Number(f.protein) || 0; names.push(f.name); }
-  return { kcal: Math.round(kcal), protein: Math.round(protein), name: names.join("＋") };
+  return { kcal: Math.round(kcal), protein: Math.round(protein), name: names.join("＋"), pendingNames };
 }
 function renderElse(st) {
   const id = ui.elseMeal;
@@ -1595,7 +1616,7 @@ function renderElse(st) {
   const sel = ui.elseSel || {};
   const rows = elseItems(st).map((x) => {
     const n = Number(sel[x.key]) || 0;
-    return `<div class="else-row" data-testid="else-${x.key}"><span class="nm">${esc(x.name)}${x.pending ? '<span class="pend">待確認</span>' : ""}</span>
+    return `<div class="else-row" data-testid="else-${x.key}"><span class="nm">${esc(x.name)}${x.pending || x.nutriPending ? `<span class="pend" data-testid="else-pend-${x.key}">待確認</span>` : ""}</span>
       <span class="left">剩 ${fmtServ({ n: x.left, pending: x.pending })}</span>
       <span class="stp"><button type="button" data-else-dec="${x.key}" aria-label="少一份">−</button><b data-testid="else-n-${x.key}">${n}</b><button type="button" data-else-inc="${x.key}" data-testid="else-inc-${x.key}" aria-label="多一份">+</button></span></div>`;
   }).join("");
@@ -1618,7 +1639,7 @@ function renderElse(st) {
         <button type="button" class="btn primary" data-else-free-add data-testid="else-free-add">加入</button></div>`
       : `<button type="button" class="btn full" data-else-free-open data-testid="else-free-open">＋ 其他</button>`}
     <div class="else-total" data-testid="else-total">${tot.kcal} kcal · 蛋白 ${tot.protein} g</div>
-    <button type="button" class="btn primary xl" data-else-save data-testid="else-save"${tot.kcal || tot.protein ? "" : " disabled"}>✓ 吃了</button>`;
+    <button type="button" class="btn primary xl" data-else-save data-testid="else-save"${tot.kcal || tot.protein || tot.name ? "" : " disabled"}>✓ 吃了</button>`;
 }
 function renderSwap(st) {
   if (ui.elseMeal) return renderElse(st);
@@ -2032,7 +2053,7 @@ function renderShop(st) {
       const qty = it.whey
         ? `<span class="shop-qty whey-stock"><button type="button" data-whey-pack="-1" aria-label="少一份">−</button><b data-testid="whey-packs">${shop.wheyPacks}</b><button type="button" data-whey-pack="1" aria-label="多一份">+</button><small>份</small></span>`
         : `<span class="shop-qty" data-testid="shop-qty-${it.id}">${(() => { const l = shopLeft(st, it); return fmtServ(l); })()}</span>`;
-      const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : "";
+      const pend = shopServings(st, it).pending ? `<span class="pend" data-testid="shop-pending-${it.id}">待確認</span>` : (!it.whey && shopNutri(st, it).pending ? `<span class="pend" data-testid="shop-nutri-pend-${it.id}">待確認</span>` : "");
       const del = `<button type="button" class="ic" data-shop-edit="${it.id}" data-testid="shop-edit-${it.id}" aria-label="編輯">⋯</button>`;
       return `<div class="item shop-row${on ? " on" : ""}${have ? " have" : ""}${freq ? " freq" : ""}" data-shop="${it.id}" data-testid="shop-${it.id}" role="button" tabindex="0">
         <span class="ck${on ? " on" : ""}">${on ? "✓" : ""}</span>
@@ -2052,15 +2073,10 @@ function renderShop(st) {
       <input type="text" data-shop-new-name placeholder="名稱，例如 雞柳" aria-label="名稱" value="${esc(ui.shopDraftName || "")}">
       <input type="text" data-shop-new-amount placeholder="份量，例如 300g 或 2" aria-label="份量" value="${esc(ui.shopDraftAmount || "")}">
       <div class="shop-cats" data-testid="shop-cats"${knownDraft ? " hidden" : ""}>
-        <button type="button" class="chip${(ui.shopCat || "protein") === "protein" ? " on" : ""}" data-shop-cat="protein">蛋白質</button>
-        <button type="button" class="chip${ui.shopCat === "starch" ? " on" : ""}" data-shop-cat="starch">澱粉</button>
-        <button type="button" class="chip${ui.shopCat === "veg" ? " on" : ""}" data-shop-cat="veg">蔬菜</button>
+        <span class="muted">分類</span>
+        ${[["protein", "蛋白質"], ["starch", "澱粉"], ["veg", "蔬菜"]].map(([k, l]) => `<button type="button" class="chip${ui.shopCat === k ? " on" : ""}" data-shop-cat="${k}" data-testid="shop-cat-${k}">${l}<small class="sug" data-sug="${k}"${suggestCat(ui.shopDraftName) === k && !ui.shopCat ? "" : " hidden"}> 建議</small></button>`).join("")}
       </div>
-      <select data-shop-new-group aria-label="分類">
-        <option value="protein"${(ui.shopCat || "protein") === "protein" ? " selected" : ""}>蛋白質</option>
-        <option value="starch"${ui.shopCat === "starch" ? " selected" : ""}>澱粉</option>
-        <option value="veg"${ui.shopCat === "veg" ? " selected" : ""}>蔬菜</option>
-      </select>
+      ${ui.shopCatMissing ? `<p class="note warn" data-testid="shop-cat-missing">請先選分類</p>` : ""}
       <button type="button" class="btn primary" data-shop-add>新增</button>
     </div>` : "";
   const editIt = ui.shopEdit ? shopAllItems(st).find((x) => x.id === ui.shopEdit) : null;
@@ -2074,7 +2090,10 @@ function renderShop(st) {
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
          <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
-         <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || (typeof shopBasisG(st, editIt) === "number" ? `${shopBasisG(st, editIt)} g` : ""))}" placeholder="例如 150 g 或 1 包"></label>${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
+         <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || (typeof shopBasisG(st, editIt) === "number" ? `${shopBasisG(st, editIt)} g` : ""))}" placeholder="例如 150 g 或 1 包"></label>
+         <label class="edit-row"><span>每份熱量</span><input type="number" inputmode="decimal" data-edit-kcal data-testid="edit-kcal" value="${shopNutri(st, editIt).pending ? "" : shopNutri(st, editIt).kcal}" placeholder="kcal"></label>
+         <label class="edit-row"><span>每份蛋白</span><input type="number" inputmode="decimal" data-edit-prot data-testid="edit-prot" value="${shopNutri(st, editIt).pending ? "" : shopNutri(st, editIt).protein}" placeholder="g"></label>
+         ${shopNutri(st, editIt).pending ? `<p class="muted" data-testid="edit-nutri-pend">待確認：填每份熱量和蛋白</p>` : ""}${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
          <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : fmtServ(shopLeft(st, editIt))}</p>${!shopServings(st, editIt).pending && typeof shopBasisG(st, editIt) === "number" ? `<small class="muted" data-testid="edit-left">剩 ${fmtG(shopLeft(st, editIt).n * shopBasisG(st, editIt))}</small>` : ""}`;
     const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
@@ -2558,7 +2577,11 @@ document.getElementById("main").addEventListener("click", (e) => {
       if (portion) shopPortions[id] = portion; else delete shopPortions[id];
       const shopNames = { ...(st.shopNames || {}) };
       if (nameV && nameV !== shopSplit(it).label) shopNames[id] = nameV; else delete shopNames[id];
-      const patch = { shopPortions, shopNames };
+      const kV = String((document.querySelector("[data-edit-kcal]") || {}).value || "").trim();
+      const pV = String((document.querySelector("[data-edit-prot]") || {}).value || "").trim();
+      const shopNutriM = { ...(st.shopNutri || {}) };
+      if (kV !== "" && pV !== "") shopNutriM[id] = { kcal: Number(kV), protein: Number(pV) }; else delete shopNutriM[id];
+      const patch = { shopPortions, shopNames, shopNutri: shopNutriM };
       if (it.custom) {
         const label = shopSplit(it).label;
         patch.shopExtra = (st.shopExtra || []).map((x) => x.id === id ? { ...x, amount: qty, name: shopDisplayName(label, qty) } : x);
@@ -2629,7 +2652,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   }
   const shopCat = e.target.closest("[data-shop-cat]");
   if (shopCat) {
-    ui.shopCat = shopCat.dataset.shopCat;
+    ui.shopCat = shopCat.dataset.shopCat; ui.shopCatMissing = false;
     ui.shopDraftName = (document.querySelector("[data-shop-new-name]") || {}).value || ui.shopDraftName || "";
     ui.shopDraftAmount = (document.querySelector("[data-shop-new-amount]") || {}).value || ui.shopDraftAmount || "";
     render();
@@ -2649,8 +2672,9 @@ document.getElementById("main").addEventListener("click", (e) => {
     const label = String(ui.shopDraftName || "").trim();
     const amount = String(ui.shopDraftAmount || "").trim();
     const known = matchShopItem(st, label);
-    const selGroup = (document.querySelector("[data-shop-new-group]") || {}).value;
-    const group = known ? known.group : (ui.shopCat || selGroup || "protein");
+    const group = known ? known.group : ui.shopCat;
+    if (label && !group) { ui.shopCatMissing = true; render(); return; }
+    ui.shopCatMissing = false;
     const qty = parseShopQty(amount);
     if (label) {
       const item = {
@@ -2667,6 +2691,7 @@ document.getElementById("main").addEventListener("click", (e) => {
       ui.shopDraftName = "";
       ui.shopDraftAmount = "";
       ui.shopAdd = false;
+      ui.shopCat = null;
     }
     render();
     return;
@@ -2769,7 +2794,11 @@ document.getElementById("main").addEventListener("click", (e) => {
   const eatElse = e.target.closest("[data-eat-else]");
   if (eatElse) {
     ui.elseMeal = eatElse.dataset.eatElse;
-    ui.elseSel = {}; ui.elseOut = null; ui.elseOutSize = null; ui.elseFree = []; ui.elseFreeOpen = false;
+    const lg = ((st.mealLogs || {})[todayKey()] || {})[ui.elseMeal] || {};
+    const isElse = lg.mode === "else";
+    ui.elseSel = isElse ? { ...(lg.sel || lg.pantryUsed || lg.pantryPlan || {}) } : {};
+    ui.elseOut = isElse ? lg.out || null : null; ui.elseOutSize = isElse ? lg.outSize || null : null;
+    ui.elseFree = isElse ? [...(lg.free || [])] : []; ui.elseFreeOpen = false;
     ui.swap = null;
     render();
     window.scrollTo(0, 0);
@@ -2815,7 +2844,7 @@ document.getElementById("main").addEventListener("click", (e) => {
       shopUsed[k] = (shopUsed[k] || 0) + n;
     }
     packs = Math.max(0, packs - wheyUsed);
-    meals[ui.elseMeal] = { mode: "else", name: tot.name, kcal: tot.kcal, protein: tot.protein, eaten: true, pantryUsed, wheyUsed };
+    meals[ui.elseMeal] = { mode: "else", name: tot.name, kcal: tot.kcal, protein: tot.protein, eaten: true, pantryUsed, wheyUsed, nutriPending: tot.pendingNames, sel: { ...(ui.elseSel || {}) }, out: ui.elseOut || null, outSize: ui.elseOutSize || null, free: [...(ui.elseFree || [])] };
     save({ mealLogs: { ...st.mealLogs, [day]: meals }, shopUsed, wheyPacks: packs });
     ui.elseMeal = null; ui.elseSel = {}; ui.elseOut = null; ui.elseOutSize = null; ui.elseFree = []; ui.elseFreeOpen = false;
     go("today");
@@ -2996,6 +3025,10 @@ document.getElementById("main").addEventListener("click", (e) => {
 
 
 document.getElementById("main").addEventListener("input", (e) => {
+  if (e.target.matches && e.target.matches("[data-shop-new-name]")) {
+    const sc = suggestCat(e.target.value);
+    document.querySelectorAll("[data-sug]").forEach((el) => { el.hidden = !(sc === el.dataset.sug && !ui.shopCat); });
+  }
   if (e.target.matches("[data-shop-new-name]")) {
     ui.shopDraftName = e.target.value;
     const known = matchShopItem(state(), e.target.value);
@@ -3078,7 +3111,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-17";
+const APP_VERSION = "2026.11.07-preview-18";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
