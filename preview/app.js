@@ -509,8 +509,9 @@ function mealTotals(st, d = now()) {
   for (const id of ids) {
     const m = ((st.mealLogs || {})[todayKey(d)] || {})[id];
     if (m && m.eaten === true) {
-      kcal += Number(m.kcal) || 0;
-      protein += Number(m.protein) || 0;
+      const v = id === "snack" && m.mode !== "else" ? mealEstimate(st, id, d) : m;
+      kcal += Number(v.kcal) || 0;
+      protein += Number(v.protein) || 0;
     }
   }
   return { kcal, protein };
@@ -571,8 +572,29 @@ function hasCustomPortions(m) {
   if (m.mode === "else") return false;
   return !!(Number(m.palms) || Number(m.fists) || m.veg);
 }
+// Single source for protein-powder macros (chosen scoop flavors via resolveWhey)
+function wheyPowderMacros(st, d = now()) {
+  const ids = selectedScoops(st, d);
+  const ws = [0, 1].map((i) => resolveWhey(st, ids[i] || "plantAlmond"));
+  return { kcal: ws.reduce((a, w) => a + (Number(w.kcal) || 0), 0), protein: ws.reduce((a, w) => a + (Number(w.protein) || 0), 0), kcalUnknown: ws.some((w) => w.kcal == null), scoopIds: ws.map((w) => w.id) };
+}
+// Snack = chosen powder + the other component (default 地瓜 150g, or 外食/掌拳 portions; whey2 = powder only)
+function snackMacros(st, d = now()) {
+  const logged = ((st.mealLogs || {})[todayKey(d)] || {}).snack || {};
+  const w = wheyPowderMacros(st, d);
+  let other = { kcal: 182, protein: 2, name: "地瓜 150g" };
+  if (logged.mode === "whey2") other = { kcal: 0, protein: 0, name: "" };
+  else if (hasCustomPortions(logged)) other = portionMacros(logged, st, d);
+  return { kcal: Math.round(w.kcal + (Number(other.kcal) || 0)), protein: Math.round(w.protein + (Number(other.protein) || 0)), powder: w, otherName: other.name };
+}
 function mealEstimate(st, id, d = now()) {
   const logged = ((st.mealLogs || {})[todayKey(d)] || {})[id];
+  if (id === "snack" && !(logged && logged.mode === "else")) {
+    const sug = suggestionOf(st, id, d);
+    const m = snackMacros(st, d);
+    const base = logged && hasCustomPortions(logged) ? { ...sug, ...logged, name: [m.otherName, "蛋白粉 2 份"].filter(Boolean).join("＋") } : { ...sug, ...(logged || {}), name: sug.name };
+    return { ...base, kcal: m.kcal, protein: m.protein, scoopIds: m.powder.scoopIds, kcalUnknown: m.powder.kcalUnknown, suggestName: sug.name };
+  }
   const sug = suggestionOf(st, id, d);
   if (logged && hasCustomPortions(logged)) {
     const est = portionMacros(logged, st, d);
@@ -1480,10 +1502,9 @@ function wheyCatalogSelects(prefix) {
   </div>`;
 }
 function wheyNutriLine(st) {
-  const ids = selectedScoops(st);
-  const ws = [0, 1].map((i) => resolveWhey(st, ids[i] || "plantAlmond"));
-  const k = ws.some((w) => w.kcal == null) ? "?" : Math.round(ws.reduce((a, w) => a + Number(w.kcal), 0));
-  const pr = Math.round(ws.reduce((a, w) => a + Number(w.protein), 0));
+  const w = wheyPowderMacros(st);
+  const k = w.kcalUnknown ? "?" : Math.round(w.kcal);
+  const pr = Math.round(w.protein);
   return `<p class="whey-nutri" data-testid="whey-nutri">蛋白粉 ${k} kcal / ${pr} g</p>`;
 }
 function scoopPicker(st, slot) {
@@ -3339,7 +3360,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-35";
+const APP_VERSION = "2026.11.07-preview-36";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3615,7 +3636,7 @@ document.getElementById("main").addEventListener("change", (e) => {
         patch.wheyStockG = stock;
       }
       meals.snack = { ...meals.snack, scoopIds: cur.slice() };
-      const est = twoScoopMeal({ ...st2, mealLogs: { ...(st2.mealLogs || {}), [day]: meals } });
+      const est = mealEstimate({ ...st2, mealLogs: { ...(st2.mealLogs || {}), [day]: meals } }, "snack");
       meals.snack = { ...meals.snack, name: est.name, kcal: est.kcal, protein: est.protein, hasPlant: est.hasPlant, chickenG: est.chickenG, kcalUnknown: est.kcalUnknown };
       patch.mealLogs = { ...(st2.mealLogs || {}), [day]: meals };
     }
