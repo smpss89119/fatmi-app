@@ -2170,7 +2170,7 @@ function renderRules(st) {
     <p class="sec">今天怎麼決定課表</p>
     <div class="card prose">
       <p>睡滿 6 小時、心率正常、Body Battery ≥ 30 就練原課表，否則改 25 分鐘快版。Garmin 有重訓也算一堂；錯過就延後，不跳過。熱量只看有吃飯紀錄的日子，用兩週體重平均。</p>
-      <p>訓練日建議 16:00 喝兩份樂維根（芝麻／豆漿／杏仁各約 20 g 蛋白，極致／純淨各口味約 23–27 g）加地瓜。一份極致／純淨則 18:30 雞胸 150g；兩份經典無糖則雞胸 200g 或 21:00 加蛋 2 顆。</p>
+      <p>訓練日建議 16:00 喝兩份樂維根（各口味蛋白見標示）加地瓜。一份極致／純淨則 18:30 雞胸 150g；兩份經典無糖則雞胸 200g 或 21:00 加蛋 2 顆。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
       <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
@@ -3139,7 +3139,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-22";
+const APP_VERSION = "2026.11.07-preview-23";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
