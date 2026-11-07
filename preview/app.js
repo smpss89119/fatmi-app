@@ -2074,7 +2074,7 @@ function renderShop(st) {
          <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
          <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || (typeof shopBasisG(st, editIt) === "number" ? `${shopBasisG(st, editIt)} g` : ""))}" placeholder="例如 150 g 或 1 包"></label>${shopOrigWeight(st, editIt) ? `<small class="muted" data-testid="edit-orig">原 ${esc(shopOrigWeight(st, editIt))}</small>` : ""}
-         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : fmtServ(shopLeft(st, editIt))}</p>`;
+         <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : fmtServ(shopLeft(st, editIt))}</p>${!shopServings(st, editIt).pending && typeof shopBasisG(st, editIt) === "number" ? `<small class="muted" data-testid="edit-left">剩 ${fmtG(shopLeft(st, editIt).n * shopBasisG(st, editIt))}</small>` : ""}`;
     const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
     editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
@@ -3065,7 +3065,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-15";
+const APP_VERSION = "2026.11.07-preview-16";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;

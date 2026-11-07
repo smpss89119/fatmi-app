@@ -1,0 +1,54 @@
+const { test, expect } = require("@playwright/test");
+const fs = require("fs");
+const P = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/preview/"}`;
+const TUE_15 = "2026-11-10T15:00:00+07:00";
+const url = `${P}?debug=1&sleep=8&now=${encodeURIComponent(TUE_15)}#today`;
+const shot = (n) => (process.env.SHOT_DIR ? { path: `${process.env.SHOT_DIR}/${n}` } : {});
+const dump = (n, d) => { if (process.env.SHOT_DIR) fs.writeFileSync(`${process.env.SHOT_DIR}/${n}`, JSON.stringify(d, null, 2)); };
+test.use({ viewport: { width: 390, height: 844 } });
+
+test("r11) 燕麥 500g/150g: eat 1 → 350g persists; cancel restores 500g", async ({ page }) => {
+  await page.goto(url); await page.waitForSelector(".ttl");
+  await page.locator("[data-tab=shop]").click();
+  await page.locator("[data-testid=shop-plus]").click();
+  await page.locator("[data-testid=shop-add] [data-shop-new-name]").fill("燕麥");
+  await page.locator("[data-testid=shop-add] [data-shop-new-amount]").fill("500g");
+  await page.locator("[data-shop-cat=starch]").click();
+  await page.locator("[data-shop-add]").click();
+  const item = async () => { const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2") || "{}")); const it = (s.shopExtra || []).find((x) => x.name.startsWith("燕麥")); return { s, it }; };
+  const { it } = await item(); const id = it.id;
+  const pick = (s) => ({ item: s.shopExtra.find((x) => x.id === id), portion: (s.shopPortions || {})[id], used: (s.shopUsed || {})[id] ?? 0, dinner: ((s.mealLogs || {})["2026-11-10"] || {}).dinner || null });
+  await page.locator(`[data-testid=shop-edit-${id}]`).click();
+  await page.locator("[data-testid=edit-portion]").fill("150 g");
+  await page.locator("[data-testid=edit-save]").click();
+  await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 3.3 份");
+  await page.locator("[data-tab=today]").click();
+  await page.locator("[data-eat-else=dinner]").click();
+  await page.locator(`[data-testid="else-inc-${id}"]`).click();
+  await page.locator("[data-testid=else-save]").click();
+  await page.locator("[data-tab=shop]").click();
+  const sheet = async (tag) => {
+    await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 2.3 份");
+    await page.locator(`[data-testid=shop-edit-${id}]`).click();
+    await expect(page.locator("[data-testid=edit-left]")).toHaveText("剩 350g");
+    await expect(page.locator("[data-testid=edit-n]")).toHaveValue("2.3");
+    await page.screenshot(shot(`fatmi_r11_${tag}.png`));
+    await page.locator("[data-edit-close]").click();
+  };
+  await sheet("before_reload");
+  dump("fatmi_r11_before_reload.json", pick((await item()).s));
+  await page.reload(); await page.waitForSelector(".ttl");
+  await page.locator("[data-tab=shop]").click();
+  await sheet("after_reload");
+  dump("fatmi_r11_after_reload.json", pick((await item()).s));
+  // cancel the eat: tap ✓ 吃了 on dinner
+  await page.locator("[data-tab=today]").click();
+  await page.locator("[data-eat=dinner]").click();
+  await page.reload(); await page.waitForSelector(".ttl");
+  await page.locator("[data-tab=shop]").click();
+  await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 3.3 份");
+  await page.locator(`[data-testid=shop-edit-${id}]`).click();
+  await expect(page.locator("[data-testid=edit-left]")).toHaveText("剩 500g");
+  await page.screenshot(shot("fatmi_r11_cancel_after_reload.png"));
+  dump("fatmi_r11_cancel_after_reload.json", pick((await item()).s));
+});
