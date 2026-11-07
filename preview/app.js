@@ -1,4 +1,16 @@
-const STORE = "fatcat-v2";
+const DEMO = (() => { try { return new URLSearchParams(location.search).get("demo") === "legacy"; } catch (_) { return false; } })();
+const STORE = DEMO ? "fatcat-demo" : "fatcat-v2";
+const LEGACY_DEMO = {
+  grocery: { chicken: true, eggs: true },
+  shopExtra: [
+    { id: "x-old", group: "protein", name: "雞柳 一包", custom: true, amount: "一包", palms: 2, fists: 0 },
+    { id: "x-w", group: "starch", name: "燕麥 500g", custom: true, amount: "500g", palms: 0, fists: 0 },
+    { id: "x-veg", group: "veg", name: "花椰菜 300g", custom: true, amount: "300g", palms: 0, fists: 0 },
+    { id: "x-q", group: "protein", name: "豆腐 2", custom: true, amount: "2", palms: 2, fists: 0 },
+  ],
+};
+if (DEMO) { try { localStorage.setItem("fatcat-demo", JSON.stringify(LEGACY_DEMO)); } catch (_) {} }
+function normName(s) { return String(s || "").normalize("NFKC").replace(/[\s\u3000]+/g, ""); }
 const DOW = ["日", "一", "二", "三", "四", "五", "六"];
 const GOAL = new Date(2026, 11, 31);
 const DEFAULT_DAYS = [2, 5];
@@ -2009,7 +2021,7 @@ function renderShop(st) {
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
          <label class="edit-row"><span>一份是多少</span><input type="text" data-edit-portion data-testid="edit-portion" value="${esc((st.shopPortions || {})[editIt.id] || "")}" placeholder="例如 150 g 或 1 包"></label>
          <p class="muted">${shopServings(st, editIt).pending ? "待確認：填一份是多少才會算進天數" : `約 ${shopServings(st, editIt).n} 份`}</p>`;
-    const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && shopLabel(st, x) === shopLabel(st, editIt));
+    const dup = editIt.whey ? null : shopAllItems(st).find((x) => x.id !== editIt.id && x.group === editIt.group && normName(shopLabel(st, x)) === normName(shopLabel(st, editIt)));
     const mergeBtn = dup ? `<button type="button" class="btn" data-shop-merge="${editIt.id}" data-merge-into="${dup.id}" data-testid="edit-merge">合併到「${esc(shopLabel(st, dup))}」</button>` : "";
     editSheet = `<div class="sheet" data-testid="shop-edit-sheet"><div class="sheet-card">
       <div class="k">${esc(shopLabel(st, editIt))}</div>${body}${mergeBtn}
@@ -2487,6 +2499,21 @@ document.getElementById("main").addEventListener("click", (e) => {
       const portion = String((document.querySelector("[data-edit-portion]") || {}).value || "").trim();
       const nameV = String((document.querySelector("[data-edit-name]") || {}).value || "").trim();
       const nV = String((document.querySelector("[data-edit-n]") || {}).value || "").trim();
+      const dupT = nameV && shopAllItems(st).find((x) => x.id !== id && !x.whey && x.group === it.group && normName(shopLabel(st, x)) === normName(nameV));
+      if (dupT) {
+        const add = nV !== "" && !Number.isNaN(Number(nV)) ? Number(nV) : shopLeft(st, it).n;
+        const total = shopLeft(st, dupT).n + add;
+        if (!window.confirm(`合併成 ${total} 份？`)) return;
+        const shopAdj = { ...(st.shopAdj || {}) };
+        shopAdj[dupT.id] = (Number(shopAdj[dupT.id]) || 0) + add;
+        const patch = { shopAdj };
+        if (it.custom) patch.shopExtra = (st.shopExtra || []).filter((x) => x.id !== id);
+        else patch.shopHide = { ...(st.shopHide || {}), [id]: true };
+        save(patch);
+        ui.shopEdit = null;
+        render();
+        return;
+      }
       const shopPortions = { ...(st.shopPortions || {}) };
       if (portion) shopPortions[id] = portion; else delete shopPortions[id];
       const shopNames = { ...(st.shopNames || {}) };
@@ -3006,7 +3033,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-11";
+const APP_VERSION = "2026.11.07-preview-12";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3159,6 +3186,7 @@ function migrateGrocery() {
   } catch (_) {}
 }
 async function boot() {
+  if (DEMO) { const h = document.querySelector(".ttl"); if (h) h.insertAdjacentHTML("afterend", `<span class="demo-tag" data-testid="demo-tag">示範舊資料（不影響你的資料）</span>`); }
   migrateGrocery();
   try {
     const v = await fetch("./version.json", { cache: "no-store" });

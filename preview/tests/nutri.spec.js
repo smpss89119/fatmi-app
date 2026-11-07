@@ -63,12 +63,11 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await expect(page.locator("[data-testid=shop-x-typo]")).toContainText("雞凶");
     await page.locator("[data-testid=shop-edit-x-typo]").click();
     await page.locator("[data-testid=edit-name]").fill("雞胸");
+    let msg = "";
+    page.once("dialog", (d) => { msg = d.message(); d.accept(); });
     await page.locator("[data-testid=edit-save]").click();
-    await expect(page.locator("[data-testid=shop-x-typo]")).toContainText("雞胸");
-    await page.locator("[data-testid=shop-edit-x-typo]").click();
-    await expect(page.locator("[data-testid=edit-merge]")).toContainText("合併到「雞胸」");
     await page.screenshot(shot("fatmi_r6_edit.png"));
-    await page.locator("[data-testid=edit-merge]").click();
+    expect(msg).toBe("合併成 12 份？");
     await expect(page.locator("[data-testid=shop-x-typo]")).toHaveCount(0);
     await expect(page.locator("[data-testid=shop-qty-chicken]")).toHaveText("12 份");
   });
@@ -101,5 +100,38 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     await page.locator("[data-testid=edit-save]").click();
     await expect(page.locator("[data-testid=shop-qty-x-old]")).toHaveText("3 份");
     await expect(page.locator("[data-testid=shop-pending-x-old]")).toHaveCount(0);
+  });
+  test("r7-1) rename to existing name auto-merges after confirm 合併成 3 份？", async ({ page }) => {
+    await fresh(page, { shopExtra: [
+      { id: "x-a", group: "protein", name: "雞柳 1 份", custom: true, amount: "1 份", palms: 0 },
+      { id: "x-b", group: "protein", name: "雞六 2 份", custom: true, amount: "2 份", palms: 0 },
+    ], shopPortions: { "x-a": "150 g" } });
+    await page.locator("[data-tab=shop]").click();
+    await page.locator("[data-testid=shop-edit-x-b]").click();
+    await page.locator("[data-testid=edit-name]").fill("　雞柳 ");
+    let msg = "";
+    page.once("dialog", (d) => { msg = d.message(); d.accept(); });
+    await page.locator("[data-testid=edit-save]").click();
+    await expect(page.locator("[data-testid=shop-x-b]")).toHaveCount(0);
+    expect(msg).toBe("合併成 3 份？");
+    await expect(page.locator(".shop-row", { hasText: "雞柳" })).toHaveCount(1);
+    await expect(page.locator("[data-testid=shop-qty-x-a]")).toHaveText("3 份");
+    await page.screenshot(shot("fatmi_r7_merge.png"));
+    await page.locator("[data-testid=shop-edit-x-a]").click();
+    await expect(page.locator("[data-testid=edit-portion]")).toHaveValue("150 g");
+  });
+  test("r7-2) ?demo=legacy shows 待確認 in throwaway storage, real data untouched", async ({ page }) => {
+    await page.addInitScript(() => { if (!sessionStorage.s) { sessionStorage.s = 1; localStorage.setItem("fatcat-v2", JSON.stringify({ mine: 1 })); } });
+    await page.goto(`${P}?demo=legacy&debug=1&sleep=8&now=${encodeURIComponent(TUE_15)}#shop`);
+    await page.waitForSelector(".ttl");
+    await expect(page.locator("[data-testid=demo-tag]")).toBeVisible();
+    await page.locator("[data-tab=shop]").click();
+    await expect(page.locator("[data-testid=shop-pending-x-old]")).toHaveText("待確認");
+    await expect(page.locator("[data-testid=shop-qty-x-w]")).toHaveText("3 份");
+    await expect(page.locator("[data-testid=shop-pending-x-w]")).toHaveCount(0);
+    await expect(page.locator("[data-testid=shop-qty-x-veg]")).toHaveText("3 份");
+    await page.screenshot(shot("fatmi_r7_legacy.png"), { fullPage: true });
+    const real = await page.evaluate(() => localStorage.getItem("fatcat-v2"));
+    expect(JSON.parse(real)).toEqual({ mine: 1 });
   });
 });
