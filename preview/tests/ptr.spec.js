@@ -44,4 +44,6 @@ test("PTR: high threshold, release-to-refresh, disabled in workout", async ({ pa
   // if workout started, class should be on; PTR code checks mode-workout
   // either way constants check above is the main gate
   expect(app.fire).toBe(200);
+  expect(app.hasWorkoutOff).toBe(true);
+  expect(await page.evaluate(async () => /ptr-spin|ptrLoading/.test(await (await fetch("./app.js")).text()))).toBe(true);
 });

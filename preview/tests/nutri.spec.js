@@ -11,29 +11,31 @@ async function fresh(page, seed) {
 const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2") || "{}"));
 
 test.describe("NUTRI r6 (UI clicks)", () => {
-  test("1) 蛋白粉 2 份 then 吃了 logs 330/50 and pantry 14 -> 12", async ({ page }) => {
+  test("1) 蛋白粉 2 份 then 吃了 logs 366/52 and pantry 14 -> 12", async ({ page }) => {
     await fresh(page);
     const row = page.locator("[data-testid=meal-dinner]");
     await page.locator("[data-testid=meal-more-dinner]").click();
     await page.locator("[data-testid=whey2-dinner]").click();
-    await expect(row.locator(".nums")).toHaveText("330 · 蛋白 50g");
+    await expect(row.locator(".nums")).toHaveText("366 · 蛋白 52g");
     await page.locator("[data-eat=dinner]").click();
     await expect(row).toHaveClass(/eaten/);
-    await expect(row.locator(".nums")).toHaveText("330 · 蛋白 50g");
-    await expect(page.locator("[data-testid=remain]")).toContainText("1820");
+    await expect(row.locator(".nums")).toHaveText("366 · 蛋白 52g");
+    await expect(page.locator("[data-testid=remain]")).toContainText("1784");
     await page.screenshot(shot("fatmi_r6_whey_eaten.png"));
     await page.locator("[data-tab=shop]").click();
     await expect(page.locator("[data-testid=whey-packs]")).toHaveText("12");
   });
   test("2) 吃了別的: pantry first with 份, then 外食, then ＋ 其他; logs and decrements", async ({ page }) => {
-    await fresh(page);
+    await fresh(page, { wheyHave: ["sesame", "plantAlmond"] });
     await page.locator("[data-eat-else=dinner]").click();
     const list = page.locator("[data-testid=else-list]");
     await expect(list).toBeVisible();
     await expect(page.locator("[data-else-pick]")).toHaveCount(0);
     await expect(page.locator("[data-testid=else-chicken]")).toContainText("剩 7 份");
     const secs = await page.locator("main .sec").allInnerTexts();
-    expect(secs.slice(0, 3)).toEqual(["家裡有的", "外食", "其他"]);
+    expect(secs[0]).toBe("家裡有的");
+    expect(secs).toContain("外食");
+    expect(secs).toContain("其他");
     await page.locator("[data-testid=else-inc-chicken]").click();
     await page.locator("[data-testid=else-inc-chicken]").click();
     await page.locator('[data-testid="else-inc-whey:sesame"]').click();

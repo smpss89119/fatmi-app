@@ -113,19 +113,24 @@ test.describe("NUTRI", () => {
     await expect(eat).not.toContainText("午餐");
   });
 
-  test("3) whey 經典＋極致／純淨各口味, chicken 200/150", async ({ page }) => {
-    await open(page, { now: TUE_15, sleep: "8" });
+  test("3) whey stock select + series catalog add; plant → chicken 150", async ({ page }) => {
+    await open(page, { now: TUE_15, sleep: "8" }, { wheyHave: ["plantAlmond"] });
     const snack = page.locator("[data-testid=meal-snack]");
-    await expect(snack).toContainText("芝麻");
-    await expect(snack).toContainText("豆漿");
-    await expect(snack).toContainText("杏仁");
-    await expect(snack).toContainText("純淨杏仁");
-    await expect(snack).toContainText("極致原味");
-    await expect(page.locator("[data-testid=meal-dinner]")).toContainText("雞胸 200g");
-    await expect(snack).toContainText("蛋白 52g");
-    await page.locator("[data-scoop-slot='0'][data-scoop-id='plantAlmond']").first().click();
+    await expect(page.locator("[data-testid=scoop-select-0]")).toBeVisible();
+    await expect(page.locator("[data-testid=scoop-select-0]")).toHaveValue("plantAlmond");
     await expect(page.locator("[data-testid=meal-dinner]")).toContainText("雞胸 150g");
     await expect(snack).toContainText("蛋白 54g");
+    await page.locator("[data-tab=shop]").click();
+    await page.locator("[data-testid=shop-edit-whey]").click();
+    await page.locator("[data-testid=whey-add-series]").selectOption("classic");
+    await page.waitForFunction(() => [...document.querySelector("[data-testid=whey-add-flavor]").options].some((o) => o.value === "sesame"));
+    await page.locator("[data-testid=whey-add-flavor]").selectOption("sesame");
+    await page.locator("[data-testid=whey-add-have]").click();
+    await expect(page.locator("[data-testid=whey-edit-sesame]")).toBeVisible();
+    await page.locator("[data-edit-close]").click();
+    await page.locator("[data-tab=today]").click();
+    await page.locator("[data-testid=scoop-select-0]").selectOption("sesame");
+    await expect(page.locator("[data-testid=scoop-select-0]")).toHaveValue("sesame");
   });
 
   test("4) shop add, bars, frequent, starch plan not zero", async ({ page }) => {
@@ -220,7 +225,7 @@ test.describe("FOOD", () => {
     await page.locator("[data-testid=meal-dinner] [data-eat]").click();
     await page.locator("[data-testid=meal-eggs21] [data-eat]").click();
     const ring = page.locator("[data-testid=eat-card] .ring").nth(1);
-    await expect(ring).toContainText("116");
+    await expect(ring).toContainText("107");
   });
 });
 
@@ -255,14 +260,14 @@ test.describe("FITMI", () => {
     await expect(page.locator("[data-testid=rest-quick]")).toContainText("可以練原課表");
   });
 
-  test("unticking 16:00 protein subtracts the 330 kcal", async ({ page }) => {
+  test("unticking 16:00 protein subtracts the 366 kcal", async ({ page }) => {
     await open(page, { now: SAT_10, sleep: "8" });
     const snack = page.locator("[data-testid=meal-snack]");
     await snack.locator("[data-testid=meal-more-snack]").click();
     await snack.locator("[data-testid=whey2-snack]").click();
     await snack.locator("[data-eat]").click();
     const ring = page.locator("[data-testid=eat-card] .ring").first().locator("b");
-    await expect(ring).toHaveText("330");
+    await expect(ring).toHaveText("366");
     await expect(snack).toHaveClass(/eaten/);
     await snack.locator("[data-eat]").click();
     await expect(snack).not.toHaveClass(/eaten/);

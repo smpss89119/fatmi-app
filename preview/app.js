@@ -22,7 +22,7 @@ const HIGH_STEPS = 15000;
 const REST_SEC = 90;
 
 let LIVE = { garmin: { daily: [], activities: [] }, inbody: [], exportedAt: null, ok: {} };
-let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null, wantTrain: false, shopAdd: false, shopCat: null, shopDraftName: "", shopDraftAmount: "" };
+let ui = { swap: null, bodyPart: null, showReason: false, mealMore: null, shareSheet: null, wantTrain: false, shopAdd: false, shopCat: null, wheyOpen: null, shopDraftName: "", shopDraftAmount: "" };
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
@@ -111,6 +111,7 @@ function state() {
     fasted: s.fasted || {},
     wheyEst: s.wheyEst || {},
     scoopPick: s.scoopPick || {},
+    wheyHave: s.wheyHave || null,
     dinnerAlt: s.dinnerAlt || {},
     lastAdvice: s.lastAdvice || "",
     shopWeek: s.shopWeek || null,
@@ -260,7 +261,7 @@ function selectedScoops(st, d = now()) {
   const logged = ((st.mealLogs || {})[day] || {}).snack;
   if (logged && Array.isArray(logged.scoopIds) && logged.scoopIds.length === 2) return logged.scoopIds.slice();
   if ((st.scoopPick || {})[day]) return (st.scoopPick[day] || []).slice();
-  return ["sesame", "soymilk"];
+  return ["plantAlmond", "plantAlmond"];
 }
 function twoScoopMeal(st, d = now()) {
   const ids = selectedScoops(st, d);
@@ -1335,12 +1336,93 @@ function renderSunday(st) {
   </section>`;
 }
 
+
+const WHEY_SERIES = [
+  { id: "classic", title: "經典" },
+  { id: "plant", title: "極致／純淨" },
+  { id: "hiFiber", title: "高纖 35g" },
+  { id: "hiCalcium", title: "高鈣" },
+];
+function wheyLineOf(o) {
+  if (o.line) return o.line;
+  if (String(o.id || "").startsWith("plant")) return "plant";
+  if (String(o.id || "").startsWith("hf")) return "hiFiber";
+  if (String(o.id || "").startsWith("hc")) return "hiCalcium";
+  return "classic";
+}
+function wheyChip(o) {
+  return o.chip || String(o.name || "").replace("樂維根 ", "").trim();
+}
+function wheySorted(list) {
+  return (list || []).slice().sort((a, b) => wheyChip(a).localeCompare(wheyChip(b), "zh-Hant"));
+}
+function wheyBySeries() {
+  const map = {};
+  for (const s of WHEY_SERIES) map[s.id] = [];
+  for (const o of WHEY_OPTIONS || []) {
+    const k = wheyLineOf(o);
+    (map[k] || (map[k] = [])).push(o);
+  }
+  for (const k of Object.keys(map)) map[k] = wheySorted(map[k]);
+  return map;
+}
+function wheyOpenSeries(st, selectedIds) {
+  const open = new Set(ui.wheyOpen || []);
+  if (!ui.wheyOpen) {
+    // default: series of current selection, else 極致／純淨 (建毅常用)
+    const sel = selectedIds || selectedScoops(st) || [];
+    let any = false;
+    for (const id of sel) {
+      const o = (WHEY_OPTIONS || []).find((x) => x.id === id);
+      if (o) { open.add(wheyLineOf(o)); any = true; }
+    }
+    if (!any) open.add("plant");
+    open.add("classic"); // keep classic visible for default scoops
+    open.add("plant");
+  }
+  return open;
+}
+
+
+function wheyHaveIds(st) {
+  const raw = st && st.wheyHave;
+  if (Array.isArray(raw) && raw.length) return raw.filter((id) => (WHEY_OPTIONS || []).some((o) => o.id === id));
+  // default stock: 建毅常用純淨杏仁
+  return ["plantAlmond"];
+}
+function wheyHaveOptions(st) {
+  const ids = new Set(wheyHaveIds(st));
+  return wheySorted((WHEY_OPTIONS || []).filter((o) => ids.has(o.id)));
+}
+function wheySelectHtml(st, slot, selectedId, attrs) {
+  const opts = wheyHaveOptions(st);
+  const cur = opts.some((o) => o.id === selectedId) ? selectedId : (opts[0] && opts[0].id) || "";
+  const options = opts.map((o) => `<option value="${esc(o.id)}"${o.id === cur ? " selected" : ""}>${esc(wheyChip(o))}</option>`).join("");
+  return `<select class="whey-select" data-scoop-slot="${slot}" data-testid="scoop-select-${slot}" aria-label="蛋白粉口味"${attrs || ""}>${options || "<option value=\"\">（庫存無口味）</option>"}</select>`;
+}
+function wheyCatalogSelects(prefix) {
+  const by = wheyBySeries();
+  const seriesOpts = WHEY_SERIES.map((s) => `<option value="${s.id}">${esc(s.title)}</option>`).join("");
+  // flavors filled by change handler; initial classic sorted
+  const first = "plant";
+  const seriesOpts2 = WHEY_SERIES.map((s) => `<option value="${s.id}"${s.id === first ? " selected" : ""}>${esc(s.title)}</option>`).join("");
+  const flav = (by[first] || []).map((o) => `<option value="${esc(o.id)}"${o.id === "plantAlmond" ? " selected" : ""}>${esc(wheyChip(o))}</option>`).join("");
+  return `<div class="whey-add" data-testid="whey-add">
+    <label class="whey-add-row"><span>系列</span>
+      <select data-whey-add-series data-testid="whey-add-series">${seriesOpts2}</select></label>
+    <label class="whey-add-row"><span>口味</span>
+      <select data-whey-add-flavor data-testid="whey-add-flavor">${flav}</select></label>
+    <button type="button" class="btn" data-whey-add-have data-testid="whey-add-have">加入庫存口味</button>
+  </div>`;
+}
 function scoopPicker(st, slot) {
   const ids = selectedScoops(st);
-  const label = (o) => o.chip || String(o.name || "").replace("樂維根 ", "").replace("無糖", "").trim();
-  return `<div class="chips" data-scoop-row="${slot}">${WHEY_OPTIONS.map((o) =>
-    `<button type="button" class="chip${ids[slot] === o.id ? " on" : ""}" data-scoop-slot="${slot}" data-scoop-id="${esc(o.id)}">${esc(label(o))}</button>`
-  ).join("")}</div>`;
+  const have = wheyHaveOptions(st);
+  let cur = ids[slot];
+  if (!have.some((o) => o.id === cur)) cur = (have[0] && have[0].id) || "plantAlmond";
+  return `<div class="whey-pick" data-scoop-row="${slot}" data-testid="scoop-row-${slot}">
+    <label class="whey-pick-label">第 ${slot + 1} 份 ${wheySelectHtml(st, slot, cur)}</label>
+  </div>`;
 }
 function proteinShortfall(st) {
   const t = now();
@@ -1601,9 +1683,9 @@ function elseItems(st) {
   const out = [];
   for (const it of shopAllItems(st)) {
     if (it.whey) {
-      for (const o of WHEY_OPTIONS || []) {
+      for (const o of wheyHaveOptions(st)) {
         const w = resolveWhey(st, o.id);
-        out.push({ key: `whey:${o.id}`, name: o.chip || o.name.replace("樂維根 ", ""), left: shopLeft(st, it).n, kcal: w.kcal == null ? 0 : Number(w.kcal), protein: Number(w.protein), nutriPending: w.kcal == null, whey: true });
+        out.push({ key: `whey:${o.id}`, name: wheyChip(o), left: shopLeft(st, it).n, kcal: w.kcal == null ? 0 : Number(w.kcal), protein: Number(w.protein), nutriPending: w.kcal == null, whey: true, series: wheyLineOf(o) });
       }
       continue;
     }
@@ -1636,12 +1718,16 @@ function renderElse(st) {
   const id = ui.elseMeal;
   if (!id) return renderHome(st);
   const sel = ui.elseSel || {};
-  const rows = elseItems(st).map((x) => {
+  const items = elseItems(st);
+  const pantry = items.filter((x) => !x.whey);
+  const wheyRows = items.filter((x) => x.whey).slice().sort((a, b) => a.name.localeCompare(b.name, "zh-Hant"));
+  const rowHtml = (x) => {
     const n = Number(sel[x.key]) || 0;
     return `<div class="else-row" data-testid="else-${x.key}"><span class="nm">${esc(x.name)}${x.pending || x.nutriPending ? `<span class="pend" data-testid="else-pend-${x.key}">待確認</span>` : ""}</span>
       <span class="left">剩 ${fmtServ({ n: x.left, pending: x.pending })}</span>
       <span class="stp"><button type="button" data-else-dec="${x.key}" aria-label="少一份">−</button><b data-testid="else-n-${x.key}">${n}</b><button type="button" data-else-inc="${x.key}" data-testid="else-inc-${x.key}" aria-label="多一份">+</button></span></div>`;
-  }).join("");
+  };
+  const rows = pantry.map(rowHtml).join("") + (wheyRows.length ? `<p class="sec muted">蛋白粉庫存口味</p>` + wheyRows.map(rowHtml).join("") : "");
   const outs = (OUT_MEALS || []).map((o) => `<button type="button" class="chip${ui.elseOut === o.id ? " on" : ""}" data-else-out="${o.id}" data-testid="else-out-${o.id}">${esc(o.name)}</button>`).join("");
   const sizes = ui.elseOut ? (OUT_SIZES || []).map((s) => `<button type="button" class="chip${(ui.elseOutSize || "normal") === s.id ? " on" : ""}" data-else-size="${s.id}">${esc(s.name)}</button>`).join("") : "";
   const free = (ui.elseFree || []).map((f, i) => `<div class="else-row"><span class="nm">${esc(f.name)}</span><span class="left">${f.kcal} kcal</span><span class="stp"><button type="button" data-else-free-del="${i}" aria-label="移除">✕</button></span></div>`).join("");
@@ -2106,11 +2192,17 @@ function renderShop(st) {
   if (editIt) {
     const sp = shopSplit(editIt);
     const body = editIt.whey
-      ? (WHEY_OPTIONS || []).map((o) => { const w = resolveWhey(st, o.id); return `<div class="edit-row" data-testid="whey-edit-${o.id}"><span>${esc(o.name.replace("樂維根 ", ""))}</span>
+      ? (() => {
+        const have = wheyHaveOptions(st);
+        const haveRows = have.map((o) => { const w = resolveWhey(st, o.id); return `<div class="edit-row" data-testid="whey-edit-${o.id}"><span>${esc(wheyChip(o))}</span>
           <label>一份 <input type="number" inputmode="decimal" data-whey-g="${o.id}" value="${w.scoopG}"> g</label>
           <label>蛋白 <input type="number" inputmode="decimal" data-whey-p="${o.id}" value="${w.protein}"> g</label>
           <label>熱量 <input type="number" inputmode="decimal" data-whey-k="${o.id}" data-testid="whey-kcal-${o.id}" value="${w.kcal == null ? "" : w.kcal}" placeholder="?"> kcal</label>
-          ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : (w.source ? `<small class="muted" data-testid="whey-src-${o.id}">${esc(w.source)}${w.note ? " · " + esc(w.note) : ""}</small>` : "")}</div>`; }).join("")
+          <button type="button" class="btn" data-whey-have-del="${o.id}" data-testid="whey-have-del-${o.id}">移出庫存</button>
+          ${w.kcal == null ? `<span class="pend" data-testid="whey-pend-${o.id}">待確認</span>` : (w.source ? `<small class="muted" data-testid="whey-src-${o.id}">${esc(w.source)}${w.note ? " · " + esc(w.note) : ""}</small>` : "")}</div>`; }).join("");
+        return `<p class="muted">庫存口味（記吃只顯示這些）</p>${haveRows || "<p class=\"muted\">尚未加入口味</p>"}
+          <p class="muted">從目錄加入</p>${wheyCatalogSelects()}`;
+      })()
       : `<label class="edit-row"><span>名稱</span><input type="text" data-edit-name data-testid="edit-name" value="${esc(shopLabel(st, editIt))}"></label>
          <label class="edit-row"><span>份數</span><input type="number" inputmode="numeric" data-edit-n data-testid="edit-n" value="${shopLeft(st, editIt).pending && !shopLeft(st, editIt).n ? "" : r1(shopLeft(st, editIt).n)}" step="0.1" placeholder="?"></label>
          <label class="edit-row"><span>購買量</span><input type="text" data-edit-qty data-testid="edit-qty" value="${esc(shopQtyOf(st, editIt))}" placeholder="例如 600 g"></label>
@@ -2809,6 +2901,23 @@ document.getElementById("main").addEventListener("click", (e) => {
     window.scrollTo(0, 0);
     return;
   }
+  const wheyAddHave = e.target.closest("[data-whey-add-have]");
+  if (wheyAddHave) {
+    const flav = (document.querySelector("[data-whey-add-flavor]") || {}).value;
+    if (flav) {
+      const have = wheyHaveIds(st);
+      if (!have.includes(flav)) save({ wheyHave: have.concat([flav]) });
+    }
+    render();
+    return;
+  }
+  const wheyHaveDel = e.target.closest("[data-whey-have-del]");
+  if (wheyHaveDel) {
+    const id = wheyHaveDel.dataset.wheyHaveDel;
+    save({ wheyHave: wheyHaveIds(st).filter((x) => x !== id) });
+    render();
+    return;
+  }
   const scoopPick = e.target.closest("[data-scoop-slot]");
   if (scoopPick) {
     const slot = Number(scoopPick.dataset.scoopSlot);
@@ -3137,9 +3246,9 @@ window.addEventListener("hashchange", () => {
 });
 
 
-const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-27", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
+const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-28", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-27";
+const APP_VERSION = "2026.11.07-preview-28";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
@@ -3183,6 +3292,7 @@ async function fetchNoStore(url) {
   return fetch(url, { cache: "no-store" });
 }
 async function hardRefresh() {
+  try { ptrLoading(); } catch (_) {}
   showToast("重新整理中…");
   await Promise.all(ASSETS.map((u) => fetchNoStore(u).catch(() => null)));
   try {
@@ -3229,6 +3339,7 @@ function maybeApplyDeferredUpdate() {
 }
 
 // Pull-to-refresh: high threshold; disabled during workout / busy (set/rest/forms).
+// Visual: arrow follows pull → at threshold flips; on release spinner while hardRefresh.
 const PTR_HINT = 140;
 const PTR_FIRE = 200;
 function ptrAllowed() {
@@ -3239,6 +3350,49 @@ function ptrAllowed() {
   if (window.scrollY > 2) return false;
   return true;
 }
+function ptrEnsure() {
+  let bar = document.getElementById("ptr");
+  if (bar) return bar;
+  bar = document.createElement("div");
+  bar.id = "ptr";
+  bar.innerHTML = `<div class="ptr-inner" data-testid="ptr" role="status" aria-live="polite">
+    <span class="ptr-disc" aria-hidden="true">
+      <svg class="ptr-arrow" viewBox="0 0 24 24" width="20" height="20">
+        <path fill="currentColor" d="M12 4l6 6h-4v8h-4v-8H6l6-6z"/>
+      </svg>
+      <svg class="ptr-spin" viewBox="0 0 40 40" width="28" height="28">
+        <circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="60 28"/>
+      </svg>
+    </span>
+  </div>`;
+  document.body.appendChild(bar);
+  return bar;
+}
+function ptrHide() {
+  const bar = document.getElementById("ptr");
+  if (!bar) return;
+  bar.classList.remove("on", "ready", "loading");
+  bar.style.removeProperty("--ptr-y");
+  bar.style.removeProperty("--ptr-rot");
+}
+function ptrPull(dy) {
+  const bar = ptrEnsure();
+  // Chrome-like: indicator eases down with pull; arrow rotates 0→180° toward threshold
+  const y = Math.min(Math.max(dy * 0.4, 0), 64);
+  const rot = Math.min(180, (dy / PTR_FIRE) * 180);
+  const ready = dy >= PTR_FIRE;
+  bar.style.setProperty("--ptr-y", y + "px");
+  bar.style.setProperty("--ptr-rot", rot + "deg");
+  bar.classList.toggle("on", dy > 28);
+  bar.classList.toggle("ready", ready);
+  bar.classList.remove("loading");
+}
+function ptrLoading() {
+  const bar = ptrEnsure();
+  bar.classList.add("on", "loading");
+  bar.classList.remove("ready");
+  bar.style.setProperty("--ptr-y", "44px");
+}
 let ptrY = null;
 window.addEventListener("touchstart", (e) => {
   if (!ptrAllowed()) { ptrY = null; return; }
@@ -3246,26 +3400,20 @@ window.addEventListener("touchstart", (e) => {
 }, { passive: true });
 window.addEventListener("touchmove", (e) => {
   if (ptrY == null) return;
-  if (!ptrAllowed()) { ptrY = null; const b = document.getElementById("ptr"); if (b) b.classList.remove("on"); return; }
-  const dy = e.touches[0].clientY - ptrY;
-  let bar = document.getElementById("ptr");
-  if (!bar) {
-    bar = document.createElement("div");
-    bar.id = "ptr";
-    bar.textContent = "繼續下拉以重新整理";
-    document.body.appendChild(bar);
-  }
-  bar.textContent = dy > PTR_FIRE ? "放開以重新整理全部" : "繼續下拉以重新整理";
-  bar.classList.toggle("on", dy > PTR_HINT);
+  if (!ptrAllowed()) { ptrY = null; ptrHide(); return; }
+  ptrPull(e.touches[0].clientY - ptrY);
 }, { passive: true });
 window.addEventListener("touchend", (e) => {
   if (ptrY == null) return;
   const dy = e.changedTouches[0].clientY - ptrY;
   const ok = ptrAllowed() && dy > PTR_FIRE;
   ptrY = null;
-  const bar = document.getElementById("ptr");
-  if (bar) bar.classList.remove("on");
-  if (ok) hardRefresh();
+  if (ok) {
+    ptrLoading();
+    hardRefresh();
+  } else {
+    ptrHide();
+  }
 }, { passive: true });
 
 document.addEventListener("visibilitychange", () => {
@@ -3350,6 +3498,26 @@ setInterval(tick, 500);
 boot();
 
 document.getElementById("main").addEventListener("change", (e) => {
+  const scoopSel = e.target.closest("select[data-scoop-slot]");
+  if (scoopSel) {
+    const slot = Number(scoopSel.dataset.scoopSlot);
+    const id = scoopSel.value;
+    const st2 = state();
+    const cur = selectedScoops(st2);
+    cur[slot] = id;
+    save({ scoopPick: { ...(st2.scoopPick || {}), [todayKey()]: cur } });
+    render();
+    return;
+  }
+  const series = e.target.closest("[data-whey-add-series]");
+  if (series) {
+    const by = wheyBySeries();
+    const list = by[series.value] || [];
+    const flav = document.querySelector("[data-whey-add-flavor]");
+    if (flav) flav.innerHTML = list.map((o) => `<option value="${o.id}">${wheyChip(o)}</option>`).join("");
+    return;
+  }
+
   const el = e.target.closest && e.target.closest("[data-meal-time]");
   if (!el || !el.value) return;
   const st = state();

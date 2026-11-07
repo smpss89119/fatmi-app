@@ -6,6 +6,10 @@ const shot = (n) => (process.env.SHOT_DIR ? { path: `${process.env.SHOT_DIR}/${n
 test.use({ viewport: { width: 390, height: 844 } });
 
 test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavors", async ({ page }) => {
+  await page.addInitScript(() => {
+    const ids = ["sesame","soymilk","almond","peanut","coffeeUS","choco","milkTea","teaSoy","matchaMilk","vanilla","jasmine","miencha","yuanyang","brownSugar","sesameSweet","tieguanyin","coffeeSweet","oatMilk","hfStrawberry","hfPeach","hfMelon","hcSoymilk","hcOatMilk","hcAlmond","plant","plantChoco","plantOat","plantAlmond"];
+    localStorage.setItem("fatcat-v2", JSON.stringify({ wheyHave: ids }));
+  });
   await page.goto(url); await page.waitForSelector(".ttl");
   await page.locator("[data-tab=shop]").click();
 
@@ -65,9 +69,9 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavor
   await expectW("soymilk", 172, 26);
   await expectW("almond", 172, 21);
   await expect(page.locator("[data-testid=whey-edit-sesame]")).toContainText("無糖芝麻");
-  await expect(page.locator("[data-testid=whey-edit-sesameSweet]")).toContainText("芝麻（有糖）");
+  await expect(page.locator("[data-testid=whey-edit-sesameSweet]")).toContainText("芝麻有糖");
   await expect(page.locator("[data-testid=whey-edit-coffeeUS]")).toContainText("無糖咖啡");
-  await expect(page.locator("[data-testid=whey-edit-coffeeSweet]")).toContainText("咖啡（有糖）");
+  await expect(page.locator("[data-testid=whey-edit-coffeeSweet]")).toContainText("咖啡有糖");
   await expectW("plant", 164, 27);
   await expectW("plantChoco", 148, 23);
   await expectW("plantOat", 152, 25);
@@ -96,7 +100,7 @@ test("r15) Nutri official per-份 defaults: 雞胸/地瓜/毛豆 + 7 whey flavor
   await page.locator("[data-eat-else=eggs21]").click();
   await page.locator('[data-testid="else-inc-whey:hfStrawberry"]').click();
   await expect(page.locator("[data-testid=else-total]")).toHaveText("122 kcal · 蛋白 18 g");
-  await expect(page.locator('[data-testid="else-whey:hfStrawberry"]')).toContainText("高纖草莓35g");
+  await expect(page.locator('[data-testid="else-whey:hfStrawberry"]')).toContainText("高纖草莓·35g");
   await page.locator("[data-testid=else-save]").click();
   await expect(page.locator("[data-testid=meal-eggs21] .nums")).toHaveText("122 · 蛋白 18g");
   await page.screenshot(shot("fatmi_r18_hifiber_log.png"));

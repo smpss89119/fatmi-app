@@ -114,8 +114,18 @@ nav#tabs button.on i{filter:none;opacity:1}
 
 .toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:#1A1208;color:#fff;padding:10px 16px;border-radius:999px;font-weight:800;z-index:40;max-width:90%;text-align:center}
 .toast[hidden]{display:none!important}
-#ptr{position:fixed;top:calc(var(--st) + 52px);left:0;right:0;text-align:center;font-weight:800;color:var(--od);z-index:30;pointer-events:none;opacity:0;transition:opacity .2s}
+#ptr{position:fixed;top:calc(var(--st) + 6px);left:0;right:0;z-index:30;pointer-events:none;opacity:0;transform:translateY(var(--ptr-y,0));transition:opacity .15s ease,transform .12s ease-out;display:flex;justify-content:center}
 #ptr.on{opacity:1}
+#ptr .ptr-inner{display:flex;align-items:center;justify-content:center}
+#ptr .ptr-disc{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--oa);box-shadow:0 1px 4px rgba(80,50,0,.18);display:grid;place-items:center;border:1px solid #F5E6D0}
+#ptr.ready .ptr-disc{color:var(--o);border-color:#FDBA74}
+#ptr .ptr-arrow{display:block;transform:rotate(calc(180deg + var(--ptr-rot, 0deg)));transform-origin:center;will-change:transform}
+#ptr .ptr-spin{display:none}
+#ptr.loading .ptr-arrow{display:none}
+#ptr.loading .ptr-spin{display:block;animation:ptr-spin .7s linear infinite;color:var(--o)}
+#ptr.loading .ptr-disc{box-shadow:0 2px 8px rgba(194,65,12,.2)}
+@keyframes ptr-spin{to{transform:rotate(360deg)}}
+
 .ring.ok b{color:#166534}
 
 .body-svg .fig-label{fill:#5C4A36;font-size:56px;font-weight:800;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
@@ -286,3 +296,18 @@ html.mode-sleep{background:#000}
 .chip .sug{font-size:10px;color:#c2410c}
 
 body.mode-workout #ptr{display:none!important}
+
+.whey-pick{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.whey-series-btn{display:flex;width:100%;align-items:center;gap:6px;border:0;background:#FFF7ED;color:var(--od);border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px;cursor:pointer;text-align:left;min-height:40px}
+.whey-series.open .whey-series-btn{background:#FFEDD5}
+.whey-chips{margin:6px 0 2px;gap:6px}
+.chip-sm{padding:6px 10px;min-height:36px;font-size:13px;border-radius:999px}
+.else-list .whey-series{margin:6px 0}
+.else-list .whey-series-btn{margin-bottom:4px}
+
+.whey-pick{margin:6px 0}
+.whey-pick-label{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--mut)}
+.whey-select,.whey-add select{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;padding:8px 12px;font-size:15px;font-weight:700;color:var(--ink)}
+.whey-add{display:flex;flex-direction:column;gap:8px;margin:8px 0;padding:10px;background:#FFF7ED;border-radius:14px}
+.whey-add-row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.whey-add-row span{min-width:2.5em;color:var(--mut)}
