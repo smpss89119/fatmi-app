@@ -145,6 +145,9 @@ test("r13) Nutri flow: add 燕麥 via pantry form (category explicit), unknown n
   await expect(row.locator(".nums")).toHaveText("0 · 蛋白 0g");
   await row.scrollIntoViewIfNeeded();
   await page.screenshot(shot("fatmi_r13_card_pending.png"));
+  await expect(page.locator("[data-testid=totals-pending]")).toHaveText("⚠ 燕麥 1 份營養待確認，未計入");
+  await page.locator("[data-testid=totals-pending]").scrollIntoViewIfNeeded();
+  await page.screenshot(shot("fatmi_r14_totals_pending.png"));
   // set nutrition, reopen 吃了別的: prefilled 1, re-save → real values
   await page.locator("[data-tab=shop]").click();
   await page.locator(`[data-testid=shop-edit-${id}]`).click();
@@ -161,6 +164,7 @@ test("r13) Nutri flow: add 燕麥 via pantry form (category explicit), unknown n
   await page.locator("[data-testid=else-save]").click();
   await expect(row.locator(".nums")).toHaveText("570 · 蛋白 20g");
   await expect(row.locator("[data-testid=meal-pend-dinner]")).toHaveCount(0);
+  await expect(page.locator("[data-testid=totals-pending]")).toHaveCount(0);
   await rl("shop");
   await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 2.3 份");
   await page.locator("[data-tab=today]").click();

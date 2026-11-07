@@ -1513,7 +1513,7 @@ function renderHome(st) {
         ${ringEl(totals.kcal, kcal.target, "kcal", String(kcal.target), false)}
         ${ringEl(totals.protein, PROTEIN_TARGET, "蛋白 g", "140–160", totals.protein >= PROTEIN_MIN)}
       </div>
-      <p class="remain" data-testid="remain">${esc(remainText(st, totals, kcal))}</p>
+      <p class="remain" data-testid="remain">${esc(remainText(st, totals, kcal))}</p>${(() => { const ms = (st.mealLogs || {})[todayKey()] || {}; const bits = []; for (const m of Object.values(ms)) { if (!m || !m.eaten || !(m.nutriPending || []).length) continue; const parts = String(m.name || "").split("＋"); for (const nm of m.nutriPending) bits.push(parts.find((p) => p.startsWith(nm + " ")) || nm); } return bits.length ? `<p class="note warn" data-testid="totals-pending">⚠ ${esc(bits.join("、"))}營養待確認，未計入</p>` : ""; })()}
       ${meals}
       ${shareCatsBtn()}
     </section>
@@ -3111,7 +3111,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-18";
+const APP_VERSION = "2026.11.07-preview-19";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
