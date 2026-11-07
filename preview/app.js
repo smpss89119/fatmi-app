@@ -783,7 +783,9 @@ function parseDose(dose) {
 function lastBackScore(st) {
   const dates = Object.keys(st.logs || {}).sort();
   for (let i = dates.length - 1; i >= 0; i--) {
-    const sc = st.logs[dates[i]].backScore;
+    const lg = st.logs[dates[i]];
+    if (lg.exBack) return 0;
+    const sc = lg.backScore;
     if (sc != null) return Number(sc);
   }
   return 0;
@@ -1298,7 +1300,7 @@ function renderHome(st) {
   let trainCard;
   if (trainedToday && !(ui.wantTrain === "picked")) {
     trainCard = `<section class="card hero" data-testid="train-card">
-      <div class="big" data-testid="trained-today">今天已練 ✓</div>
+      <div class="big" data-testid="trained-today" data-log-row="${todayKey()}">今天已練 ✓</div>
       <div class="acts">${pickRow}</div>
     </section>`;
   } else if (!plan.train) {
@@ -1453,6 +1455,40 @@ function renderSwap(st) {
     <button type="button" class="btn primary xl" data-apply-swap>照這個吃</button>`;
 }
 
+function deleteLog(date) {
+  const st = state();
+  const logs = { ...(st.logs || {}) };
+  if (!logs[date]) return;
+  delete logs[date];
+  const lastLoads = {};
+  for (const d of Object.keys(logs).sort()) {
+    for (const [name, sets] of Object.entries(logs[d].moves || {})) {
+      const done = (sets || []).filter((s) => s.done && s.weight != null);
+      if (done.length) { const l = done[done.length - 1]; lastLoads[moveKey(name)] = { weight: l.weight, reps: l.reps, date: d, returning: !!logs[d].returning }; }
+    }
+  }
+  const backSwap = {};
+  for (const [k, v] of Object.entries(st.backSwap || {})) if (!(v && v.date === date) && logs[v && v.date]) backSwap[k] = v;
+  const loadHistory = {};
+  for (const [k, arr] of Object.entries(st.loadHistory || {})) loadHistory[k] = (arr || []).filter((x) => x.date !== date);
+  const suggest = {};
+  for (const [k, arr] of Object.entries(loadHistory)) if (arr.length >= 2 && arr[arr.length - 1].hitAll && arr[arr.length - 2].hitAll) suggest[k] = { add: 2.5 };
+  const session = st.session && st.session.date === date ? null : st.session;
+  const restTrain = { ...(st.restTrain || {}) }; delete restTrain[date];
+  save({ logs, lastLoads, backSwap, loadHistory, suggest, session, restTrain });
+  showToast("已刪除這筆訓練");
+  render();
+}
+function renderLogRows(st) {
+  const dates = Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length).sort().reverse();
+  if (!dates.length) return `<p class="muted">還沒有訓練紀錄。</p>`;
+  return dates.map((d) => {
+    const l = st.logs[d];
+    const w = WORKOUTS[l.workoutId];
+    const n = Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0);
+    return `<div class="stat" data-log-row="${d}" data-testid="log-row-${d}"><span>${fmtMD(d)} ${esc(w ? w.name : "訓練")}</span><span>${n} 組</span></div>`;
+  }).join("") + `<p class="muted">長按一筆可刪除</p>`;
+}
 function renderBody(st) {
   const last = lastInbody();
   const daily = LIVE.garmin.daily || [];
@@ -1485,6 +1521,8 @@ function renderBody(st) {
     <div class="card">${lineChart(rhr, "#B45309", 320, 140, "chart chart-lg")}<p class="muted">比 7 日平均高 5 下以上，今天改家裡快版。</p></div>
     <p class="sec">最近 InBody</p>
     <div class="card">${rows}</div>
+    <p class="sec">訓練紀錄</p>
+    <div class="card" data-testid="log-list">${renderLogRows(st)}</div>
     <p class="sec">運動心率／時長</p>
     <div class="card">${actRows}</div>`;
 }
@@ -1501,7 +1539,7 @@ function sessionLoad(session, st) {
   let weight = session.editWeight;
   if (weight == null && lastSet && lastSet.weight != null) weight = lastSet.weight;
   if (weight == null && hist && hist.weight != null) {
-    weight = session.returning ? Math.round(Number(hist.weight) * 0.7 * 2) / 2 : Number(hist.weight);
+    weight = session.returning && !hist.returning ? Math.round(Number(hist.weight) * 0.7 * 2) / 2 : Number(hist.weight);
     if (!session.returning && !session.fasted && sug && sug.add) weight = Number(hist.weight) + Number(sug.add);
   }
   const noWeight = NO_WEIGHT.test(step.name);
@@ -1779,8 +1817,9 @@ function buildSteps(st, workout) {
   const back = lastBackScore(st);
   const steps = workout.steps.map((s) => {
     let r = resolveName(s, back);
-    const sw = (st.backSwap || {})[moveKey(r.name)];
-    if (sw) r = { name: sw, video: r.video, swapped: true };
+    const swv = (st.backSwap || {})[moveKey(r.name)];
+    const sw = swv && (swv.to || swv);
+    if (sw && typeof sw === "string") r = { name: sw, video: r.video, swapped: true };
     return {
       name: r.name,
       dose: s.dose,
@@ -1801,11 +1840,7 @@ function buildSteps(st, workout) {
 
 function startWorkout() {
   let st = state();
-  const noMeal = !hasPreWorkoutMeal(st);
-  if (noMeal && !markedFasted(st)) {
-    save({ fasted: { ...(st.fasted || {}), [todayKey()]: true } });
-    st = state();
-  }
+  const noMeal = false;
   const plan = todayPlan(st);
   if (!plan.train || !plan.workout) return;
   if (isReturnWeek(st) && !st.returnUntil) {
@@ -1882,7 +1917,7 @@ function applyExBack(score) {
   if (n >= 3) {
     const to = exSwapTarget(step.name);
     if (to) {
-      backSwap[key] = to;
+      backSwap[key] = { to, date: session.date };
       session.swapNote = `下次這動作換成 ${to}`;
     } else {
       session.swapNote = "下次這動作減輕重量";
@@ -1914,13 +1949,17 @@ function finishWithScore(score) {
   const lastLoads = { ...st.lastLoads };
   const loadHistory = { ...st.loadHistory };
   const suggest = { ...st.suggest };
+  for (const [name, sets] of Object.entries(session.moves || {})) {
+    const done = (sets || []).filter((s) => s.done);
+    if (!done.length) continue;
+    const last = done[done.length - 1];
+    lastLoads[moveKey(name)] = { weight: last.weight, reps: last.reps, date: session.date, returning: !!session.returning };
+  }
   if (!session.fasted) {
     for (const [name, sets] of Object.entries(session.moves || {})) {
       const done = (sets || []).filter((s) => s.done);
       if (!done.length) continue;
       const key = moveKey(name);
-      const last = done[done.length - 1];
-      lastLoads[key] = { weight: last.weight, reps: last.reps, date: session.date };
       const hitAll = done.every((s) => !s.short && Number(s.reps) >= Number(s.target));
       const arr = [...(loadHistory[key] || []), { date: session.date, hitAll }].slice(-4);
       loadHistory[key] = arr;
@@ -1939,6 +1978,7 @@ function finishWithScore(score) {
     [session.date]: {
       workoutId: session.workoutId,
       sessionStart: session.startedAt,
+      exBack: session.exBack || null,
       moves: mergedMoves,
       backScore: session.backScore,
       reason: session.reason,
@@ -2456,6 +2496,25 @@ document.getElementById("main").addEventListener("input", (e) => {
   if (e.target.matches("[data-shop-new-group]")) ui.shopCat = e.target.value;
 });
 
+(function setupLogLongPress() {
+  const main = document.getElementById("main");
+  let timer = null;
+  const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  main.addEventListener("pointerdown", (e) => {
+    const row = e.target.closest("[data-log-row]");
+    if (!row) return;
+    timer = setTimeout(() => {
+      timer = null;
+      const d = row.dataset.logRow;
+      if (window.confirm(`刪除 ${fmtMD(d)} 這筆訓練？`)) deleteLog(d);
+    }, 600);
+  });
+  main.addEventListener("pointerup", clear);
+  main.addEventListener("pointercancel", clear);
+  main.addEventListener("pointermove", (e) => { if (Math.abs(e.movementY) > 6) clear(); });
+})();
+window.__fatmiDeleteLog = deleteLog;
+
 (function setupShopLongPress() {
   const main = document.getElementById("main");
   let timer = null;
@@ -2509,7 +2568,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-5";
+const APP_VERSION = "2026.11.07-preview-6";
 let pendingReload = false;
 let reloading = false;
 

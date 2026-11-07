@@ -508,7 +508,7 @@ test.describe("ROUND3", () => {
     }
   });
   test("4) per-exercise 下背 OK 嗎, >=3 swaps that exercise only", async ({ page }) => {
-    await open(page, { now: TUE_10, sleep: "8", rest: "0" }, gymA());
+    await open(page, { now: TUE_10, sleep: "8", rest: "30" }, gymA());
     await page.locator("[data-start]").click();
     // finish exercise 1 (腿推, 3 sets)
     for (let s = 0; s < 3; s++) {
@@ -526,7 +526,7 @@ test.describe("ROUND3", () => {
     await page.locator("[data-exback='4']").click();
     await expect(page.locator("[data-testid=ex-swap-note]")).toHaveText("下次這動作換成 地板臥推");
     const sw = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).backSwap);
-    expect(Object.values(sw)).toEqual(["地板臥推"]);
+    expect(Object.values(sw).map((v) => v.to || v)).toEqual(["地板臥推"]);
   });
   test("4b) next session swaps only that exercise", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, gymA({ backSwap: { 胸推: "地板臥推" } }));
