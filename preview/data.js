@@ -342,7 +342,7 @@ const SHOP_ITEMS = [
   { id: "seafood", label: "蝦仁＋魚排", qty: "500 g＋4 片", group: "protein", name: "蝦仁 500g＋吳郭魚排 4 片", hint: "", palms: 8 },
   { id: "edamame", label: "冷凍毛豆", qty: "700 g", group: "protein", name: "冷凍毛豆 700g", hint: "", palms: 2 },
   { id: "eggs", label: "雞蛋", qty: "10 顆", group: "protein", name: "雞蛋 10 顆", hint: "備用", palms: 3 },
-  { id: "whey", label: "蛋白粉", qty: "14 包", group: "protein", name: "蛋白粉 14 包", hint: "少於 6 包要補貨", palms: 9, whey: true },
+  { id: "whey", label: "蛋白粉", qty: "2.5 kg", group: "protein", name: "蛋白粉 2.5 kg", hint: "剩約 15 份（約 600 g）要補貨", palms: 9, whey: true },
   { id: "yam", label: "地瓜", qty: "2 kg", group: "starch", name: "地瓜約 2kg", hint: "", fists: 13 },
   { id: "rice", label: "糙米／白米", qty: "", group: "starch", name: "糙米和白米", hint: "照常補貨", fists: 7, frequent: true },
   { id: "sourdough", label: "酸種麵包", qty: "1 條", group: "starch", name: "酸種麵包 1 條", hint: "訓練日帶去公司", fists: 4 },
