@@ -1,4 +1,4 @@
-const C = "fatcat-preview-20261107g";
+const C = "fatcat-preview-20261107h";
 const F = [
   "./",
   "index.html",
@@ -16,14 +16,24 @@ self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(C).then((c) => c.addAll(F)).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
+  const mine = /preview/.test(C) ? "fatcat-preview-" : "fatcat-2-";
+  let upgraded = false;
   e.waitUntil(
-    caches
-      .keys()
-      .then((k) => Promise.all(k.filter((x) => x.startsWith("fatcat-preview-") && x !== C).map((x) => caches.delete(x))))
-      .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: "window" }))
-      .then((cs) => Promise.all(cs.map((c) => c.postMessage({ type: "SW_UPDATED", cache: C }))))
+    caches.keys().then((k) => {
+      const old = k.filter((x) => x.startsWith(mine) && x !== C);
+      upgraded = old.length > 0;
+      return Promise.all(old.map((x) => caches.delete(x)));
+    }).then(() => self.clients.claim())
   );
+  // After activation finishes (not inside waitUntil, to avoid a fetch deadlock),
+  // reload open windows so an old page picks up the new code without reopening.
+  setTimeout(() => {
+    if (!upgraded) return;
+    self.clients.matchAll({ type: "window" }).then((cs) => cs.forEach((c) => {
+      c.postMessage({ type: "SW_UPDATED", cache: C });
+      if (c.navigate) c.navigate(c.url).catch(() => null);
+    }));
+  }, 1500);
 });
 self.addEventListener("message", (e) => {
   const data = e.data;
