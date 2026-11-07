@@ -535,6 +535,7 @@ function mealEstimate(st, id, d = now()) {
     const est = portionMacros(logged, st, d);
     return { ...sug, ...logged, ...est, suggestName: sug.name };
   }
+  if (logged && logged.mode === "else") return { ...sug, ...logged, suggestName: sug.name };
   if (logged && logged.eaten && (logged.kcal || logged.protein) && !hasCustomPortions(logged)) {
     return { ...sug, ...logged, suggestName: sug.name };
   }
@@ -2724,13 +2725,25 @@ document.getElementById("main").addEventListener("click", (e) => {
       packs += Number(meals[id].wheyUsed) || 0;
       for (const [k, n] of Object.entries(meals[id].pantryUsed || {})) shopUsed[k] = Math.max(0, (shopUsed[k] || 0) - n);
       const keep = meals[id].mode ? { ...meals[id] } : {};
+      if (keep.mode === "else") { keep.pantryPlan = keep.pantryUsed || {}; keep.wheyPlan = Number(keep.wheyUsed) || 0; }
       delete keep.wheyUsed; delete keep.pantryUsed;
       meals[id] = { ...keep, eaten: false };
     } else {
+      const prevM = meals[id] || {};
+      if (prevM.mode === "else") {
+        const pantryUsed = { ...(prevM.pantryPlan || {}) };
+        for (const [k, n] of Object.entries(pantryUsed)) shopUsed[k] = (shopUsed[k] || 0) + n;
+        const wu = Number(prevM.wheyPlan) || 0;
+        packs = Math.max(0, packs - wu);
+        const m2 = { ...prevM, eaten: true, pantryUsed, wheyUsed: wu };
+        delete m2.pantryPlan; delete m2.wheyPlan;
+        meals[id] = m2;
+      } else {
       const est = mealEstimate(st, id);
       const used = Array.isArray(est.scoopIds) ? est.scoopIds.length : 0;
       packs = Math.max(0, packs - used);
       meals[id] = { ...(meals[id] || {}), ...est, eaten: true, wheyUsed: used };
+      }
     }
     save({ mealLogs: { ...st.mealLogs, [day]: meals }, wheyPacks: packs, shopUsed });
     render();
@@ -3065,7 +3078,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-16";
+const APP_VERSION = "2026.11.07-preview-17";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;

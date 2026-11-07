@@ -52,3 +52,50 @@ test("r11) 燕麥 500g/150g: eat 1 → 350g persists; cancel restores 500g", asy
   await page.screenshot(shot("fatmi_r11_cancel_after_reload.png"));
   dump("fatmi_r11_cancel_after_reload.json", pick((await item()).s));
 });
+
+test("r12) 吃了別的 logs chosen items' nutrition; cancel/re-tick exact; persists after reload", async ({ page }) => {
+  await page.goto(url); await page.waitForSelector(".ttl");
+  const rings = async () => (await page.locator("[data-testid=eat-card] .ring b").allInnerTexts()).map((x) => Number(x.replace(/[^\d.]/g, "")));
+  const base = await rings();
+  await page.locator("[data-tab=shop]").click();
+  await page.locator("[data-testid=shop-plus]").click();
+  await page.locator("[data-testid=shop-add] [data-shop-new-name]").fill("燕麥");
+  await page.locator("[data-testid=shop-add] [data-shop-new-amount]").fill("500g");
+  await page.locator("[data-shop-cat=starch]").click();
+  await page.locator("[data-shop-add]").click();
+  const id = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).shopExtra.find((x) => x.name.startsWith("燕麥")).id);
+  await page.locator(`[data-testid=shop-edit-${id}]`).click();
+  await page.locator("[data-testid=edit-portion]").fill("150 g");
+  await page.locator("[data-testid=edit-save]").click();
+  await page.locator("[data-tab=today]").click();
+  await page.locator("[data-eat-else=dinner]").click();
+  await page.locator(`[data-testid="else-inc-${id}"]`).click();
+  await expect(page.locator("[data-testid=else-total]")).toContainText("180");
+  await page.locator("[data-testid=else-save]").click();
+  const row = page.locator("[data-testid=meal-dinner]");
+  const eatenState = async (tag) => {
+    await expect(row).toHaveClass(/eaten/);
+    await expect(row.locator(".nums")).toHaveText("180 · 蛋白 4g");
+    const r = await rings();
+    expect(r[0]).toBe(base[0] + 180);
+    if (r.length > 1) expect(r[1]).toBe(base[1] + 4);
+    await page.screenshot(shot(`fatmi_r12_${tag}.png`));
+  };
+  await eatenState("eaten");
+  await page.reload(); await page.waitForSelector(".ttl");
+  await eatenState("eaten_reload");
+  await page.locator("[data-eat=dinner]").click(); // cancel
+  await expect(row).not.toHaveClass(/eaten/);
+  await expect(row.locator(".nums")).toHaveText("180 · 蛋白 4g");
+  await page.reload(); await page.waitForSelector(".ttl");
+  expect(await rings()).toEqual(base);
+  await page.screenshot(shot("fatmi_r12_cancel_reload.png"));
+  await page.locator("[data-tab=shop]").click();
+  await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 3.3 份");
+  await page.locator("[data-tab=today]").click();
+  await page.locator("[data-eat=dinner]").click(); // re-tick
+  await page.reload(); await page.waitForSelector(".ttl");
+  await eatenState("retick_reload");
+  await page.locator("[data-tab=shop]").click();
+  await expect(page.locator(`[data-testid=shop-qty-${id}]`)).toHaveText("約 2.3 份");
+});
