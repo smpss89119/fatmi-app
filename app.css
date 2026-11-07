@@ -282,3 +282,5 @@ html.mode-sleep{background:#000}
 .else-total{text-align:center;font-weight:900;font-size:20px;margin:14px 0 8px}
 
 .demo-tag{display:block;text-align:center;font-size:12px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}
+.now-pick .pend,.else-row .pend{font-size:11px;background:#fff1c2;color:#8a5a00;border-radius:6px;padding:1px 6px;margin-left:4px}
+.chip .sug{font-size:10px;color:#c2410c}
