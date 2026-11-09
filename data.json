@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-08T23:06:59+07:00",
+  "exportedAt": "2026-11-09T07:09:05+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1402,12 +1402,12 @@
       },
       {
         "date": "2026-11-08",
-        "kcal": 1955.0,
-        "steps": 3977,
+        "kcal": 2185.0,
+        "steps": 4937,
         "sleepHours": 6.4,
         "restingHR": 55.0,
         "weightKg": null,
-        "bodyBattery": 27.0,
+        "bodyBattery": 21.0,
         "sleep": {
           "start": "2026-11-08T04:15",
           "end": "2026-11-08T10:39",
@@ -1506,12 +1506,97 @@
       },
       {
         "date": "2026-11-09",
-        "kcal": null,
-        "steps": null,
-        "sleepHours": null,
-        "restingHR": null,
+        "kcal": 696.0,
+        "steps": 241,
+        "sleepHours": 5.9,
+        "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": null
+        "bodyBattery": 64.0,
+        "sleep": {
+          "start": "2026-11-09T01:52",
+          "end": "2026-11-09T07:44",
+          "deepMin": 72,
+          "coreMin": 252,
+          "remMin": 28,
+          "awakeMin": 1,
+          "segments": [
+            [
+              0,
+              5,
+              "core"
+            ],
+            [
+              5,
+              11,
+              "deep"
+            ],
+            [
+              11,
+              16,
+              "core"
+            ],
+            [
+              16,
+              49,
+              "deep"
+            ],
+            [
+              49,
+              56,
+              "core"
+            ],
+            [
+              56,
+              57,
+              "awake"
+            ],
+            [
+              57,
+              98,
+              "core"
+            ],
+            [
+              98,
+              103,
+              "deep"
+            ],
+            [
+              103,
+              116,
+              "core"
+            ],
+            [
+              116,
+              139,
+              "deep"
+            ],
+            [
+              139,
+              243,
+              "core"
+            ],
+            [
+              243,
+              248,
+              "deep"
+            ],
+            [
+              248,
+              262,
+              "core"
+            ],
+            [
+              262,
+              290,
+              "rem"
+            ],
+            [
+              290,
+              352,
+              "core"
+            ]
+          ]
+        }
       }
     ],
     "activities": [
@@ -6719,6 +6804,15 @@
       "smmKg": 35.9,
       "bmi": 25.2,
       "whr": 0.9
+    },
+    {
+      "date": "2026-11-09",
+      "weightKg": 81.5,
+      "bfmKg": 18.7,
+      "pbf": 23.0,
+      "smmKg": 36.1,
+      "bmi": 26.2,
+      "whr": 0.91
     }
   ],
   "ok": {
