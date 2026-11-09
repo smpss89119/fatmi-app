@@ -1,17 +1,8 @@
 {
-  "exportedAt": "2026-11-09T22:06:29+07:00",
+  "exportedAt": "2026-11-09T23:07:09+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-11",
-        "kcal": 2683.0,
-        "steps": 12091,
-        "sleepHours": 8.1,
-        "restingHR": 49.0,
-        "weightKg": null,
-        "bodyBattery": 11.0
-      },
       {
         "date": "2026-10-12",
         "kcal": 2448.0,
@@ -154,77 +145,7 @@
         "sleepHours": 6.8,
         "restingHR": 49.0,
         "weightKg": null,
-        "bodyBattery": 17.0,
-        "sleep": {
-          "start": "2026-10-27T01:13",
-          "end": "2026-10-27T08:01",
-          "deepMin": 43,
-          "coreMin": 279,
-          "remMin": 86,
-          "awakeMin": 0,
-          "segments": [
-            [
-              0,
-              10,
-              "core"
-            ],
-            [
-              10,
-              32,
-              "deep"
-            ],
-            [
-              32,
-              47,
-              "core"
-            ],
-            [
-              47,
-              54,
-              "deep"
-            ],
-            [
-              54,
-              80,
-              "core"
-            ],
-            [
-              80,
-              90,
-              "rem"
-            ],
-            [
-              90,
-              144,
-              "core"
-            ],
-            [
-              144,
-              158,
-              "deep"
-            ],
-            [
-              158,
-              280,
-              "core"
-            ],
-            [
-              280,
-              331,
-              "rem"
-            ],
-            [
-              331,
-              383,
-              "core"
-            ],
-            [
-              383,
-              407,
-              "rem"
-            ]
-          ]
-        }
+        "bodyBattery": 17.0
       },
       {
         "date": "2026-10-28",
@@ -1597,6 +1518,15 @@
             ]
           ]
         }
+      },
+      {
+        "date": "2026-11-10",
+        "kcal": null,
+        "steps": null,
+        "sleepHours": null,
+        "restingHR": null,
+        "weightKg": null,
+        "bodyBattery": null
       }
     ],
     "activities": [
