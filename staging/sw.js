@@ -1,5 +1,5 @@
 // Same file is published to /staging/, /preview/ and root; cache prefix follows the path so they never share caches.
-const STAMP = "20261110r18";
+const STAMP = "20261110r19";
 const P = /\/staging\//.test(self.location.pathname) ? "fatcat-staging-" : /\/preview\//.test(self.location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 const C = P + STAMP;
 const F = [

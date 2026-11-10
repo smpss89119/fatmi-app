@@ -60,6 +60,6 @@ test("gym day menu: 18:30 chicken 200g, 21:00 seafood meal; weekday keeps eggs",
   expect(p).toBeGreaterThanOrEqual(140);
   await page.goto(at("2026-11-13T10:00:00+08:00"));
   await page.waitForSelector(".ttl");
-  expect(await page.evaluate(() => suggestionOf(load(), "eggs21").name)).toBe("雞蛋 2 顆");
+  expect(await page.evaluate(() => suggestionOf(load(), "eggs21").name)).toContain("飯半碗");
   console.log("gym day planned", k, p);
 });

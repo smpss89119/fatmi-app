@@ -594,7 +594,8 @@ function suggestionOf(st, id, d = now()) {
       // Nutri: 健身房日 21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g
       return { name: "21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g", kcal: 435, protein: 48, id: "gymNight", eaten: false };
     }
-    return { name: "雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
+    // Nutri: 平日／休息日 21:00 蝦仁或魚 150g＋青菜＋毛豆 100g＋飯半碗
+    return { name: "21:00 蝦仁或魚 150g＋飯半碗＋青菜＋毛豆 100g", kcal: 410, protein: 47, id: "dayNight", eaten: false };
   }
   const def = MEAL_DEFS[id];
   if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
@@ -2484,7 +2485,7 @@ function renderRules(st) {
     <p class="sec">今天怎麼決定課表</p>
     <div class="card prose">
       <p>睡滿 6 小時、心率正常、Body Battery ≥ 30 就練原課表，否則改 25 分鐘快版。Garmin 有重訓也算一堂；錯過就延後，不跳過。熱量只看有吃飯紀錄的日子，用兩週體重平均。</p>
-      <p>訓練日建議 16:00 喝兩份樂維根（各口味蛋白見標示）加地瓜。一份極致／純淨則 18:30 雞胸 150g；兩份經典無糖則雞胸 200g 或 21:00 加蛋 2 顆。</p>
+      <p>16:00 兩份樂維根加地瓜。健身房日 18:30 雞胸 200g，21:00 蝦仁或魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g；平日 21:00 同樣配菜，飯減到半碗。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
       <p>當週有部位不到 6 組，週日會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
@@ -3526,7 +3527,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-18";
+const APP_VERSION = "2026.11.10-19";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
