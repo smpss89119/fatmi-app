@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-10T07:09:05+07:00",
+  "exportedAt": "2026-11-10T07:59:40+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1521,8 +1521,8 @@
       },
       {
         "date": "2026-11-10",
-        "kcal": 709.0,
-        "steps": 530,
+        "kcal": 776.0,
+        "steps": 724,
         "sleepHours": 6.2,
         "restingHR": 51.0,
         "weightKg": null,
@@ -6818,6 +6818,15 @@
       "smmKg": 36.1,
       "bmi": 26.2,
       "whr": 0.91
+    },
+    {
+      "date": "2026-11-10",
+      "weightKg": 81.4,
+      "bfmKg": 18.6,
+      "pbf": 22.9,
+      "smmKg": 36.1,
+      "bmi": 26.1,
+      "whr": 0.92
     }
   ],
   "ok": {
