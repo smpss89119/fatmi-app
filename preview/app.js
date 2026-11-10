@@ -106,7 +106,7 @@ function addDays(d, n) {
 }
 function tabNow() {
   const t = location.hash.slice(1) || "today";
-  return ["today", "shop", "rules", "workout", "body", "sleep"].includes(t) ? t : "today";
+  return ["today", "shop", "rules", "workout", "body", "sleep", "log"].includes(t) ? t : "today";
 }
 function state() {
   const s = load();
@@ -352,7 +352,7 @@ function twoScoopMeal(st, d = now()) {
 }
 function dinnerFor(st, d = now()) {
   const shake = twoScoopMeal(st, d);
-  const grams = shake.hasPlant ? 150 : 200;
+  const grams = (shake.hasPlant && !isGymDay(st, d)) ? 150 : 200;
   const chickenId = grams === 150 ? "chicken150" : "chicken200";
   const meal = composeSwapMeal(chickenId, "rice150");
   meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
@@ -590,7 +590,12 @@ function suggestionOf(st, id, d = now()) {
   if (id === "snack") return { ...twoScoopMeal(st, d), eaten: false };
   if (id === "dinner") return { ...dinnerFor(st, d), eaten: false };
   if (id === "eggs21") {
-    return { name: "雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
+    if (isGymDay(st, d)) {
+      // Nutri: 健身房日 21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g
+      return { name: "21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g", kcal: 435, protein: 48, id: "gymNight", eaten: false };
+    }
+    // Nutri: 平日／休息日 21:00 蝦仁或魚 150g＋青菜＋毛豆 100g＋飯半碗
+    return { name: "21:00 蝦仁或魚 150g＋飯半碗＋青菜＋毛豆 100g", kcal: 410, protein: 47, id: "dayNight", eaten: false };
   }
   const def = MEAL_DEFS[id];
   if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
@@ -1284,6 +1289,7 @@ function fridayExtras(st, baseSteps, d = now()) {
   const extras = [];
   const used = new Set();
   for (const p of MAIN_PARTS) {
+    if (extras.length >= 2) break; // FitMi: 補強最多 2 個動作
     if ((combined[p] || 0) >= 6) continue;
     const ex = EXTRA_FOR_PART[p];
     if (!ex || used.has(ex.name)) continue;
@@ -1737,7 +1743,15 @@ function renderHome(st) {
   const session = st.session && st.session.date === todayKey() && st.session.phase !== "done" ? st.session : null;
   const returning = isReturnWeek(st);
 
-  const trainedToday = !!(todayLog && todayLog.finishedAt) && !session;
+  const gToday = (LIVE.garmin.activities || []).find((a) => a.date === todayKey() && isGarminWorkout(a));
+  const trainedToday = (!!(todayLog && todayLog.finishedAt) || !!gToday) && !session;
+  const gDone = gToday
+    ? `<p data-testid="garmin-done" style="color:rgba(255,255,255,.9);margin:6px 0 0">Garmin · ${esc(gToday.name || "運動")}：${gToday.durationMin != null ? `${gToday.durationMin} 分` : ""}${gToday.avgHR != null ? ` · 心率 ${Math.round(gToday.avgHR)}` : ""}${gToday.kcal != null ? ` · ${Math.round(gToday.kcal)} kcal` : ""}</p>`
+    : "";
+  const bfId = gToday && !(todayLog && todayLog.finishedAt) ? (plannedWorkoutFor(st) || "homeQ") : null;
+  const bfBtn = bfId && WORKOUTS[bfId]
+    ? `<button type="button" class="btn primary xl" data-backfill="${bfId}" data-testid="backfill">補登：${esc(WORKOUTS[bfId].name)} 💪</button>`
+    : "";
   const pickRow = ui.wantTrain
     ? `<div class="rest-picks" data-testid="rest-picks">
         <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A</button>
@@ -1749,6 +1763,8 @@ function renderHome(st) {
   if (trainedToday && !(ui.wantTrain === "picked")) {
     trainCard = `<section class="card hero" data-testid="train-card">
       <div class="big" data-testid="trained-today" data-log-row="${todayKey()}">今天已練 ✓</div>
+      ${gDone}
+      ${bfBtn ? `<div class="acts">${bfBtn}</div>` : ""}
       <div class="acts">${pickRow}</div>
     </section>`;
   } else if (!plan.train) {
@@ -1839,6 +1855,7 @@ function renderHome(st) {
     ${bodyMap(parts.pri, parts.sec, week)}
     <div class="chips">${chips}</div>
     ${gLine}
+    <button type="button" class="btn full" data-go="log" data-testid="go-log">📋 訓練紀錄（練了什麼）</button>
     ${renderSunday(st)}
     <p class="muted">目標：12/31 前減脂 3–4 kg，體脂 15–16%，保肌。還有 ${daysLeft} 天。${LIVE.exportedAt ? `資料更新 ${esc(String(LIVE.exportedAt).replace("T", " ").slice(0, 16))}（曼谷時間）。` : ""}</p>
   `;
@@ -2018,15 +2035,64 @@ function deleteLog(date) {
   showToast("已刪除這筆訓練");
   render();
 }
+function garminWorkoutsOn(date) {
+  return (LIVE.garmin.activities || []).filter((a) => a.date === date && isGarminWorkout(a));
+}
+function logDates(st) {
+  const set = new Set(Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length));
+  for (const a of LIVE.garmin.activities || []) if (a.date && isGarminWorkout(a)) set.add(a.date);
+  return [...set].sort().reverse();
+}
+function garminText(a) {
+  return `${a.durationMin != null ? `${a.durationMin} 分` : ""}${a.avgHR != null ? ` · ❤️ ${Math.round(a.avgHR)}` : ""}${a.kcal != null ? ` · 🔥 ${Math.round(a.kcal)}` : ""}`;
+}
+function logDetail(st, d) {
+  const l = (st.logs || {})[d];
+  const gs = garminWorkoutsOn(d);
+  const g = gs.map((a) => `<p class="muted" data-testid="log-garmin-${d}">⌚ Garmin ${esc(a.name || a.type)}：${garminText(a)}</p>`).join("");
+  const moves = Object.entries((l && l.moves) || {}).filter(([, sets]) => (sets || []).some((x) => x.done));
+  if (!moves.length) {
+    const def = plannedWorkoutFor(st, parseISO(d)) || "homeQ";
+    const opts = ["homeQ", "gymA", "gymB"].filter((id) => WORKOUTS[id]);
+    return `<div class="log-detail" data-testid="log-detail-${d}">${g}
+      <p class="note">這天沒在 App 勾動作。練了哪一套？點一下就算進肌肉 👇</p>
+      <div class="acts">${opts.map((id) => `<button type="button" class="btn${id === def ? " primary" : ""}" data-backfill="${id}" data-date="${d}" data-testid="log-backfill-${id}">${esc(WORKOUTS[id].name)}</button>`).join("")}</div>
+    </div>`;
+  }
+  const rows = moves.map(([name, sets]) => {
+    const done = sets.filter((x) => x.done);
+    const reps = done.map((x) => x.reps).filter((x) => x != null);
+    const kg = done.map((x) => x.weight).filter((x) => x != null);
+    return `<div class="stat"><span>${esc(String(name).replace(/（選做）/g, ""))}</span><span>${done.length} 組${reps.length ? ` × ${reps[reps.length - 1]}` : ""}${kg.length ? ` · ${kg[kg.length - 1]} kg` : ""}</span></div>`;
+  }).join("");
+  const p = todayPartsFromMoves(Object.fromEntries(moves));
+  const nm = (arr) => arr.map((x) => PARTS[x] || x).join("、");
+  p.sec = p.sec.filter((x) => !p.pri.includes(x));
+  return `<div class="log-detail" data-testid="log-detail-${d}">${g}
+    ${l && l.backfill ? `<p class="muted">（依 Garmin 補登）</p>` : ""}
+    ${rows}
+    <p class="note" data-testid="log-muscles-${d}">💪 主要：${esc(nm(p.pri)) || "—"}${p.sec.length ? `<br>輔助：${esc(nm(p.sec))}` : ""}</p>
+    ${bodyMap(p.pri, p.sec)}
+  </div>`;
+}
 function renderLogRows(st) {
-  const dates = Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length).sort().reverse();
+  const dates = logDates(st);
   if (!dates.length) return `<p class="muted">還沒有訓練紀錄。</p>`;
   return dates.map((d) => {
-    const l = st.logs[d];
-    const w = WORKOUTS[l.workoutId];
-    const n = Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0);
-    return `<div class="stat" data-log-row="${d}" data-testid="log-row-${d}"><span>${fmtMD(d)} ${esc(w ? w.name : "訓練")}</span><span>${n} 組</span></div>`;
-  }).join("") + `<p class="muted">長按一筆可刪除</p>`;
+    const l = (st.logs || {})[d];
+    const w = l && WORKOUTS[l.workoutId];
+    const n = l ? Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0) : 0;
+    const gs = garminWorkoutsOn(d);
+    const name = w ? w.name : (gs[0] ? (gs[0].name || "訓練") : "訓練");
+    const right = n ? `${n} 組` : "⚠ 未記動作";
+    const open = ui.logOpen === d;
+    return `<div class="stat" role="button" data-log-open="${d}" data-log-row="${d}" data-testid="log-row-${d}"><span>${open ? "▾" : "▸"} ${fmtMD(d)} ${esc(name)}${gs.length ? " ⌚" : ""}</span><span>${right}</span></div>${open ? logDetail(st, d) : ""}`;
+  }).join("") + `<p class="muted">點一筆看動作和部位；長按可刪除 App 紀錄</p>`;
+}
+function renderLog(st) {
+  return `<button type="button" class="btn" data-go="today">← 回到今天</button>
+    <p class="sec">訓練紀錄</p>
+    <div class="card" data-testid="log-page">${renderLogRows(st)}</div>`;
 }
 const SLEEP_COLORS = { awake: "#FF7F50", rem: "#3BC5F5", core: "#2F80ED", deep: "#5B4BDB" };
 const SLEEP_NAMES = { awake: "清醒", rem: "REM", core: "核心", deep: "深層" };
@@ -2479,7 +2545,7 @@ function renderRules(st) {
     <p class="sec">今天怎麼決定課表</p>
     <div class="card prose">
       <p>睡滿 6 小時、心率正常、Body Battery ≥ 30 就練原課表，否則改 25 分鐘快版。Garmin 有重訓也算一堂；錯過就延後，不跳過。熱量只看有吃飯紀錄的日子，用兩週體重平均。</p>
-      <p>訓練日建議 16:00 喝兩份樂維根（各口味蛋白見標示）加地瓜。一份極致／純淨則 18:30 雞胸 150g；兩份經典無糖則雞胸 200g 或 21:00 加蛋 2 顆。</p>
+      <p>16:00 兩份樂維根加地瓜。健身房日 18:30 雞胸 200g，21:00 蝦仁或魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g；平日 21:00 同樣配菜，飯減到半碗。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
       <p>當週有部位不到 6 組，週日會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
@@ -2695,6 +2761,23 @@ function finishWithScore(score) {
   render();
 }
 
+function backfillFromGarmin(workoutId, date = todayKey()) {
+  const st = load();
+  const w = WORKOUTS[workoutId];
+  if (!w || ((st.logs || {})[date] || {}).finishedAt) return;
+  const moves = {};
+  for (const step of w.steps || []) {
+    const m = String(step.dose || "").match(/(\d+)\s*[×x]\s*(\d+)/);
+    const sets = m ? Number(m[1]) : 3;
+    const reps = m ? Number(m[2]) : null;
+    const last = (st.lastLoads || {})[moveKey(step.name)];
+    moves[step.name] = Array.from({ length: sets }, () => ({ weight: last && last.weight != null ? last.weight : null, reps, target: reps, done: true, short: false }));
+  }
+  const logs = { ...(st.logs || {}), [date]: { workoutId, moves, garmin: matchGarmin(date), backfill: true, finishedAt: Date.now() } };
+  save({ logs });
+  render();
+}
+
 function woNav(dir) {
   const st = state();
   if (!st.session || !["set", "short"].includes(st.session.phase)) return;
@@ -2721,7 +2804,7 @@ function render() {
   document.body.classList.toggle("mode-workout", st.tab === "workout");
   document.body.classList.toggle("mode-sleep", st.tab === "sleep");
   document.documentElement.classList.toggle("mode-sleep", st.tab === "sleep");
-  const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" ? "today" : st.tab;
+  const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" || st.tab === "log" ? "today" : st.tab;
   document.querySelectorAll("#tabs button").forEach((b) => {
     b.classList.toggle("on", b.dataset.tab === tabHi);
   });
@@ -2732,6 +2815,7 @@ function render() {
   else if (st.tab === "rules") main.innerHTML = renderRules(st);
   else if (st.tab === "workout") main.innerHTML = renderWorkout(st);
   else if (st.tab === "body") main.innerHTML = renderBody(st);
+  else if (st.tab === "log") main.innerHTML = renderLog(st);
   else if (st.tab === "sleep") main.innerHTML = renderSleep(st);
   else main.innerHTML = renderHome(st);
   if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
@@ -3107,6 +3191,10 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const bf = e.target.closest("[data-backfill]");
+  if (bf) { backfillFromGarmin(bf.dataset.backfill, bf.dataset.date || todayKey()); if (bf.dataset.date) showToast("已補登"); return; }
+  const lo = e.target.closest("[data-log-open]");
+  if (lo) { ui.logOpen = ui.logOpen === lo.dataset.logOpen ? null : lo.dataset.logOpen; render(); return; }
   if (e.target.closest("[data-start]")) {
     startWorkout();
     return;
@@ -3521,7 +3609,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-16";
+const APP_VERSION = "2026.11.10-22";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
