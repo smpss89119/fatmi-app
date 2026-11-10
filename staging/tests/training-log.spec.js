@@ -22,9 +22,12 @@ test('training log lists every Garmin workout, backfill shows moves + muscles, p
   await expect(det).toContainText('死蟲');
   await expect(page.getByTestId('log-muscles-2026-11-10')).toContainText('臀');
   await expect(det.locator('.body-svg, svg').first()).toBeVisible();
+  await page.getByTestId('log-rounds-2').click();
+  await expect(page.getByTestId('log-row-2026-11-10')).toContainText('8 組');
+  await expect(page.getByTestId('log-rounds-2')).toHaveClass(/primary/);
   await page.screenshot({ path: '/workspace/fatmi-audit/log-detail.png', fullPage: true });
   await page.reload();
-  await expect(page.getByTestId('log-row-2026-11-10')).toContainText('12 組');
+  await expect(page.getByTestId('log-row-2026-11-10')).toContainText('8 組');
   await page.getByTestId('log-row-2026-10-18').click();
   await expect(page.getByTestId('log-detail-2026-10-18')).toContainText('沒在 App 勾動作');
   await page.getByTestId('log-backfill-gymA').click();
