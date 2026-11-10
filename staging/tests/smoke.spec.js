@@ -114,7 +114,7 @@ test.describe("NUTRI", () => {
   });
 
   test("3) whey stock select + series catalog add; plant → chicken 150", async ({ page }) => {
-    await open(page, { now: TUE_15, sleep: "8" }, { wheyHave: ["plantAlmond"] });
+    await open(page, { now: "2026-11-11T15:00:00+07:00", sleep: "8" }, { wheyHave: ["plantAlmond"] });
     const snack = page.locator("[data-testid=meal-snack]");
     await expect(page.locator("[data-testid=scoop-select-0]")).toBeVisible();
     await expect(page.locator("[data-testid=scoop-select-0]")).toHaveValue("plantAlmond");
@@ -219,13 +219,13 @@ test.describe("FOOD", () => {
     await expect(page.locator("[data-testid=meal-dinner]")).toContainText("外食便當");
   });
 
-  test("all three logged meals add protein", async ({ page }) => {
+  test("all three logged meals add protein (gym day 154)", async ({ page }) => {
     await open(page, { now: TUE_15, sleep: "8" });
     await page.locator("[data-testid=meal-snack] [data-eat]").click();
     await page.locator("[data-testid=meal-dinner] [data-eat]").click();
     await page.locator("[data-testid=meal-eggs21] [data-eat]").click();
     const ring = page.locator("[data-testid=eat-card] .ring").nth(1);
-    await expect(ring).toContainText("107");
+    await expect(ring).toContainText("154");
   });
 });
 

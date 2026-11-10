@@ -352,7 +352,7 @@ function twoScoopMeal(st, d = now()) {
 }
 function dinnerFor(st, d = now()) {
   const shake = twoScoopMeal(st, d);
-  const grams = shake.hasPlant ? 150 : 200;
+  const grams = (shake.hasPlant && !isGymDay(st, d)) ? 150 : 200;
   const chickenId = grams === 150 ? "chicken150" : "chicken200";
   const meal = composeSwapMeal(chickenId, "rice150");
   meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
@@ -590,6 +590,10 @@ function suggestionOf(st, id, d = now()) {
   if (id === "snack") return { ...twoScoopMeal(st, d), eaten: false };
   if (id === "dinner") return { ...dinnerFor(st, d), eaten: false };
   if (id === "eggs21") {
+    if (isGymDay(st, d)) {
+      // Nutri: 健身房日 21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g
+      return { name: "21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g", kcal: 435, protein: 48, id: "gymNight", eaten: false };
+    }
     return { name: "雞蛋 2 顆", kcal: 140, protein: 12, id: "eggs2", eaten: false };
   }
   const def = MEAL_DEFS[id];
@@ -3522,7 +3526,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-17";
+const APP_VERSION = "2026.11.10-18";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;

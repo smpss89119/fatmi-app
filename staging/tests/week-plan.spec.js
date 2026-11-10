@@ -49,3 +49,17 @@ test("Sunday top-up adds at most 2 moves on an empty week", async ({ page }) => 
   expect(steps.filter((s) => s.extra).length).toBeLessThanOrEqual(2);
   expect(steps.filter((s) => !s.extra).length).toBe(await page.evaluate(() => WORKOUTS.gymB.steps.length));
 });
+
+test("gym day menu: 18:30 chicken 200g, 21:00 seafood meal; weekday keeps eggs", async ({ page }) => {
+  await page.goto(at("2026-11-14T10:00:00+08:00"));
+  await page.waitForSelector(".ttl");
+  const r = await page.evaluate(() => { const st = load(); return [suggestionOf(st, "dinner"), suggestionOf(st, "eggs21"), suggestionOf(st, "snack")]; });
+  expect(r[0].name).toContain("雞胸 200g");
+  expect(r[1].name).toContain("毛豆 100g");
+  const k = r.reduce((a, m) => a + m.kcal, 0), p = r.reduce((a, m) => a + m.protein, 0);
+  expect(p).toBeGreaterThanOrEqual(140);
+  await page.goto(at("2026-11-13T10:00:00+08:00"));
+  await page.waitForSelector(".ttl");
+  expect(await page.evaluate(() => suggestionOf(load(), "eggs21").name)).toBe("雞蛋 2 顆");
+  console.log("gym day planned", k, p);
+});
