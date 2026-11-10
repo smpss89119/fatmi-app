@@ -1750,7 +1750,7 @@ function renderHome(st) {
     : "";
   const bfId = gToday && !(todayLog && todayLog.finishedAt) ? (plannedWorkoutFor(st) || "homeQ") : null;
   const bfBtn = bfId && WORKOUTS[bfId]
-    ? `<button type="button" class="btn primary xl" data-backfill="${bfId}" data-testid="backfill">補登成「${esc(WORKOUTS[bfId].name)}」→ 算進肌肉</button>`
+    ? `<button type="button" class="btn primary xl" data-backfill="${bfId}" data-testid="backfill">補登：${esc(WORKOUTS[bfId].name)} 💪</button>`
     : "";
   const pickRow = ui.wantTrain
     ? `<div class="rest-picks" data-testid="rest-picks">
