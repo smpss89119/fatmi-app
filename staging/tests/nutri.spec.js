@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 const P = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/staging/"}`;
-const TUE_15 = "2026-11-10T15:00:00+07:00";
+const TUE_15 = "2026-11-14T15:00:00+07:00";
 const url = (hash = "today") => `${P}?debug=1&sleep=8&now=${encodeURIComponent(TUE_15)}#${hash}`;
 const shot = (n) => (process.env.SHOT_DIR ? { path: `${process.env.SHOT_DIR}/${n}` } : {});
 test.use({ viewport: { width: 390, height: 844 } });

@@ -1,10 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
-const TUE_10 = "2026-11-10T10:00:00+07:00";
-const TUE_15 = "2026-11-10T15:00:00+07:00";
+const TUE_10 = "2026-11-14T10:00:00+07:00";
+const TUE_15 = "2026-11-14T15:00:00+07:00";
 const WED_10 = "2026-11-11T10:00:00+07:00";
-const FRI_10 = "2026-11-13T10:00:00+07:00";
-const SAT_10 = "2026-11-07T10:00:00+07:00";
+const FRI_10 = "2026-11-15T10:00:00+07:00";
+const SAT_10 = "2026-11-09T10:00:00+07:00";
 
 function url(extra = {}) {
   const q = new URLSearchParams({ debug: "1", rest: "1", ...extra });
@@ -30,7 +30,7 @@ async function open(page, extra = {}, storage = null) {
 
 test.describe("TRAINING", () => {
   test("1) Tue → Plan A", async ({ page }) => {
-    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-10"));
+    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-14"));
     await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 A");
   });
 
@@ -44,7 +44,7 @@ test.describe("TRAINING", () => {
   test("10) tap a muscle shows weekly sets", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, {
       logs: {
-        "2026-11-10": {
+        "2026-11-14": {
           moves: {
             腿推: [{ done: true }, { done: true }, { done: true }],
             深蹲: [{ done: true }, { done: true }],
@@ -70,14 +70,14 @@ test.describe("TRAINING", () => {
     await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 A");
   });
 
-  test("12) missed Tuesday shifts Friday to Plan A", async ({ page }) => {
-    await open(page, { now: FRI_10, sleep: "8" }, withBreakfast("2026-11-13"));
-    await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 A");
+  test("12) Sunday is always Plan B", async ({ page }) => {
+    await open(page, { now: FRI_10, sleep: "8" }, withBreakfast("2026-11-15"));
+    await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 B");
   });
 
-  test("13) Tuesday session then Friday is Plan B", async ({ page }) => {
-    await open(page, { now: FRI_10, sleep: "8" }, withBreakfast("2026-11-13", {
-      logs: { "2026-11-10": { workoutId: "gymA", finishedAt: "2026-11-10T11:00:00+07:00", moves: { 腿推: [{ done: true }] } } },
+  test("13) Saturday session then Sunday is Plan B", async ({ page }) => {
+    await open(page, { now: FRI_10, sleep: "8" }, withBreakfast("2026-11-15", {
+      logs: { "2026-11-14": { workoutId: "gymA", finishedAt: "2026-11-14T11:00:00+07:00", moves: { 腿推: [{ done: true }] } } },
     }));
     await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 B");
   });
@@ -173,7 +173,7 @@ test.describe("NUTRI", () => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await open(page, { now: TUE_10, sleep: "8" }, {
       logs: {
-        "2026-11-10": {
+        "2026-11-14": {
           workoutId: "gymA",
           backScore: 2,
           moves: { 腿推: [{ done: true, weight: 50, reps: 10 }] },
@@ -231,7 +231,7 @@ test.describe("FOOD", () => {
 
 test.describe("FITMI", () => {
   test("rest day shows 今天也想練 and shift-aware A/B picker", async ({ page }) => {
-    await open(page, { now: SAT_10, sleep: "8" });
+    await open(page, { now: WED_10, sleep: "8" });
     await expect(page.locator("[data-testid=rest-line]")).toContainText("休息日");
     await expect(page.locator("[data-testid=want-train]")).toHaveText("今天也想練");
     await expect(page.locator("[data-testid=train-card]")).toHaveCount(0);
@@ -242,8 +242,8 @@ test.describe("FITMI", () => {
     await expect(page.locator("[data-testid=train-card]")).toContainText("健身房 A");
     await expect(page.locator("[data-start]")).toBeVisible();
 
-    await open(page, { now: SAT_10, sleep: "8" }, {
-      logs: { "2026-11-03": { workoutId: "gymA", finishedAt: "2026-11-03T11:00:00+07:00", moves: { 腿推: [{ done: true }] } } },
+    await open(page, { now: WED_10, sleep: "8" }, {
+      logs: { "2026-11-10": { workoutId: "gymA", finishedAt: "2026-11-10T11:00:00+07:00", moves: { 腿推: [{ done: true }] } } },
     });
     await page.locator("[data-testid=want-train]").click();
     await expect(page.locator("[data-testid=rest-train-gymB]")).toContainText("這週下一堂");
@@ -277,7 +277,7 @@ test.describe("FITMI", () => {
   test("full workout: exercise page, prefilled weight, done + rest, back score, export", async ({ page, context }) => {
     test.setTimeout(60000);
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await open(page, { now: TUE_10, sleep: "8", rest: "1" }, withBreakfast("2026-11-10", {
+    await open(page, { now: TUE_10, sleep: "8", rest: "1" }, withBreakfast("2026-11-14", {
       lastLoads: { "腿推": { weight: 80, reps: 12, date: "2026-11-06" } },
       logs: {
         "2026-11-06": {
@@ -337,8 +337,8 @@ test.describe("FITMI2", () => {
   test("1) chest counts stay 3 when log and session overlap", async ({ page }) => {
     const sets = [{ done: true }, { done: true }, { done: true }];
     await open(page, { now: TUE_10, sleep: "8" }, {
-      logs: { "2026-11-10": { workoutId: "gymA", finishedAt: 1, moves: { 胸推: sets } } },
-      session: { date: "2026-11-10", workoutId: "gymA", phase: "done", moves: { 胸推: sets } },
+      logs: { "2026-11-14": { workoutId: "gymA", finishedAt: 1, moves: { 胸推: sets } } },
+      session: { date: "2026-11-14", workoutId: "gymA", phase: "done", moves: { 胸推: sets } },
     });
     await expect(page.locator("[data-testid=week-chip-chest]")).toHaveText("胸 3 組");
     await page.locator(".body-svg [data-part=chest]").first().click();
@@ -352,7 +352,7 @@ test.describe("FITMI2", () => {
   test("2+3) export is 腿推 60kg×10×3 and workout comes first", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, {
       logs: {
-        "2026-11-10": {
+        "2026-11-14": {
           workoutId: "gymA",
           backScore: 2,
           moves: {
@@ -373,7 +373,7 @@ test.describe("FITMI2", () => {
   });
 
   test("4) back score >= 3 swaps row and press, not only squat", async ({ page }) => {
-    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-10", {
+    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-14", {
       logs: {
         "2026-11-06": {
           workoutId: "gymA",
@@ -393,7 +393,7 @@ test.describe("FITMI2", () => {
   });
 
   test("5) 腿推 cue is 下背別離開椅背", async ({ page }) => {
-    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-10", {
+    await open(page, { now: TUE_10, sleep: "8" }, withBreakfast("2026-11-14", {
       logs: {
         "2026-11-06": {
           workoutId: "gymA",
@@ -411,7 +411,7 @@ test.describe("FITMI2", () => {
   test("6) swap suggestions show right after scoring 3+", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, {
       session: {
-        date: "2026-11-10",
+        date: "2026-11-14",
         workoutId: "gymA",
         phase: "back",
         steps: [],
@@ -454,7 +454,7 @@ test.describe("FITMI2", () => {
 });
 
 test.describe("ROUND3", () => {
-  const gymA = (extra = {}) => withBreakfast("2026-11-10", extra);
+  const gymA = (extra = {}) => withBreakfast("2026-11-14", extra);
   test("0) pantry from 3/14: 600g adds real servings, ambiguous stays 待確認", async ({ page }) => {
     await open(page, { now: TUE_10, sleep: "8" }, { shopExtra: [{ id: "x-old", group: "protein", name: "雞柳 一包", custom: true, amount: "一包", palms: 2, fists: 0 }] });
     await page.locator("[data-tab=shop]").click();
@@ -543,7 +543,7 @@ test.describe("ROUND3", () => {
     expect(steps).toContain("坐姿啞鈴肩推");
   });
   test("5+6) home shows 今天已練 ✓ and 今天也想練 A/B/快版", async ({ page }) => {
-    await open(page, { now: TUE_15, sleep: "8" }, gymA({ logs: { "2026-11-10": { workoutId: "gymA", finishedAt: 1, backScore: 1, moves: { 腿推: [{ done: true, weight: 60, reps: 10 }] } } } }));
+    await open(page, { now: TUE_15, sleep: "8" }, gymA({ logs: { "2026-11-14": { workoutId: "gymA", finishedAt: 1, backScore: 1, moves: { 腿推: [{ done: true, weight: 60, reps: 10 }] } } } }));
     await expect(page.locator("[data-testid=trained-today]")).toHaveText("今天已練 ✓");
     await expect(page.locator("[data-start]")).toHaveCount(0);
     await page.locator("[data-testid=want-train]").click();
@@ -602,8 +602,8 @@ test.describe("ROUND4", () => {
     await open(page, { now: TUE_15, sleep: "8" });
     await page.locator("[data-testid=add-meal]").click();
     const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
-    const id = s.extraMeals["2026-11-10"][0].id;
-    expect(s.extraMeals["2026-11-10"][0].time).toBe("15:00"); // TUE_15 is 15:00 +07:00 (config pins timezoneId Asia/Bangkok)
+    const id = s.extraMeals["2026-11-14"][0].id;
+    expect(s.extraMeals["2026-11-14"][0].time).toBe("15:00"); // TUE_15 is 15:00 +07:00 (config pins timezoneId Asia/Bangkok)
     await page.locator(`[data-testid=meal-time-${id}]`).fill("13:30");
     await page.locator(`[data-testid=meal-time-${id}]`).dispatchEvent("change");
     await expect(page.locator(".meal-row").first()).toHaveAttribute("data-testid", `meal-${id}`);
@@ -618,7 +618,7 @@ test.describe("ROUND4", () => {
     await expect(page.locator("[data-testid=remain]")).toContainText("2150");
   });
   test("sleep page: Apple-style day view with stages, W/M bars with average", async ({ page }) => {
-    await open(page, { now: "2026-11-07T10:00:00+07:00", sleep: "8" });
+    await open(page, { now: "2026-11-09T10:00:00+07:00", sleep: "8" });
     await page.locator("[data-testid=sleep-home]").click();
     await expect(page.locator("[data-testid=sleep-page]")).toBeVisible();
     await expect(page.locator("[data-testid=sleep-total]")).toContainText(/\d+小時/);

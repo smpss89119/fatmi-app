@@ -1,8 +1,8 @@
 const { test, expect } = require("@playwright/test");
 const P = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/staging/"}`;
 const u = (now) => `${P}?debug=1&rest=0&sleep=8&now=${encodeURIComponent(now)}`;
-const TUE = "2026-11-10T10:00:00+07:00";
-const FRI = "2026-11-13T10:00:00+07:00";
+const TUE = "2026-11-14T10:00:00+07:00";
+const FRI = "2026-11-15T10:00:00+07:00";
 async function jump(page, i) {
   await page.evaluate((n) => {
     const s = JSON.parse(localStorage.getItem("fatcat-v2"));
@@ -68,8 +68,8 @@ test.describe("FRESH (empty storage)", () => {
     await fullWorkout(page, { [chest]: 4 });
     const sw = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).backSwap);
     expect(Object.keys(sw)).toHaveLength(1);
-    // next gymA (Tue next week)
-    await page.goto(u("2026-11-17T10:00:00+07:00")); await page.waitForSelector(".ttl");
+    // next gymA (Sat next week)
+    await page.goto(u("2026-11-21T10:00:00+07:00")); await page.waitForSelector(".ttl");
     await page.locator("[data-start]").click();
     const next = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).session.steps.map((s) => s.name));
     expect(next.filter((n, i) => n !== first[i])).toEqual(["地板臥推"]);
@@ -78,24 +78,24 @@ test.describe("FRESH (empty storage)", () => {
     await page.goto(u(TUE)); await page.waitForSelector(".ttl");
     await page.evaluate(() => {
       localStorage.setItem("fatcat-v2", JSON.stringify({
-        logs: { "2026-11-10": { workoutId: "gymA", finishedAt: 1, moves: { 腿推: [{ done: true, weight: 60, reps: 10 }] } } },
-        lastLoads: { 腿推: { weight: 60, reps: 10, date: "2026-11-10" } },
-        backSwap: { 胸推: { to: "地板臥推", date: "2026-11-10" } },
-        mealLogs: { "2026-11-10": { snack: { eaten: true } } },
+        logs: { "2026-11-14": { workoutId: "gymA", finishedAt: 1, moves: { 腿推: [{ done: true, weight: 60, reps: 10 }] } } },
+        lastLoads: { 腿推: { weight: 60, reps: 10, date: "2026-11-14" } },
+        backSwap: { 胸推: { to: "地板臥推", date: "2026-11-14" } },
+        mealLogs: { "2026-11-14": { snack: { eaten: true } } },
         shopChecked: { chicken: true },
       }));
     });
-    await page.goto(u(TUE) + "#body"); await page.waitForSelector("[data-testid=log-row-2026-11-10]");
+    await page.goto(u(TUE) + "#body"); await page.waitForSelector("[data-testid=log-row-2026-11-14]");
     page.on("dialog", (d) => d.accept());
-    const row = page.locator("[data-testid=log-row-2026-11-10]");
-    await page.evaluate(() => document.querySelector("[data-testid=log-row-2026-11-10]").dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
+    const row = page.locator("[data-testid=log-row-2026-11-14]");
+    await page.evaluate(() => document.querySelector("[data-testid=log-row-2026-11-14]").dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
     await page.waitForTimeout(900);
     await expect(row).toHaveCount(0);
     const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
-    expect(s.logs["2026-11-10"]).toBeUndefined();
+    expect(s.logs["2026-11-14"]).toBeUndefined();
     expect(Object.keys(s.lastLoads || {})).toHaveLength(0);
     expect(Object.keys(s.backSwap || {})).toHaveLength(0);
-    expect(s.mealLogs["2026-11-10"].snack.eaten).toBe(true);
+    expect(s.mealLogs["2026-11-14"].snack.eaten).toBe(true);
     expect(s.shopChecked.chicken).toBe(true);
   });
 });

@@ -13,7 +13,9 @@ if (DEMO) { try { localStorage.setItem("fatcat-demo", JSON.stringify(LEGACY_DEMO
 function normName(s) { return String(s || "").normalize("NFKC").replace(/[\s\u3000]+/g, ""); }
 const DOW = ["日", "一", "二", "三", "四", "五", "六"];
 const GOAL = new Date(2026, 11, 31);
-const DEFAULT_DAYS = [2, 5];
+const DEFAULT_DAYS = [2, 4, 6, 0];
+// 週二、週四在家快版；週六健身房 A、週日健身房 B
+const WEEK_PLAN = { 2: "homeQ", 4: "homeQ", 6: "gymA", 0: "gymB" };
 const PROTEIN_MIN = 140;
 const PROTEIN_TARGET = 150;
 const PROTEIN_MAX = 160;
@@ -42,14 +44,14 @@ function save(patch) {
   localStorage.setItem(STORE, JSON.stringify(s));
   return s;
 }
-// One-time migrations for stored state (versioned). 1: reset stale trainDays to Tue/Fri.
-const MIG_VERSION = 1;
+// One-time migrations for stored state (versioned). 1: reset stale trainDays to Tue/Fri. 2: Tue/Thu home + Sat A / Sun B.
+const MIG_VERSION = 2;
 function migrateState() {
   try {
     const s = load();
     if (!Object.keys(s).length || (Number(s.migV) || 0) >= MIG_VERSION) return;
     const patch = { migV: MIG_VERSION };
-    if ((Number(s.migV) || 0) < 1) patch.trainDays = DEFAULT_DAYS.slice();
+    if ((Number(s.migV) || 0) < 2) patch.trainDays = DEFAULT_DAYS.slice();
     save(patch);
   } catch (_) {}
 }
@@ -76,9 +78,10 @@ function debugParams() {
 function now() {
   return debugParams().now || new Date();
 }
-function restMs() {
+function restMs(session) {
   const s = debugParams().rest;
-  return ((s != null && !Number.isNaN(s)) ? s : REST_SEC) * 1000;
+  const base = session && WORKOUTS[session.workoutId] && WORKOUTS[session.workoutId].restSec ? WORKOUTS[session.workoutId].restSec : REST_SEC;
+  return ((s != null && !Number.isNaN(s)) ? s : base) * 1000;
 }
 function sleepText(sleep) {
   if (sleep == null || Number.isNaN(Number(sleep))) return "";
@@ -183,6 +186,16 @@ function rhrAvg7(d = now()) {
 function isTrainDay(st, d = now()) {
   return (st.trainDays || DEFAULT_DAYS).includes(d.getDay());
 }
+function plannedWorkoutFor(st, d = now()) {
+  if (!isTrainDay(st, d)) return null;
+  return WEEK_PLAN[d.getDay()] || pickScheduled(st, d);
+}
+function isGymDay(st, d = now()) {
+  const extra = restTrainPick(st, d);
+  if (extra) return String(extra).startsWith("gym");
+  const id = plannedWorkoutFor(st, d);
+  return !!id && String(id).startsWith("gym");
+}
 function isGarminWorkout(a) {
   if (!a) return false;
   return /strength|multi_sport|training|fitness_equipment/i.test(a.type || "")
@@ -200,7 +213,8 @@ function pickScheduled(st, d = now()) {
   for (let i = 0; i < 7; i++) {
     const key = todayKey(addDays(mon, i));
     if (key >= today) break;
-    if (dateHasSession(st, key)) n += 1;
+    const log = (st.logs || {})[key];
+    if (log && /^gym/.test(String(log.workoutId || ""))) n += 1;
   }
   return n % 2 === 0 ? "gymA" : "gymB";
 }
@@ -396,24 +410,28 @@ function todayPlan(st, d = now()) {
       reason: "休息日，走走路就好", collapsed: true, chk, canOverride: false, fasted: false,
     };
   }
-  let wantQuick = chk.quick || fasted;
+  const base = plannedWorkoutFor(st, d) || scheduled;
+  const homeDay = !extra && base === "homeQ";
+  let wantQuick = !homeDay && (chk.quick || fasted);
   if (ov === "original") wantQuick = false;
-  if (ov === "quick") wantQuick = true;
-  let id = extra || (wantQuick ? "quick" : scheduled);
+  if (ov === "quick" && !homeDay) wantQuick = true;
+  let id = extra || (wantQuick ? "quick" : base);
   if (extra) {
     id = extra;
     wantQuick = extra === "quick";
   }
   let reason = chk.reasons[0];
-  if (fasted && wantQuick) {
+  if (homeDay) {
+    reason = fasted ? "平日在家 20 分，空腹不追重量" : "平日在家 20 分，3 輪";
+  } else if (fasted && wantQuick) {
     reason = chk.quick ? `空腹練，改 25 分鐘快版，不追重量（${chk.reasons[0]}）` : "空腹練，改 25 分鐘快版，不追重量";
   } else if (fasted) {
     reason = `${chk.reasons[0]}。空腹不追重量`;
   }
   return {
-    train: true, id, scheduled, workout: WORKOUTS[id],
+    train: true, id, scheduled: base, workout: WORKOUTS[id], homeDay,
     reason, chk, wantQuick, fasted, restPick: !train && !!extra,
-    canOverride: !extra && wantQuick && id === "quick",
+    canOverride: !extra && !homeDay && wantQuick && id === "quick",
   };
 }
 
@@ -481,7 +499,7 @@ function computeKcalAdjust(st, d = now()) {
   return { adj: 0, note: null };
 }
 function kcalInfo(st, d = now()) {
-  const trainLike = isActiveTrainDay(st, d);
+  const trainLike = isGymDay(st, d);
   const y = dailyOn(todayKey(addDays(d, -1)));
   const adj = computeKcalAdjust(st, d);
   let target = trainLike ? 2150 : 1950;
@@ -490,7 +508,7 @@ function kcalInfo(st, d = now()) {
   const label = String(target);
   return {
     target,
-    source: trainLike ? `訓練日 ${target}` : `休息日 ${target}`,
+    source: trainLike ? `健身房日 ${target}` : (isActiveTrainDay(st, d) ? `在家練日 ${target}` : `休息日 ${target}`),
     adj,
     trainLike,
     band: label,
@@ -576,7 +594,7 @@ function suggestionOf(st, id, d = now()) {
   }
   const def = MEAL_DEFS[id];
   if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
-  return { ...mealOf(def, isTrainDay(st, d)), id: "default", eaten: false };
+  return { ...mealOf(def, isGymDay(st, d)), id: "default", eaten: false };
 }
 function hasCustomPortions(m) {
   if (!m) return false;
@@ -1258,7 +1276,7 @@ function weekSetCounts(st, d = now(), opts = {}) {
   return weekPartSources(st, d, opts).counts;
 }
 function fridayExtras(st, baseSteps, d = now()) {
-  if (d.getDay() !== 5) return [];
+  if (d.getDay() !== 0) return [];
   const week = weekSetCounts(st, d, { excludeToday: true });
   const planned = countPlanned(baseSteps);
   const combined = { ...week };
@@ -2454,8 +2472,8 @@ function renderRules(st) {
     <div class="card">
       <div class="stat"><span>體位參考</span><span>${last.weightKg} kg／體脂 ${last.pbf}%／骨骼肌 ${last.smmKg} kg（${fmtMD(last.date)}）</span></div>
       <div class="stat"><span>減脂</span><span>12/31 前減脂 3–4 kg，體脂 15–16%，保肌</span></div>
-      <div class="stat"><span>訓練</span><span>週二 A、週五 B，每週 ≥ 2 次</span></div>
-      <div class="stat"><span>熱量</span><span>工作日 1900–2000 kcal；訓練日或步數多 2100–2200 kcal。有 Garmin 時依昨天消耗 −450，最低 1800</span></div>
+      <div class="stat"><span>訓練</span><span>週六健身房 A、週日健身房 B；週二、週四在家 20 分</span></div>
+      <div class="stat"><span>熱量</span><span>平日（含在家練）1900–2000 kcal；健身房日或步數多 2100–2200 kcal。有 Garmin 時依昨天消耗 −450，最低 1800</span></div>
       <div class="stat"><span>蛋白質</span><span>140–160 g</span></div>
     </div>
     <p class="sec">今天怎麼決定課表</p>
@@ -2464,7 +2482,7 @@ function renderRules(st) {
       <p>訓練日建議 16:00 喝兩份樂維根（各口味蛋白見標示）加地瓜。一份極致／純淨則 18:30 雞胸 150g；兩份經典無糖則雞胸 200g 或 21:00 加蛋 2 顆。</p>
       <p>標示「今天空腹練」，或開始訓練前早餐、午餐、練前餐都沒記錄，就改 25 分鐘快版，而且不追重量。</p>
       <p>回台第一週重量抓上次七成，每組留 3 下。某個動作連續兩次做滿且有餘力，下次提示加 1–2.5 kg。</p>
-      <p>當週有部位不到 6 組，週五會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
+      <p>當週有部位不到 6 組，週日會自動加一組補強。下背 3 分以上，下次改成較安全的動作。</p>
       <p>換餐時蛋白質可互選：雞胸 200g、蝦仁 150g、吳郭魚排 1 片、雞蛋 3 顆。澱粉可互選：飯 150g、地瓜 150g、酸種麵包 2 片。</p>
     </div>
     <p class="sec">下背：少做</p>
@@ -2514,7 +2532,7 @@ function buildSteps(st, workout) {
       extra: false,
     };
   });
-  if (now().getDay() === 5) {
+  if (now().getDay() === 0) {
     for (const ex of fridayExtras(st, steps, now())) {
       const r = resolveName(ex, back);
       steps.push({ name: r.name, dose: ex.dose, video: r.video || ex.video, extra: true, extraFor: ex.extraFor, swapped: r.swapped });
@@ -2583,7 +2601,7 @@ function applySet(short, reps) {
   } else {
     session.setI += 1;
     session.phase = "rest";
-    session.restUntil = Date.now() + restMs();
+    session.restUntil = Date.now() + restMs(session);
   }
   save({ session });
   render();
@@ -2623,7 +2641,7 @@ function applyExBack(score) {
   session.editWeight = null;
   session.exBackI = null;
   session.phase = "rest";
-  session.restUntil = Date.now() + restMs();
+  session.restUntil = Date.now() + restMs(session);
   save({ session });
   render();
 }
@@ -3503,7 +3521,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-15";
+const APP_VERSION = "2026.11.10-16";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;

@@ -64,12 +64,12 @@ test("promote keeps his /preview/ icon data, applies trainDays fix, and matches 
   await expect(page.locator("[data-testid=staging-tag]")).toHaveCount(0);
   expect(await page.title()).toBe("減脂喵");
   await expect(page.locator("[data-testid=rest-line]")).toHaveCount(0);
-  await expect(page.locator("[data-testid=train-card]")).toContainText("A");
+  await expect(page.locator("[data-testid=train-card]")).toContainText("平日在家");
   const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
   expect(s.mealLogs).toEqual(seed.mealLogs);
   expect(s.logs).toEqual(seed.logs);
   expect(s.wheyStockG).toEqual(seed.wheyStockG);
-  expect(s.trainDays).toEqual([2, 5]);
+  expect(s.trainDays).toEqual([2, 4, 6, 0]);
   // preview and root are byte-identical (except data.json, owned by the hourly job)
   for (const f of ["app.js", "app.css", "sw.js", "index.html", "manifest.webmanifest", "version.json", "data.js", "body-svg.js"]) {
     expect(fs.readFileSync(path.join(newRoot, "preview", f)).equals(fs.readFileSync(path.join(newRoot, f))), f).toBe(true);

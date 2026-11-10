@@ -31,6 +31,21 @@ const WORKOUTS = {
       { name: "死蟲", dose: "2 × 8 / 側", video: "deadbug" },
     ],
   },
+  homeQ: {
+    id: "homeQ",
+    name: "平日在家",
+    time: "約 20 分",
+    where: "家裡啞鈴",
+    tag: "3 輪，每個動作間休 30 秒",
+    restSec: 30,
+    warm: "可選：關節繞圈 1 分鐘。全程背打直，下背不舒服就停。",
+    steps: [
+      { name: "高腳杯深蹲", dose: "3 × 10", video: "goblet" },
+      { name: "伏地挺身（可撐桌邊）", dose: "3 × 8–10", video: "kneelpush" },
+      { name: "臀橋", dose: "3 × 12", video: "bridge" },
+      { name: "死蟲", dose: "3 × 8 / 側", video: "deadbug" },
+    ],
+  },
   homeA: {
     id: "homeA",
     name: "家用完整 A",

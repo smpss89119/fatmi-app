@@ -12,10 +12,10 @@ test("stale stored trainDays [1,4] → Tuesday is a training day after load (one
   await page.goto(`${BASE}?debug=1&now=${encodeURIComponent(TUE_10)}&sleep=8`);
   await page.waitForSelector(".ttl");
   await expect(page.locator("[data-testid=rest-line]")).toHaveCount(0);
-  await expect(page.locator("[data-testid=train-card]")).toContainText("A");
+  await expect(page.locator("[data-testid=train-card]")).toContainText("平日在家");
   const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
-  expect(s.trainDays).toEqual([2, 5]);
-  expect(s.migV).toBe(1);
+  expect(s.trainDays).toEqual([2, 4, 6, 0]);
+  expect(s.migV).toBe(2);
   expect(s.grocery).toEqual({ chicken: true });
   // runs once: a later change is not overwritten
   await page.evaluate(() => {
@@ -42,7 +42,7 @@ test("restored backup with stale trainDays gets migrated", async ({ browser }) =
   await nav;
   await p.waitForSelector(".ttl");
   const s = await p.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
-  expect(s.trainDays).toEqual([2, 5]);
+  expect(s.trainDays).toEqual([2, 4, 6, 0]);
   expect(s.grocery).toEqual({ eggs: true });
   await p.goto(`${BASE}?debug=1&now=${encodeURIComponent(TUE_10)}&sleep=8#today`);
   await p.waitForSelector(".ttl");
