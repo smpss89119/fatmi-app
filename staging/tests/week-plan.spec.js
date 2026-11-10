@@ -40,3 +40,12 @@ test("home workout rest timer is 30s, gym stays 90s", async ({ page }) => {
   expect(await page.evaluate(() => restMs({ workoutId: "homeQ" }))).toBe(30000);
   expect(await page.evaluate(() => restMs({ workoutId: "gymA" }))).toBe(90000);
 });
+
+test("Sunday top-up adds at most 2 moves on an empty week", async ({ page }) => {
+  await page.goto(at("2026-11-15T10:00:00+08:00"));
+  await page.waitForSelector(".ttl");
+  await page.locator("[data-start]").click();
+  const steps = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")).session.steps);
+  expect(steps.filter((s) => s.extra).length).toBeLessThanOrEqual(2);
+  expect(steps.filter((s) => !s.extra).length).toBe(await page.evaluate(() => WORKOUTS.gymB.steps.length));
+});

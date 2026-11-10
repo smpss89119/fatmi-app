@@ -1284,6 +1284,7 @@ function fridayExtras(st, baseSteps, d = now()) {
   const extras = [];
   const used = new Set();
   for (const p of MAIN_PARTS) {
+    if (extras.length >= 2) break; // FitMi: 補強最多 2 個動作
     if ((combined[p] || 0) >= 6) continue;
     const ex = EXTRA_FOR_PART[p];
     if (!ex || used.has(ex.name)) continue;
@@ -3521,7 +3522,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-16";
+const APP_VERSION = "2026.11.10-17";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
