@@ -1,0 +1,14 @@
+{
+  "name": "減脂喵測試",
+  "short_name": "減脂喵測試",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFF8EE",
+  "theme_color": "#FDA125",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon-180-20261107p25.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-20261107p25.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

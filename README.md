@@ -58,3 +58,9 @@ python3 -m http.server 43123
 ## 部署
 
 倉庫根目錄即網站。GitHub Pages：`main` 分支、`/ (root)`。
+
+- `staging/`：唯一的測試站（https://smpss89119.github.io/fatmi-app/staging/ ，標題「減脂喵測試」、標頭有「測試」標籤、快取前綴 `fatcat-staging-`）。新功能先改這裡、跑 `cd staging && npx playwright test`，FitMi／Nutri 驗收。
+- `./promote.sh`（不帶參數）：把 `staging/` 同時發佈到根目錄與 `preview/`，兩邊檔案完全相同、版號相同（取自 `staging/version.json`），名稱改回「減脂喵」。`preview/` 保留是因為建毅的主畫面圖示指向 `/fatmi-app/preview/`；同網域、同 `fatcat-v2`，更新不會清掉紀錄。
+- Service Worker 依路徑決定快取前綴（根目錄 `fatcat-2-`、`preview/` `fatcat-preview-`、`staging/` `fatcat-staging-`），只清自己的舊快取。
+- `data.json` 不由 promote 複製：每小時任務寫根目錄並複製到 `preview/`（也請複製到 `staging/`）。
+- 備份／還原：規則頁最下方「備份／還原」，「複製備份」產生 `FATMI1:` 開頭的碼，另一個 App「貼上還原」。
