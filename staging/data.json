@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-10T22:00:57+07:00",
+  "exportedAt": "2026-11-10T22:47:54+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1521,12 +1521,12 @@
       },
       {
         "date": "2026-11-10",
-        "kcal": 1582.0,
-        "steps": 4225,
+        "kcal": 2278.0,
+        "steps": 5415,
         "sleepHours": 6.2,
         "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": 36.0,
+        "bodyBattery": 8.0,
         "sleep": {
           "start": "2026-11-10T01:51",
           "end": "2026-11-10T08:06",
@@ -1658,6 +1658,15 @@
         "avgHR": null,
         "kcal": 478.0,
         "name": "複合式運動"
+      },
+      {
+        "type": "strength_training",
+        "date": "2026-11-10",
+        "startTime": "2026-11-10 23:26:25",
+        "durationMin": 16.4,
+        "avgHR": 98.0,
+        "kcal": 102.0,
+        "name": "肌力訓練"
       }
     ]
   },
