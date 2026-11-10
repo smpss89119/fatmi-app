@@ -1745,8 +1745,12 @@ function renderHome(st) {
 
   const gToday = (LIVE.garmin.activities || []).find((a) => a.date === todayKey() && isGarminWorkout(a));
   const trainedToday = (!!(todayLog && todayLog.finishedAt) || !!gToday) && !session;
-  const gDone = gToday && !(todayLog && todayLog.finishedAt)
+  const gDone = gToday
     ? `<p data-testid="garmin-done" style="color:rgba(255,255,255,.9);margin:6px 0 0">Garmin · ${esc(gToday.name || "運動")}：${gToday.durationMin != null ? `${gToday.durationMin} 分` : ""}${gToday.avgHR != null ? ` · 心率 ${Math.round(gToday.avgHR)}` : ""}${gToday.kcal != null ? ` · ${Math.round(gToday.kcal)} kcal` : ""}</p>`
+    : "";
+  const bfId = gToday && !(todayLog && todayLog.finishedAt) ? (plannedWorkoutFor(st) || "homeQ") : null;
+  const bfBtn = bfId && WORKOUTS[bfId]
+    ? `<button type="button" class="btn primary xl" data-backfill="${bfId}" data-testid="backfill">補登成「${esc(WORKOUTS[bfId].name)}」→ 算進肌肉</button>`
     : "";
   const pickRow = ui.wantTrain
     ? `<div class="rest-picks" data-testid="rest-picks">
@@ -1760,6 +1764,7 @@ function renderHome(st) {
     trainCard = `<section class="card hero" data-testid="train-card">
       <div class="big" data-testid="trained-today" data-log-row="${todayKey()}">今天已練 ✓</div>
       ${gDone}
+      ${bfBtn ? `<div class="acts">${bfBtn}</div>` : ""}
       <div class="acts">${pickRow}</div>
     </section>`;
   } else if (!plan.train) {
@@ -2706,6 +2711,24 @@ function finishWithScore(score) {
   render();
 }
 
+function backfillFromGarmin(workoutId) {
+  const st = load();
+  const w = WORKOUTS[workoutId];
+  const date = todayKey();
+  if (!w || ((st.logs || {})[date] || {}).finishedAt) return;
+  const moves = {};
+  for (const step of w.steps || []) {
+    const m = String(step.dose || "").match(/(\d+)\s*[×x]\s*(\d+)/);
+    const sets = m ? Number(m[1]) : 3;
+    const reps = m ? Number(m[2]) : null;
+    const last = (st.lastLoads || {})[moveKey(step.name)];
+    moves[step.name] = Array.from({ length: sets }, () => ({ weight: last && last.weight != null ? last.weight : null, reps, target: reps, done: true, short: false }));
+  }
+  const logs = { ...(st.logs || {}), [date]: { workoutId, moves, garmin: matchGarmin(date), backfill: true, finishedAt: Date.now() } };
+  save({ logs });
+  render();
+}
+
 function woNav(dir) {
   const st = state();
   if (!st.session || !["set", "short"].includes(st.session.phase)) return;
@@ -3118,6 +3141,8 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const bf = e.target.closest("[data-backfill]");
+  if (bf) { backfillFromGarmin(bf.dataset.backfill); return; }
   if (e.target.closest("[data-start]")) {
     startWorkout();
     return;
@@ -3532,7 +3557,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-20";
+const APP_VERSION = "2026.11.10-21";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
