@@ -1,35 +1,8 @@
 {
-  "exportedAt": "2026-11-07T09:11:23+07:00",
+  "exportedAt": "2026-11-10T07:59:40+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-09",
-        "kcal": 2725.0,
-        "steps": 17914,
-        "sleepHours": 5.3,
-        "restingHR": 54.0,
-        "weightKg": null,
-        "bodyBattery": 5.0
-      },
-      {
-        "date": "2026-10-10",
-        "kcal": 2380.0,
-        "steps": 11609,
-        "sleepHours": null,
-        "restingHR": 54.0,
-        "weightKg": null,
-        "bodyBattery": 10.0
-      },
-      {
-        "date": "2026-10-11",
-        "kcal": 2683.0,
-        "steps": 12091,
-        "sleepHours": 8.1,
-        "restingHR": 49.0,
-        "weightKg": null,
-        "bodyBattery": 11.0
-      },
       {
         "date": "2026-10-12",
         "kcal": 2448.0,
@@ -163,147 +136,7 @@
         "sleepHours": 6.9,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 8.0,
-        "sleep": {
-          "start": "2026-10-26T00:24",
-          "end": "2026-10-26T07:37",
-          "deepMin": 83,
-          "coreMin": 238,
-          "remMin": 92,
-          "awakeMin": 20,
-          "segments": [
-            [
-              0,
-              6,
-              "core"
-            ],
-            [
-              6,
-              11,
-              "deep"
-            ],
-            [
-              11,
-              24,
-              "core"
-            ],
-            [
-              24,
-              33,
-              "awake"
-            ],
-            [
-              33,
-              38,
-              "core"
-            ],
-            [
-              38,
-              49,
-              "deep"
-            ],
-            [
-              49,
-              54,
-              "awake"
-            ],
-            [
-              54,
-              90,
-              "core"
-            ],
-            [
-              90,
-              108,
-              "deep"
-            ],
-            [
-              108,
-              140,
-              "core"
-            ],
-            [
-              140,
-              146,
-              "deep"
-            ],
-            [
-              146,
-              156,
-              "core"
-            ],
-            [
-              156,
-              172,
-              "deep"
-            ],
-            [
-              172,
-              175,
-              "awake"
-            ],
-            [
-              175,
-              185,
-              "core"
-            ],
-            [
-              185,
-              213,
-              "rem"
-            ],
-            [
-              213,
-              236,
-              "core"
-            ],
-            [
-              236,
-              256,
-              "deep"
-            ],
-            [
-              256,
-              263,
-              "core"
-            ],
-            [
-              263,
-              266,
-              "awake"
-            ],
-            [
-              266,
-              285,
-              "core"
-            ],
-            [
-              285,
-              292,
-              "deep"
-            ],
-            [
-              292,
-              314,
-              "core"
-            ],
-            [
-              314,
-              349,
-              "rem"
-            ],
-            [
-              349,
-              404,
-              "core"
-            ],
-            [
-              404,
-              433,
-              "rem"
-            ]
-          ]
-        }
+        "bodyBattery": 8.0
       },
       {
         "date": "2026-10-27",
@@ -312,77 +145,7 @@
         "sleepHours": 6.8,
         "restingHR": 49.0,
         "weightKg": null,
-        "bodyBattery": 17.0,
-        "sleep": {
-          "start": "2026-10-27T01:13",
-          "end": "2026-10-27T08:01",
-          "deepMin": 43,
-          "coreMin": 279,
-          "remMin": 86,
-          "awakeMin": 0,
-          "segments": [
-            [
-              0,
-              10,
-              "core"
-            ],
-            [
-              10,
-              32,
-              "deep"
-            ],
-            [
-              32,
-              47,
-              "core"
-            ],
-            [
-              47,
-              54,
-              "deep"
-            ],
-            [
-              54,
-              80,
-              "core"
-            ],
-            [
-              80,
-              90,
-              "rem"
-            ],
-            [
-              90,
-              144,
-              "core"
-            ],
-            [
-              144,
-              158,
-              "deep"
-            ],
-            [
-              158,
-              280,
-              "core"
-            ],
-            [
-              280,
-              331,
-              "rem"
-            ],
-            [
-              331,
-              383,
-              "core"
-            ],
-            [
-              383,
-              407,
-              "rem"
-            ]
-          ]
-        }
+        "bodyBattery": 17.0
       },
       {
         "date": "2026-10-28",
@@ -1436,12 +1199,12 @@
       },
       {
         "date": "2026-11-07",
-        "kcal": 795.0,
-        "steps": 156,
+        "kcal": 2222.0,
+        "steps": 10194,
         "sleepHours": 7.3,
         "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": 51.0,
+        "bodyBattery": 5.0,
         "sleep": {
           "start": "2026-11-07T01:05",
           "end": "2026-11-07T08:33",
@@ -1554,6 +1317,288 @@
               438,
               448,
               "rem"
+            ]
+          ]
+        }
+      },
+      {
+        "date": "2026-11-08",
+        "kcal": 2185.0,
+        "steps": 4937,
+        "sleepHours": 6.4,
+        "restingHR": 55.0,
+        "weightKg": null,
+        "bodyBattery": 21.0,
+        "sleep": {
+          "start": "2026-11-08T04:15",
+          "end": "2026-11-08T10:39",
+          "deepMin": 44,
+          "coreMin": 277,
+          "remMin": 61,
+          "awakeMin": 3,
+          "segments": [
+            [
+              0,
+              10,
+              "core"
+            ],
+            [
+              10,
+              24,
+              "deep"
+            ],
+            [
+              24,
+              61,
+              "core"
+            ],
+            [
+              61,
+              80,
+              "rem"
+            ],
+            [
+              80,
+              91,
+              "core"
+            ],
+            [
+              91,
+              121,
+              "deep"
+            ],
+            [
+              121,
+              157,
+              "core"
+            ],
+            [
+              157,
+              169,
+              "rem"
+            ],
+            [
+              169,
+              218,
+              "core"
+            ],
+            [
+              218,
+              219,
+              "awake"
+            ],
+            [
+              219,
+              246,
+              "core"
+            ],
+            [
+              246,
+              248,
+              "awake"
+            ],
+            [
+              248,
+              257,
+              "core"
+            ],
+            [
+              257,
+              273,
+              "rem"
+            ],
+            [
+              273,
+              335,
+              "core"
+            ],
+            [
+              335,
+              349,
+              "rem"
+            ],
+            [
+              349,
+              384,
+              "core"
+            ]
+          ]
+        }
+      },
+      {
+        "date": "2026-11-09",
+        "kcal": 2204.0,
+        "steps": 6142,
+        "sleepHours": 5.9,
+        "restingHR": 50.0,
+        "weightKg": null,
+        "bodyBattery": 17.0,
+        "sleep": {
+          "start": "2026-11-09T01:52",
+          "end": "2026-11-09T07:44",
+          "deepMin": 72,
+          "coreMin": 252,
+          "remMin": 28,
+          "awakeMin": 1,
+          "segments": [
+            [
+              0,
+              5,
+              "core"
+            ],
+            [
+              5,
+              11,
+              "deep"
+            ],
+            [
+              11,
+              16,
+              "core"
+            ],
+            [
+              16,
+              49,
+              "deep"
+            ],
+            [
+              49,
+              56,
+              "core"
+            ],
+            [
+              56,
+              57,
+              "awake"
+            ],
+            [
+              57,
+              98,
+              "core"
+            ],
+            [
+              98,
+              103,
+              "deep"
+            ],
+            [
+              103,
+              116,
+              "core"
+            ],
+            [
+              116,
+              139,
+              "deep"
+            ],
+            [
+              139,
+              243,
+              "core"
+            ],
+            [
+              243,
+              248,
+              "deep"
+            ],
+            [
+              248,
+              262,
+              "core"
+            ],
+            [
+              262,
+              290,
+              "rem"
+            ],
+            [
+              290,
+              352,
+              "core"
+            ]
+          ]
+        }
+      },
+      {
+        "date": "2026-11-10",
+        "kcal": 776.0,
+        "steps": 724,
+        "sleepHours": 6.2,
+        "restingHR": 51.0,
+        "weightKg": null,
+        "bodyBattery": 70.0,
+        "sleep": {
+          "start": "2026-11-10T01:51",
+          "end": "2026-11-10T08:06",
+          "deepMin": 119,
+          "coreMin": 184,
+          "remMin": 72,
+          "awakeMin": 0,
+          "segments": [
+            [
+              0,
+              8,
+              "core"
+            ],
+            [
+              8,
+              67,
+              "deep"
+            ],
+            [
+              67,
+              75,
+              "core"
+            ],
+            [
+              75,
+              85,
+              "rem"
+            ],
+            [
+              85,
+              97,
+              "core"
+            ],
+            [
+              97,
+              136,
+              "deep"
+            ],
+            [
+              136,
+              157,
+              "core"
+            ],
+            [
+              157,
+              186,
+              "rem"
+            ],
+            [
+              186,
+              211,
+              "core"
+            ],
+            [
+              211,
+              232,
+              "deep"
+            ],
+            [
+              232,
+              278,
+              "core"
+            ],
+            [
+              278,
+              311,
+              "rem"
+            ],
+            [
+              311,
+              374,
+              "core"
             ]
           ]
         }
@@ -6764,6 +6809,24 @@
       "smmKg": 35.9,
       "bmi": 25.2,
       "whr": 0.9
+    },
+    {
+      "date": "2026-11-09",
+      "weightKg": 81.5,
+      "bfmKg": 18.7,
+      "pbf": 23.0,
+      "smmKg": 36.1,
+      "bmi": 26.2,
+      "whr": 0.91
+    },
+    {
+      "date": "2026-11-10",
+      "weightKg": 81.4,
+      "bfmKg": 18.6,
+      "pbf": 22.9,
+      "smmKg": 36.1,
+      "bmi": 26.1,
+      "whr": 0.92
     }
   ],
   "ok": {
