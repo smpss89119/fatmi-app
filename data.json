@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-09T23:07:09+07:00",
+  "exportedAt": "2026-11-10T07:09:05+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1427,12 +1427,12 @@
       },
       {
         "date": "2026-11-09",
-        "kcal": 1846.0,
-        "steps": 5574,
+        "kcal": 2204.0,
+        "steps": 6142,
         "sleepHours": 5.9,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 31.0,
+        "bodyBattery": 17.0,
         "sleep": {
           "start": "2026-11-09T01:52",
           "end": "2026-11-09T07:44",
@@ -1521,12 +1521,87 @@
       },
       {
         "date": "2026-11-10",
-        "kcal": null,
-        "steps": null,
-        "sleepHours": null,
-        "restingHR": null,
+        "kcal": 709.0,
+        "steps": 530,
+        "sleepHours": 6.2,
+        "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": null
+        "bodyBattery": 70.0,
+        "sleep": {
+          "start": "2026-11-10T01:51",
+          "end": "2026-11-10T08:06",
+          "deepMin": 119,
+          "coreMin": 184,
+          "remMin": 72,
+          "awakeMin": 0,
+          "segments": [
+            [
+              0,
+              8,
+              "core"
+            ],
+            [
+              8,
+              67,
+              "deep"
+            ],
+            [
+              67,
+              75,
+              "core"
+            ],
+            [
+              75,
+              85,
+              "rem"
+            ],
+            [
+              85,
+              97,
+              "core"
+            ],
+            [
+              97,
+              136,
+              "deep"
+            ],
+            [
+              136,
+              157,
+              "core"
+            ],
+            [
+              157,
+              186,
+              "rem"
+            ],
+            [
+              186,
+              211,
+              "core"
+            ],
+            [
+              211,
+              232,
+              "deep"
+            ],
+            [
+              232,
+              278,
+              "core"
+            ],
+            [
+              278,
+              311,
+              "rem"
+            ],
+            [
+              311,
+              374,
+              "core"
+            ]
+          ]
+        }
       }
     ],
     "activities": [
