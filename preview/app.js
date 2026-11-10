@@ -42,6 +42,18 @@ function save(patch) {
   localStorage.setItem(STORE, JSON.stringify(s));
   return s;
 }
+// One-time migrations for stored state (versioned). 1: reset stale trainDays to Tue/Fri.
+const MIG_VERSION = 1;
+function migrateState() {
+  try {
+    const s = load();
+    if (!Object.keys(s).length || (Number(s.migV) || 0) >= MIG_VERSION) return;
+    const patch = { migV: MIG_VERSION };
+    if ((Number(s.migV) || 0) < 1) patch.trainDays = DEFAULT_DAYS.slice();
+    save(patch);
+  } catch (_) {}
+}
+migrateState();
 function debugParams() {
   try {
     const q = new URLSearchParams(location.search);
@@ -950,6 +962,79 @@ ${eatSection}
 ${shopSection}
 
 ${trainSection}`;
+}
+const BACKUP_PREFIX = "FATMI1:";
+function backupKeys() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("fatcat-") && k !== "fatcat-live" && k !== "fatcat-demo") out.push(k);
+  }
+  return out.sort();
+}
+function makeBackup() {
+  const data = {};
+  backupKeys().forEach((k) => { data[k] = localStorage.getItem(k); });
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return BACKUP_PREFIX + btoa(bin);
+}
+function parseBackup(code) {
+  const t = String(code || "").replace(/\s+/g, "");
+  if (!t.startsWith(BACKUP_PREFIX)) return null;
+  try {
+    const bin = atob(t.slice(BACKUP_PREFIX.length));
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const data = JSON.parse(new TextDecoder().decode(bytes));
+    if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+    const keys = Object.keys(data);
+    if (!keys.length) return null;
+    for (const k of keys) {
+      if (!k.startsWith("fatcat-") || k === "fatcat-live" || k === "fatcat-demo" || typeof data[k] !== "string") return null;
+      JSON.parse(data[k]);
+    }
+    return data;
+  } catch (_) {
+    return null;
+  }
+}
+function copyBackup() {
+  const text = makeBackup();
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    try { document.execCommand("copy"); } catch (__) {}
+    ta.remove();
+  };
+  let p;
+  try { p = navigator.clipboard.writeText(text); } catch (_) { p = Promise.reject(); }
+  return Promise.resolve(p).catch(fallback).then(() => showToast("已複製"));
+}
+function applyBackup(code) {
+  const data = parseBackup(code);
+  if (!data) { showToast("備份碼不對，請重新複製"); return false; }
+  if (!window.confirm("會覆蓋這裡的紀錄，確定？")) return false;
+  backupKeys().forEach((k) => localStorage.removeItem(k));
+  Object.keys(data).forEach((k) => {
+    let v = data[k];
+    if (k === STORE || k === "fatcat-v1") {
+      // re-run migrations on restored records
+      try { const o = JSON.parse(v); if (o && typeof o === "object") { delete o.migV; v = JSON.stringify(o); } } catch (_) {}
+    }
+    localStorage.setItem(k, v);
+  });
+  migrateState();
+  ui.restoreDraft = "";
+  showToast("已還原");
+  setTimeout(() => location.reload(), 600);
+  return true;
 }
 async function copyShareText(st) {
   const text = shareCatsText(st);
@@ -2364,6 +2449,13 @@ function renderRules(st) {
         <span><b>隱藏建議原因</b><br><span class="muted">課表只說改快版，不寫睡眠或 Body Battery 的原因。提醒只在打開 App 時顯示一張卡片。</span></span>
       </button>
     </div>
+    <p class="sec">備份／還原</p>
+    <div class="card backup" data-testid="backup-card">
+      <p class="muted">換手機或換 App 時，搬紀錄用。</p>
+      <button type="button" class="btn primary full" data-backup-copy data-testid="backup-copy">複製備份</button>
+      <textarea class="backup-in" data-restore-in data-testid="restore-input" rows="3" placeholder="把備份碼貼在這裡" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(ui.restoreDraft || "")}</textarea>
+      <button type="button" class="btn full" data-backup-restore data-testid="backup-restore">貼上還原</button>
+    </div>
     <p class="sec">目標</p>
     <div class="card">
       <div class="stat"><span>體位參考</span><span>${last.weightKg} kg／體脂 ${last.pbf}%／骨骼肌 ${last.smmKg} kg（${fmtMD(last.date)}）</span></div>
@@ -2664,6 +2756,24 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (muscleId) {
     ui.bodyPart = ui.bodyPart === muscleId ? null : muscleId;
     render();
+    return;
+  }
+  if (e.target.closest("[data-backup-copy]")) {
+    copyBackup();
+    return;
+  }
+  if (e.target.closest("[data-backup-restore]")) {
+    const ta = document.querySelector("[data-restore-in]");
+    const typed = ta ? ta.value.trim() : "";
+    if (typed) { applyBackup(typed); return; }
+    let p;
+    try { p = navigator.clipboard.readText(); } catch (_) { p = Promise.reject(); }
+    Promise.resolve(p).then((t) => {
+      if (t && t.trim().startsWith(BACKUP_PREFIX)) {
+        if (ta) ta.value = t.trim();
+        applyBackup(t);
+      } else showToast("先把備份碼貼到框裡");
+    }).catch(() => showToast("先把備份碼貼到框裡"));
     return;
   }
   if (e.target.closest("[data-share-cats]")) {
@@ -3303,6 +3413,7 @@ document.getElementById("main").addEventListener("click", (e) => {
 
 
 document.getElementById("main").addEventListener("input", (e) => {
+  if (e.target && e.target.matches && e.target.matches("[data-restore-in]")) { ui.restoreDraft = e.target.value; return; }
   if (e.target.matches && e.target.matches("[data-shop-new-name]")) {
     const sc = suggestCat(e.target.value);
     document.querySelectorAll("[data-sug]").forEach((el) => { el.hidden = !(sc === el.dataset.sug && !ui.shopCat); });
@@ -3389,7 +3500,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.07-preview-38";
+const APP_VERSION = "2026.11.10-preview-39";
 const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;

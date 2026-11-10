@@ -1,4 +1,4 @@
-const C = "fatcat-preview-20261107p38";
+const C = "fatcat-preview-20261110p39";
 const F = [
   "./",
   "index.html",
