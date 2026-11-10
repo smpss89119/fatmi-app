@@ -106,7 +106,7 @@ function addDays(d, n) {
 }
 function tabNow() {
   const t = location.hash.slice(1) || "today";
-  return ["today", "shop", "rules", "workout", "body", "sleep"].includes(t) ? t : "today";
+  return ["today", "shop", "rules", "workout", "body", "sleep", "log"].includes(t) ? t : "today";
 }
 function state() {
   const s = load();
@@ -1855,6 +1855,7 @@ function renderHome(st) {
     ${bodyMap(parts.pri, parts.sec, week)}
     <div class="chips">${chips}</div>
     ${gLine}
+    <button type="button" class="btn full" data-go="log" data-testid="go-log">📋 訓練紀錄（練了什麼）</button>
     ${renderSunday(st)}
     <p class="muted">目標：12/31 前減脂 3–4 kg，體脂 15–16%，保肌。還有 ${daysLeft} 天。${LIVE.exportedAt ? `資料更新 ${esc(String(LIVE.exportedAt).replace("T", " ").slice(0, 16))}（曼谷時間）。` : ""}</p>
   `;
@@ -2034,15 +2035,64 @@ function deleteLog(date) {
   showToast("已刪除這筆訓練");
   render();
 }
+function garminWorkoutsOn(date) {
+  return (LIVE.garmin.activities || []).filter((a) => a.date === date && isGarminWorkout(a));
+}
+function logDates(st) {
+  const set = new Set(Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length));
+  for (const a of LIVE.garmin.activities || []) if (a.date && isGarminWorkout(a)) set.add(a.date);
+  return [...set].sort().reverse();
+}
+function garminText(a) {
+  return `${a.durationMin != null ? `${a.durationMin} 分` : ""}${a.avgHR != null ? ` · ❤️ ${Math.round(a.avgHR)}` : ""}${a.kcal != null ? ` · 🔥 ${Math.round(a.kcal)}` : ""}`;
+}
+function logDetail(st, d) {
+  const l = (st.logs || {})[d];
+  const gs = garminWorkoutsOn(d);
+  const g = gs.map((a) => `<p class="muted" data-testid="log-garmin-${d}">⌚ Garmin ${esc(a.name || a.type)}：${garminText(a)}</p>`).join("");
+  const moves = Object.entries((l && l.moves) || {}).filter(([, sets]) => (sets || []).some((x) => x.done));
+  if (!moves.length) {
+    const def = plannedWorkoutFor(st, parseISO(d)) || "homeQ";
+    const opts = ["homeQ", "gymA", "gymB"].filter((id) => WORKOUTS[id]);
+    return `<div class="log-detail" data-testid="log-detail-${d}">${g}
+      <p class="note">這天沒在 App 勾動作。練了哪一套？點一下就算進肌肉 👇</p>
+      <div class="acts">${opts.map((id) => `<button type="button" class="btn${id === def ? " primary" : ""}" data-backfill="${id}" data-date="${d}" data-testid="log-backfill-${id}">${esc(WORKOUTS[id].name)}</button>`).join("")}</div>
+    </div>`;
+  }
+  const rows = moves.map(([name, sets]) => {
+    const done = sets.filter((x) => x.done);
+    const reps = done.map((x) => x.reps).filter((x) => x != null);
+    const kg = done.map((x) => x.weight).filter((x) => x != null);
+    return `<div class="stat"><span>${esc(String(name).replace(/（選做）/g, ""))}</span><span>${done.length} 組${reps.length ? ` × ${reps[reps.length - 1]}` : ""}${kg.length ? ` · ${kg[kg.length - 1]} kg` : ""}</span></div>`;
+  }).join("");
+  const p = todayPartsFromMoves(Object.fromEntries(moves));
+  const nm = (arr) => arr.map((x) => PARTS[x] || x).join("、");
+  p.sec = p.sec.filter((x) => !p.pri.includes(x));
+  return `<div class="log-detail" data-testid="log-detail-${d}">${g}
+    ${l && l.backfill ? `<p class="muted">（依 Garmin 補登）</p>` : ""}
+    ${rows}
+    <p class="note" data-testid="log-muscles-${d}">💪 主要：${esc(nm(p.pri)) || "—"}${p.sec.length ? `<br>輔助：${esc(nm(p.sec))}` : ""}</p>
+    ${bodyMap(p.pri, p.sec)}
+  </div>`;
+}
 function renderLogRows(st) {
-  const dates = Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length).sort().reverse();
+  const dates = logDates(st);
   if (!dates.length) return `<p class="muted">還沒有訓練紀錄。</p>`;
   return dates.map((d) => {
-    const l = st.logs[d];
-    const w = WORKOUTS[l.workoutId];
-    const n = Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0);
-    return `<div class="stat" data-log-row="${d}" data-testid="log-row-${d}"><span>${fmtMD(d)} ${esc(w ? w.name : "訓練")}</span><span>${n} 組</span></div>`;
-  }).join("") + `<p class="muted">長按一筆可刪除</p>`;
+    const l = (st.logs || {})[d];
+    const w = l && WORKOUTS[l.workoutId];
+    const n = l ? Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0) : 0;
+    const gs = garminWorkoutsOn(d);
+    const name = w ? w.name : (gs[0] ? (gs[0].name || "訓練") : "訓練");
+    const right = n ? `${n} 組` : "⚠ 未記動作";
+    const open = ui.logOpen === d;
+    return `<div class="stat" role="button" data-log-open="${d}" data-log-row="${d}" data-testid="log-row-${d}"><span>${open ? "▾" : "▸"} ${fmtMD(d)} ${esc(name)}${gs.length ? " ⌚" : ""}</span><span>${right}</span></div>${open ? logDetail(st, d) : ""}`;
+  }).join("") + `<p class="muted">點一筆看動作和部位；長按可刪除 App 紀錄</p>`;
+}
+function renderLog(st) {
+  return `<button type="button" class="btn" data-go="today">← 回到今天</button>
+    <p class="sec">訓練紀錄</p>
+    <div class="card" data-testid="log-page">${renderLogRows(st)}</div>`;
 }
 const SLEEP_COLORS = { awake: "#FF7F50", rem: "#3BC5F5", core: "#2F80ED", deep: "#5B4BDB" };
 const SLEEP_NAMES = { awake: "清醒", rem: "REM", core: "核心", deep: "深層" };
@@ -2711,10 +2761,9 @@ function finishWithScore(score) {
   render();
 }
 
-function backfillFromGarmin(workoutId) {
+function backfillFromGarmin(workoutId, date = todayKey()) {
   const st = load();
   const w = WORKOUTS[workoutId];
-  const date = todayKey();
   if (!w || ((st.logs || {})[date] || {}).finishedAt) return;
   const moves = {};
   for (const step of w.steps || []) {
@@ -2755,7 +2804,7 @@ function render() {
   document.body.classList.toggle("mode-workout", st.tab === "workout");
   document.body.classList.toggle("mode-sleep", st.tab === "sleep");
   document.documentElement.classList.toggle("mode-sleep", st.tab === "sleep");
-  const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" ? "today" : st.tab;
+  const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" || st.tab === "log" ? "today" : st.tab;
   document.querySelectorAll("#tabs button").forEach((b) => {
     b.classList.toggle("on", b.dataset.tab === tabHi);
   });
@@ -2766,6 +2815,7 @@ function render() {
   else if (st.tab === "rules") main.innerHTML = renderRules(st);
   else if (st.tab === "workout") main.innerHTML = renderWorkout(st);
   else if (st.tab === "body") main.innerHTML = renderBody(st);
+  else if (st.tab === "log") main.innerHTML = renderLog(st);
   else if (st.tab === "sleep") main.innerHTML = renderSleep(st);
   else main.innerHTML = renderHome(st);
   if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
@@ -3142,7 +3192,9 @@ document.getElementById("main").addEventListener("click", (e) => {
     return;
   }
   const bf = e.target.closest("[data-backfill]");
-  if (bf) { backfillFromGarmin(bf.dataset.backfill); return; }
+  if (bf) { backfillFromGarmin(bf.dataset.backfill, bf.dataset.date || todayKey()); if (bf.dataset.date) showToast("已補登"); return; }
+  const lo = e.target.closest("[data-log-open]");
+  if (lo) { ui.logOpen = ui.logOpen === lo.dataset.logOpen ? null : lo.dataset.logOpen; render(); return; }
   if (e.target.closest("[data-start]")) {
     startWorkout();
     return;
@@ -3557,7 +3609,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-21";
+const APP_VERSION = "2026.11.10-22";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
