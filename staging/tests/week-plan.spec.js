@@ -1,4 +1,6 @@
 const { test, expect } = require("@playwright/test");
+const { fixData } = require("./_fixed-data");
+test.beforeEach(async ({ page }) => { await fixData(page); });
 const BASE = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/staging/"}`;
 const at = (iso) => `${BASE}?debug=1&now=${encodeURIComponent(iso)}&sleep=8`;
 const days = [

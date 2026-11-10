@@ -1743,7 +1743,11 @@ function renderHome(st) {
   const session = st.session && st.session.date === todayKey() && st.session.phase !== "done" ? st.session : null;
   const returning = isReturnWeek(st);
 
-  const trainedToday = !!(todayLog && todayLog.finishedAt) && !session;
+  const gToday = (LIVE.garmin.activities || []).find((a) => a.date === todayKey() && isGarminWorkout(a));
+  const trainedToday = (!!(todayLog && todayLog.finishedAt) || !!gToday) && !session;
+  const gDone = gToday && !(todayLog && todayLog.finishedAt)
+    ? `<p data-testid="garmin-done" style="color:rgba(255,255,255,.9);margin:6px 0 0">Garmin · ${esc(gToday.name || "運動")}：${gToday.durationMin != null ? `${gToday.durationMin} 分` : ""}${gToday.avgHR != null ? ` · 心率 ${Math.round(gToday.avgHR)}` : ""}${gToday.kcal != null ? ` · ${Math.round(gToday.kcal)} kcal` : ""}</p>`
+    : "";
   const pickRow = ui.wantTrain
     ? `<div class="rest-picks" data-testid="rest-picks">
         <button type="button" class="btn${plan.scheduled === "gymA" ? " primary" : ""}" data-rest-train="gymA" data-testid="rest-train-gymA">健身房 A</button>
@@ -1755,6 +1759,7 @@ function renderHome(st) {
   if (trainedToday && !(ui.wantTrain === "picked")) {
     trainCard = `<section class="card hero" data-testid="train-card">
       <div class="big" data-testid="trained-today" data-log-row="${todayKey()}">今天已練 ✓</div>
+      ${gDone}
       <div class="acts">${pickRow}</div>
     </section>`;
   } else if (!plan.train) {
@@ -3527,7 +3532,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-19";
+const APP_VERSION = "2026.11.10-20";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;

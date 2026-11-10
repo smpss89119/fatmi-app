@@ -18,7 +18,9 @@ test.beforeAll(() => {
   oldDir = path.join(oldDir, "preview");
   newRoot = path.join(tmp, "new");
   execSync(`DEST=${newRoot} ${REPO}/promote.sh`, { stdio: "ignore" });
-  for (const d of [newRoot, path.join(newRoot, "preview")]) fs.copyFileSync(path.join(REPO, "data.json"), path.join(d, "data.json"));
+  const { strip } = require("./_fixed-data");
+  const fixed = JSON.stringify(strip(JSON.parse(fs.readFileSync(path.join(REPO, "data.json"), "utf8"))));
+  for (const d of [newRoot, path.join(newRoot, "preview"), oldDir]) fs.writeFileSync(path.join(d, "data.json"), fixed);
 });
 
 const TYPES = { ".js": "text/javascript", ".css": "text/css", ".html": "text/html", ".json": "application/json", ".png": "image/png", ".webmanifest": "application/manifest+json" };
