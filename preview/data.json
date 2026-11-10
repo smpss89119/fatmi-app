@@ -1,17 +1,8 @@
 {
-  "exportedAt": "2026-11-10T22:47:54+07:00",
+  "exportedAt": "2026-11-10T23:07:14+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-12",
-        "kcal": 2448.0,
-        "steps": 6688,
-        "sleepHours": 6.0,
-        "restingHR": 50.0,
-        "weightKg": null,
-        "bodyBattery": 23.0
-      },
       {
         "date": "2026-10-13",
         "kcal": 2699.0,
@@ -154,122 +145,7 @@
         "sleepHours": 5.4,
         "restingHR": 49.0,
         "weightKg": null,
-        "bodyBattery": 14.0,
-        "sleep": {
-          "start": "2026-10-28T02:29",
-          "end": "2026-10-28T08:00",
-          "deepMin": 48,
-          "coreMin": 206,
-          "remMin": 69,
-          "awakeMin": 8,
-          "segments": [
-            [
-              0,
-              10,
-              "core"
-            ],
-            [
-              10,
-              21,
-              "deep"
-            ],
-            [
-              21,
-              22,
-              "awake"
-            ],
-            [
-              22,
-              61,
-              "core"
-            ],
-            [
-              61,
-              77,
-              "rem"
-            ],
-            [
-              77,
-              91,
-              "core"
-            ],
-            [
-              91,
-              96,
-              "deep"
-            ],
-            [
-              96,
-              101,
-              "awake"
-            ],
-            [
-              101,
-              106,
-              "core"
-            ],
-            [
-              106,
-              119,
-              "deep"
-            ],
-            [
-              119,
-              147,
-              "core"
-            ],
-            [
-              147,
-              148,
-              "awake"
-            ],
-            [
-              148,
-              155,
-              "core"
-            ],
-            [
-              155,
-              176,
-              "rem"
-            ],
-            [
-              176,
-              201,
-              "core"
-            ],
-            [
-              201,
-              220,
-              "deep"
-            ],
-            [
-              220,
-              254,
-              "core"
-            ],
-            [
-              254,
-              274,
-              "rem"
-            ],
-            [
-              274,
-              275,
-              "awake"
-            ],
-            [
-              275,
-              319,
-              "core"
-            ],
-            [
-              319,
-              331,
-              "rem"
-            ]
-          ]
-        }
+        "bodyBattery": 14.0
       },
       {
         "date": "2026-10-29",
@@ -1602,18 +1478,18 @@
             ]
           ]
         }
+      },
+      {
+        "date": "2026-11-11",
+        "kcal": null,
+        "steps": null,
+        "sleepHours": null,
+        "restingHR": null,
+        "weightKg": null,
+        "bodyBattery": null
       }
     ],
     "activities": [
-      {
-        "type": "running",
-        "date": "2026-10-11",
-        "startTime": "2026-10-11 20:25:51",
-        "durationMin": 35.0,
-        "avgHR": 123.0,
-        "kcal": 425.0,
-        "name": "香山區 跑步"
-      },
       {
         "type": "strength_training",
         "date": "2026-10-12",
