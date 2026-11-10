@@ -858,7 +858,8 @@ function mealLineText(st, id) {
   if (m && m.eaten) {
     return `${mark} ${est.name || est.suggestName}（約 ${Math.round(est.kcal || 0)} kcal／蛋白 ${Math.round(est.protein || 0)} g）`;
   }
-  return `${mark} 還沒吃（建議：${est.suggestName || est.name}）`;
+  const sug = est.suggestName || est.name;
+  return sug ? `${mark} 還沒吃（建議：${sug}）` : `${mark} 還沒吃`;
 }
 function formatSetLine(sets) {
   const done = (sets || []).filter((x) => x.done);
@@ -965,20 +966,18 @@ ${trainSection}`;
 }
 const BACKUP_PREFIX = "FATMI1:";
 function backupKeys() {
-  const out = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith("fatcat-") && k !== "fatcat-live" && k !== "fatcat-demo") out.push(k);
-  }
-  return out.sort();
+  return [STORE, "fatcat-v1"].filter((k, i, a) => a.indexOf(k) === i && localStorage.getItem(k) != null);
+}
+function b64encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
 }
 function makeBackup() {
   const data = {};
-  backupKeys().forEach((k) => { data[k] = localStorage.getItem(k); });
-  const bytes = new TextEncoder().encode(JSON.stringify(data));
-  let bin = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return BACKUP_PREFIX + btoa(bin);
+  backupKeys().forEach((k) => { data[k === STORE ? "fatcat-v2" : k] = localStorage.getItem(k); });
+  return BACKUP_PREFIX + b64encode(JSON.stringify(data));
 }
 function parseBackup(code) {
   const t = String(code || "").replace(/\s+/g, "");
@@ -989,10 +988,11 @@ function parseBackup(code) {
     const data = JSON.parse(new TextDecoder().decode(bytes));
     if (!data || typeof data !== "object" || Array.isArray(data)) return null;
     const keys = Object.keys(data);
-    if (!keys.length) return null;
+    if (!keys.length || !keys.every((k) => k === "fatcat-v2" || k === "fatcat-v1")) return null;
     for (const k of keys) {
-      if (!k.startsWith("fatcat-") || k === "fatcat-live" || k === "fatcat-demo" || typeof data[k] !== "string") return null;
-      JSON.parse(data[k]);
+      if (typeof data[k] !== "string") return null;
+      const o = JSON.parse(data[k]);
+      if (!o || typeof o !== "object" || Array.isArray(o)) return null;
     }
     return data;
   } catch (_) {
@@ -1022,9 +1022,10 @@ function applyBackup(code) {
   if (!data) { showToast("備份碼不對，請重新複製"); return false; }
   if (!window.confirm("會覆蓋這裡的紀錄，確定？")) return false;
   backupKeys().forEach((k) => localStorage.removeItem(k));
-  Object.keys(data).forEach((k) => {
-    let v = data[k];
-    if (k === STORE || k === "fatcat-v1") {
+  Object.keys(data).forEach((key) => {
+    let v = data[key];
+    const k = key === "fatcat-v2" ? STORE : key;
+    {
       // re-run migrations on restored records
       try { const o = JSON.parse(v); if (o && typeof o === "object") { delete o.migV; v = JSON.stringify(o); } } catch (_) {}
     }
@@ -2449,13 +2450,6 @@ function renderRules(st) {
         <span><b>隱藏建議原因</b><br><span class="muted">課表只說改快版，不寫睡眠或 Body Battery 的原因。提醒只在打開 App 時顯示一張卡片。</span></span>
       </button>
     </div>
-    <p class="sec">備份／還原</p>
-    <div class="card backup" data-testid="backup-card">
-      <p class="muted">換手機或換 App 時，搬紀錄用。</p>
-      <button type="button" class="btn primary full" data-backup-copy data-testid="backup-copy">複製備份</button>
-      <textarea class="backup-in" data-restore-in data-testid="restore-input" rows="3" placeholder="把備份碼貼在這裡" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(ui.restoreDraft || "")}</textarea>
-      <button type="button" class="btn full" data-backup-restore data-testid="backup-restore">貼上還原</button>
-    </div>
     <p class="sec">目標</p>
     <div class="card">
       <div class="stat"><span>體位參考</span><span>${last.weightKg} kg／體脂 ${last.pbf}%／骨骼肌 ${last.smmKg} kg（${fmtMD(last.date)}）</span></div>
@@ -2484,6 +2478,13 @@ function renderRules(st) {
     </ul>
     <p class="sec">家常輪替（15–20 分）</p>
     ${COOKS.map((c) => `<div class="card"><h3>${esc(c.name)}</h3><p class="muted">${esc(c.time)}</p><p>${esc(c.steps)}</p></div>`).join("")}
+    <details class="card backup" data-testid="backup-card"${ui.backupOpen || ui.restoreDraft ? " open" : ""}>
+      <summary data-backup-toggle>備份／還原</summary>
+      <p class="muted">換手機時搬紀錄用。</p>
+      <button type="button" class="btn primary full" data-backup-copy data-testid="backup-copy">複製備份</button>
+      <textarea class="backup-in" data-restore-in data-testid="restore-input" rows="3" placeholder="把備份碼貼在這裡" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(ui.restoreDraft || "")}</textarea>
+      <button type="button" class="btn full" data-backup-restore data-testid="backup-restore">貼上還原</button>
+    </details>
     <p class="muted">這是個人備忘小工具，不是醫療建議。下背痛持續請找物理治療或醫師。</p>`;
 }
 
@@ -2758,6 +2759,8 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const bt = e.target.closest("[data-backup-toggle]");
+  if (bt) { ui.backupOpen = !bt.parentElement.open; return; }
   if (e.target.closest("[data-backup-copy]")) {
     copyBackup();
     return;
@@ -3500,8 +3503,9 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-preview-39";
-const CACHE_PREFIX = /\/preview\//.test(location.pathname) ? "fatcat-preview-" : "fatcat-2-";
+const APP_VERSION = "2026.11.10-15";
+const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
+const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
 let reloading = false;
 
@@ -3711,6 +3715,7 @@ function migrateGrocery() {
 }
 async function boot() {
   if (DEMO) { const h = document.querySelector(".ttl"); if (h) h.parentElement.insertAdjacentHTML("afterend", `<span class="demo-tag" data-testid="demo-tag">示範舊資料（不影響你的資料）</span>`); }
+  if (SITE === "staging") { const h = document.querySelector(".ttl"); if (h) h.insertAdjacentHTML("beforeend", ` <span class="stg-tag" data-testid="staging-tag">測試</span>`); }
   migrateGrocery();
   try {
     const v = await fetch("./version.json", { cache: "no-store" });

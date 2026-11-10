@@ -1,4 +1,7 @@
-const C = "fatcat-2-20261107n";
+// Same file is published to /staging/, /preview/ and root; cache prefix follows the path so they never share caches.
+const STAMP = "20261110r15";
+const P = /\/staging\//.test(self.location.pathname) ? "fatcat-staging-" : /\/preview\//.test(self.location.pathname) ? "fatcat-preview-" : "fatcat-2-";
+const C = P + STAMP;
 const F = [
   "./",
   "index.html",
@@ -16,7 +19,7 @@ self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(C).then((c) => c.addAll(F)).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
-  const mine = /preview/.test(C) ? "fatcat-preview-" : "fatcat-2-";
+  const mine = P;
   let upgraded = false;
   e.waitUntil(
     caches.keys().then((k) => {
