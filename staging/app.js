@@ -533,6 +533,10 @@ function currentMeal(st, id, d = now()) {
   return { ...suggestionOf(st, id, d), eaten: false };
 }
 function chatMealsOn(date) {
+  const qs = new URLSearchParams(location.search);
+  if (qs.get("debug") === "1" && qs.get("demoMeal") === "1" && date === todayKey()) {
+    return [{ id: "demo", time: "12:30", name: "測試：雞腿便當（去皮）", kcal: 650, protein: 38 }];
+  }
   return ((LIVE.chatMeals || {})[date] || []).filter((c) => c && c.name);
 }
 function renderChatMeals(date) {
@@ -3635,7 +3639,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.12-1";
+const APP_VERSION = "2026.11.12-2";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
