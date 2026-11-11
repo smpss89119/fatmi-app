@@ -532,6 +532,18 @@ function currentMeal(st, id, d = now()) {
   if (logs[id]) return logs[id];
   return { ...suggestionOf(st, id, d), eaten: false };
 }
+function chatMealsOn(date) {
+  const qs = new URLSearchParams(location.search);
+  if (qs.get("debug") === "1" && qs.get("demoMeal") === "1" && date === todayKey()) {
+    return [{ id: "demo", time: "12:30", name: "測試：雞腿便當（去皮）", kcal: 650, protein: 38 }];
+  }
+  return ((LIVE.chatMeals || {})[date] || []).filter((c) => c && c.name);
+}
+function renderChatMeals(date) {
+  const list = chatMealsOn(date);
+  if (!list.length) return "";
+  return `<div class="chat-meals" data-testid="chat-meals">${list.map((c) => `<div class="stat" data-testid="chat-meal-${esc(c.id)}"><span>📸 ${esc(c.time || "")} ${esc(c.name)}</span><span>${Math.round(c.kcal)} · 蛋白 ${Math.round(c.protein)}g</span></div>`).join("")}<p class="muted">📸 群組照片，營養喵估的</p></div>`;
+}
 function mealTotals(st, d = now()) {
   let kcal = 0;
   let protein = 0;
@@ -543,6 +555,10 @@ function mealTotals(st, d = now()) {
       kcal += Number(v.kcal) || 0;
       protein += Number(v.protein) || 0;
     }
+  }
+  for (const c of chatMealsOn(todayKey(d))) {
+    kcal += Number(c.kcal) || 0;
+    protein += Number(c.protein) || 0;
   }
   return { kcal, protein };
 }
@@ -1807,7 +1823,7 @@ function renderHome(st) {
 
   const trainDay = isTrainDay(st);
   const mealIds = mealIdsFor(st);
-  const meals = mealIds.map((id) => renderMealRow(st, id, trainDay)).join("") +
+  const meals = renderChatMeals(todayKey()) + mealIds.map((id) => renderMealRow(st, id, trainDay)).join("") +
     `<button type="button" class="btn full add-meal" data-add-meal data-testid="add-meal">＋ 加一餐</button>`;
 
   const chips = MAIN_PARTS.map((p) => {
@@ -3623,7 +3639,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-23";
+const APP_VERSION = "2026.11.12-2";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
