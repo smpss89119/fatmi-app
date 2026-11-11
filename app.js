@@ -2069,7 +2069,7 @@ function logDetail(st, d) {
   const nm = (arr) => arr.map((x) => PARTS[x] || x).join("、");
   p.sec = p.sec.filter((x) => !p.pri.includes(x));
   return `<div class="log-detail" data-testid="log-detail-${d}">${g}
-    ${l && l.backfill ? `<p class="muted">（依 Garmin 補登）</p>` : ""}
+    ${l && l.backfill ? `<p class="muted">（依 Garmin 補登）做了幾輪？</p><div class="acts">${[1, 2, 3, 4].map((n) => `<button type="button" class="btn${moves.every(([, x]) => x.filter((y) => y.done).length === n) ? " primary" : ""}" data-set-rounds="${n}" data-date="${d}" data-testid="log-rounds-${n}">${n} 輪</button>`).join("")}</div>` : ""}
     ${rows}
     <p class="note" data-testid="log-muscles-${d}">💪 主要：${esc(nm(p.pri)) || "—"}${p.sec.length ? `<br>輔助：${esc(nm(p.sec))}` : ""}</p>
     ${bodyMap(p.pri, p.sec)}
@@ -2778,6 +2778,18 @@ function backfillFromGarmin(workoutId, date = todayKey()) {
   render();
 }
 
+function setBackfillRounds(date, n) {
+  const st = load();
+  const l = (st.logs || {})[date];
+  if (!l || !l.backfill || !(n >= 1)) return;
+  const moves = {};
+  for (const [name, sets] of Object.entries(l.moves || {})) {
+    const proto = (sets || [])[0] || { done: true };
+    moves[name] = Array.from({ length: n }, () => ({ ...proto, done: true }));
+  }
+  save({ logs: { ...st.logs, [date]: { ...l, moves } } });
+  render();
+}
 function woNav(dir) {
   const st = state();
   if (!st.session || !["set", "short"].includes(st.session.phase)) return;
@@ -3193,6 +3205,8 @@ document.getElementById("main").addEventListener("click", (e) => {
   }
   const bf = e.target.closest("[data-backfill]");
   if (bf) { backfillFromGarmin(bf.dataset.backfill, bf.dataset.date || todayKey()); if (bf.dataset.date) showToast("已補登"); return; }
+  const srBtn = e.target.closest("[data-set-rounds]");
+  if (srBtn) { setBackfillRounds(srBtn.dataset.date, Number(srBtn.dataset.setRounds)); return; }
   const lo = e.target.closest("[data-log-open]");
   if (lo) { ui.logOpen = ui.logOpen === lo.dataset.logOpen ? null : lo.dataset.logOpen; render(); return; }
   if (e.target.closest("[data-start]")) {
@@ -3609,7 +3623,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.10-22";
+const APP_VERSION = "2026.11.10-23";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
