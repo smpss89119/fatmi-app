@@ -1,17 +1,8 @@
 {
-  "exportedAt": "2026-11-12T22:03:08+07:00",
+  "exportedAt": "2026-11-12T23:01:19+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-14",
-        "kcal": 2237.0,
-        "steps": 5509,
-        "sleepHours": 6.3,
-        "restingHR": 50.0,
-        "weightKg": null,
-        "bodyBattery": 14.0
-      },
       {
         "date": "2026-10-15",
         "kcal": 2591.0,
@@ -154,97 +145,7 @@
         "sleepHours": 6.7,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 17.0,
-        "sleep": {
-          "start": "2026-10-30T00:52",
-          "end": "2026-10-30T07:34",
-          "deepMin": 94,
-          "coreMin": 219,
-          "remMin": 88,
-          "awakeMin": 1,
-          "segments": [
-            [
-              0,
-              4,
-              "core"
-            ],
-            [
-              4,
-              54,
-              "deep"
-            ],
-            [
-              54,
-              77,
-              "core"
-            ],
-            [
-              77,
-              108,
-              "deep"
-            ],
-            [
-              108,
-              114,
-              "core"
-            ],
-            [
-              114,
-              115,
-              "awake"
-            ],
-            [
-              115,
-              125,
-              "core"
-            ],
-            [
-              125,
-              138,
-              "deep"
-            ],
-            [
-              138,
-              148,
-              "core"
-            ],
-            [
-              148,
-              172,
-              "rem"
-            ],
-            [
-              172,
-              255,
-              "core"
-            ],
-            [
-              255,
-              277,
-              "rem"
-            ],
-            [
-              277,
-              349,
-              "core"
-            ],
-            [
-              349,
-              381,
-              "rem"
-            ],
-            [
-              381,
-              392,
-              "core"
-            ],
-            [
-              392,
-              401,
-              "rem"
-            ]
-          ]
-        }
+        "bodyBattery": 17.0
       },
       {
         "date": "2026-10-31",
@@ -1557,18 +1458,18 @@
             ]
           ]
         }
+      },
+      {
+        "date": "2026-11-13",
+        "kcal": null,
+        "steps": null,
+        "sleepHours": null,
+        "restingHR": null,
+        "weightKg": null,
+        "bodyBattery": null
       }
     ],
     "activities": [
-      {
-        "type": "multi_sport",
-        "date": "2026-10-13",
-        "startTime": "2026-10-13 20:31:12",
-        "durationMin": 47.3,
-        "avgHR": null,
-        "kcal": 474.0,
-        "name": "複合式運動"
-      },
       {
         "type": "strength_training",
         "date": "2026-10-15",
