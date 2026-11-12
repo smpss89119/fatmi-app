@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-12T07:01:02+07:00",
+  "exportedAt": "2026-11-12T08:04:48+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1476,12 +1476,87 @@
       },
       {
         "date": "2026-11-12",
-        "kcal": 275.0,
-        "steps": 109,
-        "sleepHours": null,
-        "restingHR": 55.0,
+        "kcal": 764.0,
+        "steps": 304,
+        "sleepHours": 6.2,
+        "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": 15.0
+        "bodyBattery": 63.0,
+        "sleep": {
+          "start": "2026-11-12T01:56",
+          "end": "2026-11-12T08:12",
+          "deepMin": 59,
+          "coreMin": 239,
+          "remMin": 73,
+          "awakeMin": 5,
+          "segments": [
+            [
+              0,
+              15,
+              "core"
+            ],
+            [
+              15,
+              74,
+              "deep"
+            ],
+            [
+              74,
+              83,
+              "core"
+            ],
+            [
+              83,
+              110,
+              "rem"
+            ],
+            [
+              110,
+              131,
+              "core"
+            ],
+            [
+              131,
+              135,
+              "awake"
+            ],
+            [
+              135,
+              206,
+              "core"
+            ],
+            [
+              206,
+              230,
+              "rem"
+            ],
+            [
+              230,
+              308,
+              "core"
+            ],
+            [
+              308,
+              330,
+              "rem"
+            ],
+            [
+              330,
+              364,
+              "core"
+            ],
+            [
+              364,
+              365,
+              "awake"
+            ],
+            [
+              365,
+              375,
+              "core"
+            ]
+          ]
+        }
       }
     ],
     "activities": [
@@ -6698,6 +6773,15 @@
       "smmKg": 36.1,
       "bmi": 26.1,
       "whr": 0.92
+    },
+    {
+      "date": "2026-11-12",
+      "weightKg": 81.2,
+      "bfmKg": 17.8,
+      "pbf": 21.9,
+      "smmKg": 36.5,
+      "bmi": 26.1,
+      "whr": 0.93
     }
   ],
   "ok": {
