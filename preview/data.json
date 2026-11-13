@@ -1,17 +1,8 @@
 {
-  "exportedAt": "2026-11-13T22:01:09+07:00",
+  "exportedAt": "2026-11-13T23:00:26+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-15",
-        "kcal": 2591.0,
-        "steps": 8823,
-        "sleepHours": 7.3,
-        "restingHR": 51.0,
-        "weightKg": null,
-        "bodyBattery": 8.0
-      },
       {
         "date": "2026-10-16",
         "kcal": 2298.0,
@@ -154,97 +145,7 @@
         "sleepHours": 4.2,
         "restingHR": 48.0,
         "weightKg": null,
-        "bodyBattery": 5.0,
-        "sleep": {
-          "start": "2026-10-31T01:09",
-          "end": "2026-10-31T05:26",
-          "deepMin": 92,
-          "coreMin": 133,
-          "remMin": 26,
-          "awakeMin": 6,
-          "segments": [
-            [
-              0,
-              3,
-              "core"
-            ],
-            [
-              3,
-              27,
-              "deep"
-            ],
-            [
-              27,
-              33,
-              "awake"
-            ],
-            [
-              33,
-              45,
-              "core"
-            ],
-            [
-              45,
-              62,
-              "deep"
-            ],
-            [
-              62,
-              63,
-              "core"
-            ],
-            [
-              63,
-              81,
-              "rem"
-            ],
-            [
-              81,
-              97,
-              "core"
-            ],
-            [
-              97,
-              121,
-              "deep"
-            ],
-            [
-              121,
-              168,
-              "core"
-            ],
-            [
-              168,
-              176,
-              "rem"
-            ],
-            [
-              176,
-              195,
-              "core"
-            ],
-            [
-              195,
-              211,
-              "deep"
-            ],
-            [
-              211,
-              225,
-              "core"
-            ],
-            [
-              225,
-              236,
-              "deep"
-            ],
-            [
-              236,
-              257,
-              "core"
-            ]
-          ]
-        }
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-01",
@@ -1552,6 +1453,15 @@
             ]
           ]
         }
+      },
+      {
+        "date": "2026-11-14",
+        "kcal": null,
+        "steps": null,
+        "sleepHours": null,
+        "restingHR": null,
+        "weightKg": null,
+        "bodyBattery": null
       }
     ],
     "activities": [
