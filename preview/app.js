@@ -223,6 +223,14 @@ function isGymDay(st, d = now()) {
   const id = plannedWorkoutFor(st, d);
   return !!id && String(id).startsWith("gym");
 }
+// Food follows today's ACTUAL plan (Nutri): a gym day switched to the quick / non-gym version eats like a
+// non-gym day (target 1950, rest-day portions for meals not yet eaten). Eaten meals are stored snapshots in
+// mealLogs, so they stay exactly as logged — no deduction, no negative adjustment.
+function gymFuelDay(st, d = now()) {
+  if (!isGymDay(st, d)) return false;
+  const plan = todayPlan(st, d);
+  return !(plan && plan.train && plan.id && !String(plan.id).startsWith("gym"));
+}
 function isGarminWorkout(a) {
   if (!a) return false;
   return /strength|multi_sport|training|fitness_equipment/i.test(a.type || "")
@@ -287,6 +295,15 @@ function shouldQuick(d = now()) {
     else reasons.push("還沒有昨晚的睡眠資料，先照課表");
   }
   return { quick, reasons, sleep, rhr, avg, bb };
+}
+// Why today is the short version, always visible under the title (e.g. 「改快版：昨晚睡 5 小時，未滿 6 小時」).
+function quickWhy(plan) {
+  if (!plan || plan.id !== "quick" || !plan.chk || !plan.chk.quick) return "";
+  const c = plan.chk, why = [];
+  if (c.sleep != null && c.sleep < 6) why.push(`昨晚睡 ${Math.round(c.sleep * 10) / 10} 小時，未滿 6 小時`);
+  if (c.rhr != null && c.avg != null && c.rhr >= c.avg + 5) why.push(`靜止心率 ${Math.round(c.rhr)}，比 7 日平均高 ${Math.round(c.rhr - c.avg)} 下`);
+  if (c.bb != null && !Number.isNaN(c.bb) && c.bb < 30) why.push(`Body Battery ${Math.round(c.bb)}，低於 30`);
+  return why.length ? `改快版：${why.join("；")}` : "";
 }
 function markedFasted(st, d = now()) {
   return !!(st.fasted || {})[todayKey(d)];
@@ -379,7 +396,7 @@ function twoScoopMeal(st, d = now()) {
 }
 function dinnerFor(st, d = now()) {
   const shake = twoScoopMeal(st, d);
-  const grams = (shake.hasPlant && !isGymDay(st, d)) ? 150 : 200;
+  const grams = (shake.hasPlant && !gymFuelDay(st, d)) ? 150 : 200;
   const chickenId = grams === 150 ? "chicken150" : "chicken200";
   const meal = composeSwapMeal(chickenId, "rice150");
   meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
@@ -406,6 +423,11 @@ function mealIdsFor(st, d = now()) {
   return ids.sort((x, y) => String(mealTime(st, x, d)).localeCompare(String(mealTime(st, y, d))));
 }
 function isExtraMeal(id) { return /^m-/.test(String(id)); }
+// Always 24h ("16:00", never "04:00 PM"): the native time input is invisible on top of this text.
+function time24(t) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(t || ""));
+  return m ? `${String(Number(m[1])).padStart(2, "0")}:${m[2]}` : String(t || "");
+}
 function mealLabel(id, trainDay, st) {
   const t = st ? mealTime(st, id) : DEFAULT_MEAL_TIMES[id];
   if (t) return t;
@@ -526,7 +548,8 @@ function computeKcalAdjust(st, d = now()) {
   return { adj: 0, note: null };
 }
 function kcalInfo(st, d = now()) {
-  const trainLike = isGymDay(st, d);
+  const trainLike = gymFuelDay(st, d);
+  const quickToday = isGymDay(st, d) && !trainLike;
   const y = dailyOn(todayKey(addDays(d, -1)));
   const adj = computeKcalAdjust(st, d);
   let target = trainLike ? 2150 : 1950;
@@ -535,7 +558,7 @@ function kcalInfo(st, d = now()) {
   const label = String(target);
   return {
     target,
-    source: trainLike ? `健身房日 ${target}` : (isActiveTrainDay(st, d) ? `在家練日 ${target}` : `休息日 ${target}`),
+    source: trainLike ? `健身房日 ${target}` : quickToday ? `改快版 ${target}` : (isActiveTrainDay(st, d) ? `在家練日 ${target}` : `休息日 ${target}`),
     adj,
     trainLike,
     band: label,
@@ -633,7 +656,7 @@ function suggestionOf(st, id, d = now()) {
   if (id === "snack") return { ...twoScoopMeal(st, d), eaten: false };
   if (id === "dinner") return { ...dinnerFor(st, d), eaten: false };
   if (id === "eggs21") {
-    if (isGymDay(st, d)) {
+    if (gymFuelDay(st, d)) {
       // Nutri: 健身房日 21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g
       return { name: "21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g", kcal: 435, protein: 48, id: "gymNight", eaten: false };
     }
@@ -642,7 +665,7 @@ function suggestionOf(st, id, d = now()) {
   }
   const def = MEAL_DEFS[id];
   if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
-  return { ...mealOf(def, isGymDay(st, d)), id: "default", eaten: false };
+  return { ...mealOf(def, gymFuelDay(st, d)), id: "default", eaten: false };
 }
 function hasCustomPortions(m) {
   if (!m) return false;
@@ -837,9 +860,20 @@ function shopSetCountPatch(st, it, n, base = {}) {
 }
 function round05(x) { return Math.round(x * 2) / 2; }
 // returns true when merged (or user cancelled handled); shows confirm/alert per rules
+function keepTypedPortion(id) {
+  const el = document.querySelector("[data-edit-portion]");
+  const v = el ? String(el.value || "").trim() : "";
+  if (!v || !id) return;
+  const st = state();
+  save({ shopPortions: { ...(st.shopPortions || {}), [id]: v } });
+}
 function shopTryMerge(st, src, dst, srcN) {
   const gS = shopBasisG(st, src), gT = shopBasisG(st, dst);
-  if (typeof gS !== "number" || typeof gT !== "number") { window.alert("請先設定「一份是多少」再合併"); return false; }
+  if (typeof gS !== "number" || typeof gT !== "number") {
+    const miss = [typeof gS !== "number" ? shopLabel(st, src) : null, typeof gT !== "number" ? shopLabel(st, dst) : null].filter(Boolean);
+    window.alert(`請先設定「${[...new Set(miss)].join("」和「")}」的「一份是多少」（例如 150 g），才能合併`);
+    return false;
+  }
   const left = srcN != null ? srcN : shopLeft(st, src).n;
   const grams = left * gS + shopLeft(st, dst).n * gT;
   const total = grams / gT;
@@ -1455,11 +1489,11 @@ function ringEl(value, max, top, sub, ok) {
   const color = ok ? "#166534" : "#C2410C";
   return `<div class="ring${ok ? " ok" : ""}" role="img" aria-label="${esc(top)} ${esc(sub)}" data-ok="${ok ? "1" : "0"}">
     <svg viewBox="0 0 122 122">
-      <circle cx="61" cy="61" r="${r}" fill="none" stroke="#F4E6D0" stroke-width="10"/>
+      <circle cx="61" cy="61" r="${r}" fill="none" class="ring-track" stroke="#F4E6D0" stroke-width="10"/>
       <circle cx="61" cy="61" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
         stroke-dasharray="${dash.toFixed(1)} ${c.toFixed(1)}"/>
     </svg>
-    <div class="n"><b>${Math.round(value)}</b><span>${esc(top)}</span><span>${esc(sub)}</span></div>
+    <div class="n"><b>${Math.round(value)}</b><span>${esc(top)}</span><span>${esc(sub)}</span><em class="st" data-testid="ring-status">${ok ? "✓ 正常" : max && value > max ? "偏高" : "偏低"}</em></div>
   </div>`;
 }
 
@@ -1833,7 +1867,7 @@ function renderMealRow(st, id, trainDay) {
       ${hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : ""}
     </div>` : (hasCustomPortions(logged) && est.name ? `<p class="now-pick">${esc(est.name)}</p>` : "");
   return `<div class="meal-row${eaten ? " eaten" : ""}" data-testid="meal-${id}"${id === "snack" ? ' data-top="powder"' : ""}>
-    <div class="who"><input type="time" class="meal-time" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="時間"> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
+    <div class="who"><label class="meal-time" data-testid="meal-time-label-${id}"><span class="mt-24" aria-hidden="true">${esc(time24(mealLabel(id, trainDay, st)))}</span><input type="time" class="mt-in" data-meal-time="${id}" data-testid="meal-time-${id}" value="${esc(mealLabel(id, trainDay, st))}" aria-label="用餐時間 ${esc(time24(mealLabel(id, trainDay, st)))}"></label> <span class="nums">${Math.round(est.kcal || 0)} · 蛋白 ${Math.round(est.protein || 0)}g</span>${isExtraMeal(id) ? `<button type="button" class="ic meal-del" data-meal-del="${id}" data-testid="meal-del-${id}" aria-label="刪除這餐">✕</button>` : ""}</div>
     ${suggestLine ? `<p class="suggest">建議：${esc(suggestLine)}</p>` : ""}${elsePick}
     ${id === "snack" ? (snackIsPowder(logged) ? `${scoopPicker(st, 0)}${scoopPicker(st, 1)}${wheyNutriLine(st)}` : `<p class="muted" data-testid="snack-nonpowder">已記：${esc(est.name || "")}（非蛋白粉，取消「吃了」後可再選口味）</p>`) : ""}
     ${mealCustomized(logged) ? `<div class="restore-row"><button type="button" class="btn restore-btn" data-meal-restore="${id}" data-testid="meal-restore-${id}"${eaten ? " disabled" : ""}>↺ 恢復原菜單</button>${eaten ? `<small class="muted" data-testid="meal-restore-hint-${id}">先取消「吃了」</small>` : ""}</div>` : ""}
@@ -1921,6 +1955,7 @@ function renderHome(st) {
     trainCard = `<section class="card hero" data-testid="train-card">
       <div class="k">${t.getMonth() + 1}/${t.getDate()} 週${DOW[t.getDay()]}${returning ? ' · <span data-testid="buffer-week">緩衝週</span>' : ""}</div>
       <div class="big">${esc(w.name)} · ${esc(w.time)}${reasonBtn}</div>
+      ${quickWhy(plan) ? `<p class="why" data-testid="quick-reason">${esc(quickWhy(plan))}</p>` : ""}
       ${(!st.hideSuggestReasons && ui.showReason && plan.reason) ? `<p class="reason" data-testid="reason">${esc(plan.reason)}</p>` : ""}
       <div class="acts">${primary}</div>
       <div class="acts">${fastedBtn}${ov}</div>
@@ -1935,11 +1970,11 @@ function renderHome(st) {
 
   const chips = MAIN_PARTS.map((p) => {
     const n = week[p] || 0;
-    return `<span class="chip${n < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${n} 組</span>`;
+    return `<span class="chip${n < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${n} 組${n < 6 ? `<small class="st"> · 偏低</small>` : ""}</span>`;
   }).join("");
 
   const wc = weekCardio(t);
-  const cardioLine = wc.n ? `<p class="week-cardio" data-testid="week-cardio">🫀 本週有氧 <b>${wc.min}</b> 分 · Z2 以上 <b>${wc.z2up}</b> 分 · 燃脂 Z2 <b>${wc.z2}</b> 分</p>` : "";
+  const cardioLine = wc.n ? `<p class="week-cardio" data-testid="week-cardio">🫀 本週有氧 <b>${wc.min}</b> 分鐘，其中燃脂區（Z2）<b>${wc.z2}</b> 分鐘、偏喘（Z4 以上）<b>${wc.z4up}</b> 分鐘</p>` : "";
   const gAttach = todayLog && (todayLog.garmin || matchGarmin(todayKey()));
   const gLine = gAttach
     ? `<p class="muted">Garmin${gAttach.name ? ` · ${esc(gAttach.name)}` : ""}：${gAttach.durationMin != null ? `${gAttach.durationMin} 分` : ""}${gAttach.avgHR != null ? ` · 心率 ${Math.round(gAttach.avgHR)}` : ""}${gAttach.kcal != null ? ` · ${Math.round(gAttach.kcal)} kcal` : ""}</p>`
@@ -2100,7 +2135,12 @@ function renderElse(st) {
         <button type="button" class="btn primary" data-else-free-add data-testid="else-free-add">加入</button></div>`
       : `<button type="button" class="btn full" data-else-free-open data-testid="else-free-open">＋ 其他</button>`}
     <div class="else-total" data-testid="else-total">${tot.kcal} kcal · 蛋白 ${tot.protein} g</div>
-    <button type="button" class="btn primary xl" data-else-save data-testid="else-save"${tot.kcal || tot.protein || tot.name ? "" : " disabled"}>✓ 吃了</button>`;
+    ${(() => {
+      // Nothing picked yet → plain in-flow (disabled) button, so no bar floats over the list.
+      // Once something is picked, the save bar sticks above the tab bar (list keeps 72px clearance to scroll past it).
+      const has = !!(tot.kcal || tot.protein || tot.name);
+      return `<div class="${has ? "sticky-cta tabbed" : "else-cta-idle"}" data-testid="else-cta"><button type="button" class="btn primary xl" data-else-save data-testid="else-save"${has ? "" : " disabled"}>✓ 吃了</button></div>`;
+    })()}`;
 }
 function renderSwap(st) {
   if (ui.elseMeal) return renderElse(st);
@@ -2166,11 +2206,11 @@ function garminWorkoutsOn(date) {
 }
 // ---- Cardio (data.json activities[].cardio and children[].cardio) ----
 const ZONES = [
-  { z: 1, name: "暖身", color: "#9CA3AF" },
-  { z: 2, name: "燃脂", color: "#3B82F6" },
-  { z: 3, name: "有氧", color: "#22C55E" },
-  { z: 4, name: "乳酸閾", color: "#F97316" },
-  { z: 5, name: "極限", color: "#DC2626" },
+  { z: 1, name: "暖身", color: "#9CA3AF", say: "很輕鬆" },
+  { z: 2, name: "燃脂", color: "#3B82F6", say: "輕鬆可聊天，燃脂最佳" },
+  { z: 3, name: "有氧", color: "#22C55E", say: "有點喘，還能講短句" },
+  { z: 4, name: "乳酸閾", color: "#F97316", say: "很喘，講話斷斷續續" },
+  { z: 5, name: "極限", color: "#DC2626", say: "全力衝刺，撐不久" },
 ];
 function cardioIcon(t) {
   t = String(t || "");
@@ -2195,6 +2235,7 @@ function cardioOn(date) {
   return out;
 }
 function paceText(sec) { if (!sec) return ""; const m = Math.floor(sec / 60), x = Math.round(sec % 60); return `${m}'${String(x).padStart(2, "0")}"`; }
+function paceWords(sec) { if (!sec) return ""; let m = Math.floor(sec / 60), x = Math.round(sec % 60); if (x === 60) { m++; x = 0; } return `${m}分${x ? `${x}秒` : ""}`; }
 function zoneRange(zones, i) {
   const lo = zones[i] && zones[i].low;
   const nx = zones[i + 1] && zones[i + 1].low;
@@ -2217,7 +2258,7 @@ function cardioSummary(c) {
   const tot = Object.values(zm).reduce((s, x) => s + x, 0);
   let top = null;
   for (const z of ZONES) if (zm[z.z] && (!top || zm[z.z] > zm[top.z])) top = z;
-  return `${ic} ${nm} ${Math.round(c.durationMin || 0)} 分${c.distanceKm ? ` · ${c.distanceKm} km` : ""}${c.avgHR ? ` · ❤️ ${Math.round(c.avgHR)}` : ""}${top && tot ? ` · 多在 Z${top.z} ${top.name} ${Math.round(zm[top.z] / tot * 100)}%` : ""}`;
+  return `${ic} ${nm} ${Math.round(c.durationMin || 0)} 分鐘${c.distanceKm ? `・${c.distanceKm} 公里` : ""}${c.avgHR ? `・平均心率 ${Math.round(c.avgHR)}` : ""}${top && tot ? `・大多在 Z${top.z}（${top.say.split("，")[0]}）${Math.round(zm[top.z] / tot * 100)}%` : ""}`;
 }
 function lapChart(c) {
   const laps = (c.laps || []).filter((l) => l.km >= 0.5 && l.sec > 0);
@@ -2225,25 +2266,28 @@ function lapChart(c) {
   const hrs = laps.map((l) => l.hr || 0);
   const lo = Math.min(...hrs.filter(Boolean)) - 10, hi = Math.max(...hrs) + 2;
   const zones = c.zones || [];
-  const colorOf = (hr) => { let col = ZONES[0].color; zones.forEach((z, i) => { if (z.low != null && hr >= z.low) col = ZONES[i] ? ZONES[i].color : col; }); return col; };
-  return `<div class="cd-laps" data-testid="cardio-laps">${laps.map((l, i) => {
+  const zoneOf = (hr) => { let zz = ZONES[0]; zones.forEach((z, i) => { if (z.low != null && hr >= z.low && ZONES[i]) zz = ZONES[i]; }); return zz; };
+  const colorOf = (hr) => zoneOf(hr).color;
+  return `<p class="cd-sec">每公里配速與心率 <small>（柱子越高＝越喘）</small></p><div class="cd-laps" data-testid="cardio-laps">${laps.map((l, i) => {
     const h = l.hr ? Math.max(12, Math.round((l.hr - lo) / (hi - lo) * 44)) : 6;
-    return `<div class="cd-lap"><b>${l.hr ? Math.round(l.hr) : "—"}</b><i style="height:${h}px;background:${colorOf(l.hr)}"></i><span>${paceText(l.sec / l.km)}</span><em>${i + 1} km</em></div>`;
+    return `<div class="cd-lap"><b>心率 ${l.hr ? Math.round(l.hr) : "—"}</b><i style="height:${h}px;background:${colorOf(l.hr)}"></i><span>配速 ${paceWords(l.sec / l.km)}</span><em>第 ${i + 1} 公里${l.hr ? ` · Z${zoneOf(l.hr).z} ${zoneOf(l.hr).say.split("，")[0]}` : ""}</em></div>`;
   }).join("")}</div>`;
 }
 function cardioCard(c, key) {
   const [ic, nm] = cardioIcon(c.type);
   const zm = zoneMins(c);
   const tot = Object.values(zm).reduce((s, x) => s + x, 0);
+  // Every tile = word label + value + unit (never icon-only).
   const tiles = [
-    c.distanceKm ? ["📏", `${c.distanceKm}`, "km"] : null,
-    c.paceSec ? ["⏱", paceText(c.paceSec), "/km"] : null,
-    c.speedKmh ? ["🚀", `${c.speedKmh}`, "km/h"] : null,
-    c.avgHR ? ["❤️", `${Math.round(c.avgHR)}${c.maxHR ? `<small>/${Math.round(c.maxHR)}</small>` : ""}`, "平均/最高"] : null,
-    c.steps ? ["👣", `${c.steps}`, c.cadence ? `步 · ${Math.round(c.cadence)}/分` : "步"] : null,
-    c.elevGain ? ["⛰", `+${Math.round(c.elevGain)}`, "m"] : null,
-    c.kcal ? ["🔥", `${Math.round(c.kcal)}`, "kcal"] : null,
-    c.aerobicTE != null ? ["💪", `${c.aerobicTE}${c.anaerobicTE != null ? `<small>/${c.anaerobicTE}</small>` : ""}`, `有氧${teText(c.aerobicTE)}${c.anaerobicTE != null ? "/無氧" : ""}`] : null,
+    c.distanceKm ? ["📏", "距離", `${c.distanceKm}`, "公里"] : null,
+    c.paceSec ? ["⏱", "配速", `每公里 ${paceWords(c.paceSec)}`, ""] : null,
+    c.speedKmh ? ["🚀", "速度", `時速 ${c.speedKmh}`, "公里"] : null,
+    c.avgHR ? ["❤️", "心率", `平均 ${Math.round(c.avgHR)}${c.maxHR ? `／最高 ${Math.round(c.maxHR)}` : ""}`, "", true] : null,
+    c.steps ? ["👣", "步數", `${c.steps}`, "步"] : null,
+    c.cadence ? ["🦶", "步頻", `每分鐘 ${Math.round(c.cadence)}`, "步"] : null,
+    c.elevGain ? ["⛰", "爬升", `${Math.round(c.elevGain)}`, "公尺"] : null,
+    c.kcal ? ["🔥", "消耗", `${Math.round(c.kcal)}`, "大卡"] : null,
+    c.aerobicTE != null ? ["💪", "訓練效果（0–5 分，越高越累）", `有氧效果 ${c.aerobicTE} ${teText(c.aerobicTE)}${c.anaerobicTE != null ? `／無氧效果 ${c.anaerobicTE} ${teText(c.anaerobicTE)}` : ""}`, "", true] : null,
   ].filter(Boolean);
   let zoneHtml = "";
   if (tot > 0) {
@@ -2253,25 +2297,25 @@ function cardioCard(c, key) {
       const i = zs.findIndex((x) => x.z === z.z);
       const m = zm[z.z] || 0;
       const pct = Math.round(m / tot * 100);
-      return `<div class="zrow${pct >= 40 ? " big" : ""}" data-testid="zone-${key}-${z.z}"><i style="background:${z.color}"></i><span>Z${z.z} ${z.name}</span><em>${i >= 0 ? zoneRange(zs, i) : ""}</em><b>${m >= 1 ? Math.round(m) : m ? "<1" : 0} 分</b><b class="pct">${pct}%</b></div>`;
+      return `<div class="zrow${pct >= 40 ? " big" : ""}" data-testid="zone-${key}-${z.z}"><i style="background:${z.color}"></i><span>Z${z.z} ${z.name}</span><em>${i >= 0 ? `心率 ${zoneRange(zs, i)}` : ""}</em><b>${m >= 1 ? Math.round(m) : m ? "<1" : 0} 分鐘</b><b class="pct">${pct}%</b><small class="zsay">${z.say}${z.z >= 4 ? "（偏高）" : z.z === 2 || z.z === 3 ? "（正常）" : "（偏低）"}</small></div>`;
     }).join("");
     const high = ((zm[4] || 0) + (zm[5] || 0)) / tot;
     const z2 = zs.find((x) => x.z === 2);
     const tip = high >= 0.5 && z2
-      ? `<p class="cd-tip warn" data-testid="cardio-tip-${key}">⚠ ${Math.round(high * 100)}% 在 Z4 以上，偏高。想燃脂，心率壓在 Z2 ${zoneRange(zs, zs.indexOf(z2))}</p>`
-      : ((zm[2] || 0) + (zm[3] || 0)) / tot >= 0.5 ? `<p class="cd-tip ok" data-testid="cardio-tip-${key}">✅ 多數在 Z2–Z3，燃脂／有氧區</p>` : "";
-    zoneHtml = `<div class="zbar" data-testid="zbar-${key}">${bar}</div><div class="zrows">${rows}</div>${tip}`;
+      ? `<p class="cd-tip warn" data-testid="cardio-tip-${key}">⚠ ${Math.round(high * 100)}% 的時間在 Z4 以上（很喘），太高了。想燃脂，心率壓在 Z2 ${zoneRange(zs, zs.indexOf(z2))}（輕鬆可聊天）</p>`
+      : ((zm[2] || 0) + (zm[3] || 0)) / tot >= 0.5 ? `<p class="cd-tip ok" data-testid="cardio-tip-${key}">✅ 大多在 Z2–Z3（燃脂、有氧），強度剛好</p>` : "";
+    zoneHtml = `<p class="cd-sec">心率區間 <small>（這次大部分時間在哪一區）</small></p><div class="zbar" data-testid="zbar-${key}">${bar}</div><div class="zrows">${rows}</div>${tip}`;
   }
   return `<div class="cardio" data-testid="cardio-${key}">
-    <div class="cd-head"><span>${ic} ${nm}</span><b>${Math.round(c.durationMin || 0)} 分</b></div>
+    <div class="cd-head"><span>${ic} ${nm}</span><b>${Math.round(c.durationMin || 0)} 分鐘</b></div>
     ${zoneHtml}
-    ${tiles.length ? `<div class="cd-grid">${tiles.map(([i, v, u]) => `<div class="cd-t"><span>${i}</span><b>${v}</b><em>${u}</em></div>`).join("")}</div>` : ""}
+    ${tiles.length ? `<div class="cd-grid">${tiles.map(([i, lab, v, u, wide]) => `<div class="cd-t${wide ? " wide" : ""}" data-testid="cd-tile"><em>${i} ${lab}</em><b>${v}${u ? ` <small>${u}</small>` : ""}</b></div>`).join("")}</div>` : ""}
     ${lapChart(c)}
   </div>`;
 }
 function weekCardio(d = now()) {
   const { mon } = weekRange(d);
-  let min = 0, z2up = 0, z2 = 0, n = 0;
+  let min = 0, z2up = 0, z2 = 0, n = 0, z4up = 0;
   for (let i = 0; i < 7; i++) {
     for (const c of cardioOn(todayKey(addDays(mon, i)))) {
       n++;
@@ -2279,9 +2323,10 @@ function weekCardio(d = now()) {
       const zm = zoneMins(c);
       z2 += zm[2] || 0;
       z2up += (zm[2] || 0) + (zm[3] || 0) + (zm[4] || 0) + (zm[5] || 0);
+      z4up += (zm[4] || 0) + (zm[5] || 0);
     }
   }
-  return { n, min: Math.round(min), z2up: Math.round(z2up), z2: Math.round(z2) };
+  return { n, min: Math.round(min), z2up: Math.round(z2up), z2: Math.round(z2), z4up: Math.round(z4up) };
 }
 function logDates(st) {
   const set = new Set(Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length));
@@ -2289,7 +2334,7 @@ function logDates(st) {
   return [...set].sort().reverse();
 }
 function garminText(a) {
-  return `${a.durationMin != null ? `${a.durationMin} 分` : ""}${a.avgHR != null ? ` · ❤️ ${Math.round(a.avgHR)}` : ""}${a.kcal != null ? ` · 🔥 ${Math.round(a.kcal)}` : ""}`;
+  return `${a.durationMin != null ? `${a.durationMin} 分鐘` : ""}${a.avgHR != null ? ` · 平均心率 ${Math.round(a.avgHR)}` : ""}${a.kcal != null ? ` · 消耗 ${Math.round(a.kcal)} 大卡` : ""}`;
 }
 function kgText(v) { return v == null ? "" : String(Math.round(Number(v) * 10) / 10); }
 function dayBodyMap(d, moves) {
@@ -2465,7 +2510,7 @@ function renderSleep(st) {
   const rows = sleepRows();
   const range = ui.sleepRange || "D";
   const seg = ["D", "W", "M"].map((r) => `<button type="button" class="${range === r ? "on" : ""}" data-sleep-range="${r}" data-testid="sleep-range-${r}">${{ D: "日", W: "週", M: "月" }[r]}</button>`).join("");
-  const head = `<div class="sl-top"><button type="button" class="sl-back" data-go="today">‹ 今天</button><b>睡眠</b><span></span></div>
+  const head = `<button type="button" class="btn back-today" data-go="today" data-testid="sleep-back">← 回到今天</button><div class="sl-top"><b>睡眠</b></div>
     <div class="sl-seg">${seg}</div>`;
   if (!rows.length) return `<div class="sleep-page" data-testid="sleep-page">${head}<div class="sl-card"><div class="sl-k">睡眠時間</div><div class="sl-big">—</div><p class="sl-empty" data-testid="sleep-empty">還沒有睡眠資料</p></div></div>`;
   let body = "";
@@ -2484,6 +2529,7 @@ function renderSleep(st) {
         <div class="sl-nav"><button type="button" data-sleep-step="-1" aria-label="前一天"${idx === 0 ? " disabled" : ""}>‹</button>
           <span>${fmtMD(r.date)} 週${DOW[parseISO(r.date).getDay()]}</span>
           <button type="button" data-sleep-step="1" aria-label="後一天"${idx === rows.length - 1 ? " disabled" : ""}>›</button></div>
+        ${idx === rows.length - 1 && r.date < todayKey(new Date(now().getTime() - 864e5)) ? `<p class="sl-note" data-testid="sleep-stale">這是最新一晚的資料；${fmtMD(r.date)} 之後的睡眠 Garmin 還沒同步過來。</p>` : ""}
         <div class="sl-k">睡眠時間</div>
         <div class="sl-big" data-testid="sleep-total">${hmHtml(total)}</div>
         ${sl ? `<div class="sl-sched" data-testid="sleep-schedule">🛏 ${clockOf(sl.start)} – ${clockOf(sl.end)}${inBed ? ` · 在床 ${hm(inBed).h}:${String(hm(inBed).m).padStart(2, "0")}` : ""}</div>` : ""}
@@ -2508,7 +2554,7 @@ function renderBody(st) {
     `<div class="stat"><span>${fmtMD(s.date)}</span><span>${s.weightKg} kg · 體脂 ${s.pbf}% · 肌 ${s.smmKg} kg</span></div>`
   ).join("");
   const actRows = [...acts].reverse().map((a) =>
-    `<div class="stat"><span>${fmtMD(a.date)} ${esc(a.name || a.type)}</span><span>${a.durationMin != null ? a.durationMin + " 分" : ""}${a.avgHR != null ? " · " + Math.round(a.avgHR) + " bpm" : ""}</span></div>`
+    `<div class="stat"><span>${fmtMD(a.date)} ${esc(a.name || a.type)}</span><span>${a.durationMin != null ? a.durationMin + " 分鐘" : ""}${a.avgHR != null ? " · 平均心率 " + Math.round(a.avgHR) : ""}</span></div>`
   ).join("") || `<p class="muted">最近 30 天沒有運動紀錄。</p>`;
   return `<button type="button" class="btn" data-go="today">← 回到今天</button>
     <section class="card hero">
@@ -2607,7 +2653,7 @@ function renderWorkout(st) {
           <button type="button" data-rdelta="1">+</button>
         </div>
       </div>
-      <button type="button" class="btn primary xl" data-short-save>記下來</button>`;
+      <div class="sticky-cta"><button type="button" class="btn primary xl" data-short-save>記下來</button></div>`;
   }
 
   return `
@@ -2616,14 +2662,15 @@ function renderWorkout(st) {
       <div class="wo-prog">${session.i + 1} / ${session.steps.length} · 第 ${setNo} / ${load.sets} 組</div>
     </div>
     <div class="wo-name">${esc(step.name)}${step.extra ? '<span class="chip">補強</span>' : ""}${step.swapped ? '<span class="chip">換動作</span>' : ""}${session.returning ? '<span class="chip" data-testid="buffer-week">緩衝週</span>' : ""}</div>
-    <div data-testid="wo-figure">${bodyMap((musclesFor(step.name).primary), (musclesFor(step.name).secondary), weekSetCounts(st, now(), { includeSession: true }))}</div>
-    <p class="muted">${esc(step.dose)}${load.perSide ? "（單側次數）" : ""} · 目標 ${load.target} 下${load.hist && load.hist.reps ? ` · 上次 ${load.hist.reps} 下` : ""}</p>
+    <p class="muted wo-dose">${esc(step.dose)}${load.perSide ? "（單側次數）" : ""} · 目標 ${load.target} 下${load.hist && load.hist.reps ? ` · 上次 ${load.hist.reps} 下` : ""}</p>
+    ${weightBlock}
+    <div class="sticky-cta"><button type="button" class="btn primary xl" data-complete>完成</button>
+    <button type="button" class="btn ghost short-btn" data-short>少做了</button></div>
+    ${note ? `<p class="note">${esc(note)}</p>` : ""}
     <p class="wo-cue" data-testid="wo-cue">${esc(cueFor(step.name))}</p>
     ${yt(step.video)}
-    ${weightBlock}
-    ${note ? `<p class="note">${esc(note)}</p>` : ""}
-    <button type="button" class="btn primary xl" data-complete>完成</button>
-    <button type="button" class="btn ghost short-btn" data-short>少做了</button>
+    <details class="wo-fig"${ui.woFigOpen ? " open" : ""}><summary data-wo-fig>練到哪裡（部位圖）</summary>
+    <div data-testid="wo-figure">${bodyMap((musclesFor(step.name).primary), (musclesFor(step.name).secondary), weekSetCounts(st, now(), { includeSession: true }))}</div></details>
     <p class="muted">左滑下一個動作，右滑回上一個。重量有變再按 ＋－，次數不夠才按「少做了」。</p>
   `;
 }
@@ -2635,8 +2682,8 @@ function renderRest(session) {
     <div class="t" id="rest-count">${left}</div>
     <p class="muted">秒後繼續下一組</p>
     ${session.swapNote ? `<p class="note" data-testid="ex-swap-note">${esc(session.swapNote)}</p>` : ""}
-    <button type="button" class="btn primary xl eat-toggle yes" data-undo-set data-testid="btn-undo">✓ 完成</button>
-    <button type="button" class="btn full" data-skip-rest>跳過休息</button>
+    <button type="button" class="btn primary xl" data-skip-rest data-testid="btn-skip-rest">休息好了，下一組</button>
+    <button type="button" class="btn ghost full undo-set" data-undo-set data-testid="btn-undo">↩︎ 撤銷這一組（剛剛按錯）</button>
   </div>`;
 }
 
@@ -2666,7 +2713,7 @@ function renderDone(st, session) {
   const week = weekSetCounts(st, now(), { includeSession: true });
   const parts = todayPartsFromMoves(session.moves);
   const g = session.garmin || matchGarmin(session.date);
-  const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${week[p] || 0} 組</span>`).join("");
+  const chips = MAIN_PARTS.map((p) => `<span class="chip${(week[p] || 0) < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${week[p] || 0} 組${(week[p] || 0) < 6 ? `<small class="st"> · 偏低</small>` : ""}</span>`).join("");
   const exSw = Object.entries(session.exSwaps || {}).map(([n, t]) => `${n}：${t.replace(/^下次這動作/, "")}`);
   const swaps = exSw.length ? exSw : (session.exBack ? [] : upcomingBackSwaps(session.workoutId, session.backScore));
   const swapLine = swaps.length
@@ -2678,10 +2725,10 @@ function renderDone(st, session) {
       <div class="lab" data-testid="back-score">下背 ${session.backScore} 分</div>
     </section>
     ${swapLine}
-    ${bodyMap(parts.pri, parts.sec, week)}
     <div class="chips">${chips}</div>
+    <details class="wo-fig"${ui.woFigOpen ? " open" : ""}><summary data-wo-fig>今天練到的部位（部位圖）</summary>${bodyMap(parts.pri, parts.sec, week)}</details>
     ${g ? `<p class="muted">Garmin：${g.durationMin != null ? g.durationMin + " 分" : ""}${g.avgHR != null ? " · 平均心率 " + Math.round(g.avgHR) : ""}${g.kcal != null ? " · " + Math.round(g.kcal) + " kcal" : ""}</p>` : `<p class="muted">今天的 Garmin 紀錄之後同步，會自動對上這次訓練的心率和時間。</p>`}
-    <button type="button" class="btn primary xl" data-finish-home>回到今天</button>`;
+    <div class="sticky-cta"><button type="button" class="btn primary xl" data-finish-home>回到今天</button></div>`;
 }
 
 function renderShop(st) {
@@ -3095,6 +3142,10 @@ function render() {
   document.body.classList.toggle("mode-workout", st.tab === "workout");
   document.body.classList.toggle("mode-sleep", st.tab === "sleep");
   document.documentElement.classList.toggle("mode-sleep", st.tab === "sleep");
+  { // status-bar tint follows the page: black on the sleep page, brand orange elsewhere
+    const m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute("content", st.tab === "sleep" ? "#000000" : (matchMedia("(prefers-color-scheme: dark)").matches ? "#000000" : "#C2410C"));
+  }
   const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" || st.tab === "log" ? "today" : st.tab;
   document.querySelectorAll("#tabs button").forEach((b) => {
     b.classList.toggle("on", b.dataset.tab === tabHi);
@@ -3110,7 +3161,12 @@ function render() {
   else if (st.tab === "sleep") main.innerHTML = renderSleep(st);
   else main.innerHTML = renderHome(st);
   if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
-  if (st.tab !== "workout") main.insertAdjacentHTML("beforeend", `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`);
+  if (st.tab !== "workout") {
+    // version line goes above a bottom sticky bar (else it would sit under the bar at the end of the page)
+    const ver = `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`;
+    const stick = main.lastElementChild && main.lastElementChild.classList.contains("sticky-cta") ? main.lastElementChild : null;
+    if (stick) stick.insertAdjacentHTML("beforebegin", ver); else main.insertAdjacentHTML("beforeend", ver);
+  }
 }
 
 function tick() {
@@ -3152,6 +3208,8 @@ document.getElementById("main").addEventListener("click", (e) => {
     render();
     return;
   }
+  const wf = e.target.closest("[data-wo-fig]");
+  if (wf) { ui.woFigOpen = !wf.parentElement.open; return; }
   const bt = e.target.closest("[data-backup-toggle]");
   if (bt) { ui.backupOpen = !bt.parentElement.open; return; }
   if (e.target.closest("[data-backup-copy]")) {
@@ -3296,9 +3354,12 @@ document.getElementById("main").addEventListener("click", (e) => {
   if (e.target.closest("[data-edit-close]")) { ui.shopEdit = null; render(); return; }
   const merge = e.target.closest("[data-shop-merge]");
   if (merge) {
-    const src = shopAllItems(st).find((x) => x.id === merge.dataset.shopMerge);
-    const dst = shopAllItems(st).find((x) => x.id === merge.dataset.mergeInto);
-    if (src && dst && !shopTryMerge(st, src, dst)) return;
+    // keep a serving size typed in this sheet but not saved yet — merge needs it
+    keepTypedPortion(merge.dataset.shopMerge);
+    const st2 = state();
+    const src = shopAllItems(st2).find((x) => x.id === merge.dataset.shopMerge);
+    const dst = shopAllItems(st2).find((x) => x.id === merge.dataset.mergeInto);
+    if (src && dst && !shopTryMerge(st2, src, dst)) return;
     ui.shopEdit = null;
     render();
     return;
@@ -3324,7 +3385,9 @@ document.getElementById("main").addEventListener("click", (e) => {
       const dupT = nameV && shopAllItems(st).find((x) => x.id !== id && !x.whey && x.group === it.group && normName(shopLabel(st, x)) === normName(nameV));
       if (dupT) {
         const srcN = nV !== "" && !Number.isNaN(Number(nV)) ? Number(nV) : null;
-        if (!shopTryMerge(st, it, dupT, srcN)) return;
+        keepTypedPortion(id);
+        const st2 = state();
+        if (!shopTryMerge(st2, shopAllItems(st2).find((x) => x.id === id) || it, dupT, srcN)) return;
         ui.shopEdit = null;
         render();
         return;
@@ -3902,10 +3965,9 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.15-2";
+const APP_VERSION = "2026.11.15-4";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
-let pendingReload = false;
 let reloading = false;
 
 function showToast(msg) {
@@ -3921,12 +3983,17 @@ function showToast(msg) {
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => { el.hidden = true; }, 2800);
 }
+// Busy = mid-set today, a sheet open, or typing in the last 30 s. A stale session (other day) or a
+// focused-but-idle select never blocks updates forever.
+let lastTyping = 0;
+document.addEventListener("input", () => { lastTyping = Date.now(); }, true);
+document.addEventListener("keydown", () => { lastTyping = Date.now(); }, true);
 function isBusy() {
   if (ui.swap || ui.elseMeal) return true;
   const s = load().session;
-  if (s && ["set", "rest", "short", "back"].includes(s.phase)) return true;
+  if (s && s.date === todayKey() && ["set", "rest", "short", "back"].includes(s.phase)) return true;
   const el = document.activeElement;
-  if (el && /INPUT|TEXTAREA|SELECT/.test(el.tagName)) return true;
+  if (el && /INPUT|TEXTAREA|SELECT/.test(el.tagName) && Date.now() - lastTyping < 30000) return true;
   return false;
 }
 function safeReload() {
@@ -3944,54 +4011,96 @@ async function activateWaitingSW() {
   navigator.serviceWorker.controller?.postMessage({ type: "SKIP_WAITING" });
 }
 async function fetchNoStore(url) {
-  return fetch(url, { cache: "no-store" });
+  // cache-buster + no-store: iOS / GitHub Pages (max-age=600) can't hand back a stale copy
+  return fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
 }
-async function hardRefresh() {
-  try { ptrLoading(); } catch (_) {}
-  showToast("重新整理中…");
-  await Promise.all(ASSETS.map((u) => fetchNoStore(u).catch(() => null)));
+// Refill the HTTP cache with fresh files (cache:"reload" writes the new copy) and drop our SW caches,
+// so the reload that follows can't pick up an old app.js.
+async function primeFresh() {
+  await Promise.all(ASSETS.map((u) => fetch(u, { cache: "reload" }).catch(() => null)));
   try {
     const keys = await caches.keys();
     await Promise.all(keys.filter((k) => String(k).startsWith(CACHE_PREFIX)).map((k) => caches.delete(k)));
   } catch (_) {}
+}
+async function hardRefresh() {
+  try { ptrLoading(); } catch (_) {}
+  showToast("重新整理中…");
+  await primeFresh();
   await activateWaitingSW();
   safeReload();
 }
+// ---- Auto-update: launch, resume (visibilitychange / pageshow / focus / online), every 60 s while visible ----
+const UPD_KEY = "fatmi-upd";
+const UPD_POLL_MS = 60000;
+let pendingVersion = null; // newer app version waiting until not busy
+let pendingData = false; // new data.json waiting to be drawn
+let lastCheck = 0;
+let checking = false;
+function updState() { try { return JSON.parse(sessionStorage.getItem(UPD_KEY) || "{}"); } catch (_) { return {}; } }
+// Reload once toward `target`. Loop guard: >= 20 s between tries, max 3 tries per version per 10 min.
+async function applyUpdate(target) {
+  const s = updState();
+  const t = Date.now();
+  const same = s.target === target;
+  if (same && t - (s.at || 0) < 20000) return false;
+  if (same && (s.n || 0) >= 3 && t - (s.first || 0) < 600000) return false;
+  const n = same && t - (s.first || 0) < 600000 ? (s.n || 0) + 1 : 1;
+  sessionStorage.setItem(UPD_KEY, JSON.stringify({ target, from: APP_VERSION, n, at: t, first: n === 1 ? t : s.first }));
+  showToast("更新中…");
+  await primeFresh();
+  await activateWaitingSW();
+  safeReload();
+  return true;
+}
+function announceUpdate() {
+  const s = updState();
+  if (s.target && s.target === APP_VERSION && s.from !== APP_VERSION) {
+    sessionStorage.removeItem(UPD_KEY);
+    setTimeout(() => showToast(`✅ 已更新到 v${APP_VERSION}`), 300);
+  }
+}
 async function checkUpdates(opts) {
   const force = !!(opts && opts.force);
+  if (checking || (!force && !(opts && opts.now) && Date.now() - lastCheck < 2000)) return; // de-dupe focus+pageshow+visibility firing together
+  checking = true;
+  lastCheck = Date.now();
   try {
+    if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
     const [vr, dr] = await Promise.all([
       fetchNoStore("./version.json").catch(() => null),
       fetchNoStore("./data.json").catch(() => null),
     ]);
     if (dr && dr.ok) {
-      const data = await dr.json();
+      const data = await dr.json().catch(() => null);
       if (data && data.exportedAt && data.exportedAt !== LIVE.exportedAt) {
+        const first = !LIVE.exportedAt;
         LIVE = data;
         try { localStorage.setItem("fatcat-live", JSON.stringify(LIVE)); } catch (_) {}
-        if (!isBusy() || force) render();
+        if (first) render();
+        else pendingData = true;
       }
     }
     if (vr && vr.ok) {
-      const ver = await vr.json();
-      if (ver && ver.version && loadedVersion && ver.version !== loadedVersion) {
-        if (force || !isBusy()) {
-          await activateWaitingSW();
-          safeReload();
-        } else {
-          pendingReload = true;
-          showToast("已更新");
-        }
-      }
+      const ver = await vr.json().catch(() => null);
+      loadedVersion = ver && ver.version;
+      if (loadedVersion && loadedVersion !== APP_VERSION) pendingVersion = loadedVersion;
+      else pendingVersion = null;
     }
   } catch (_) {}
+  checking = false;
+  maybeApplyDeferredUpdate(force);
 }
-function maybeApplyDeferredUpdate() {
-  if (pendingReload && !isBusy()) {
-    pendingReload = false;
-    activateWaitingSW().then(() => safeReload());
+function maybeApplyDeferredUpdate(force) {
+  const busy = isBusy() && !force;
+  if (pendingVersion && !busy) { applyUpdate(pendingVersion); return; }
+  if (pendingData && !busy) {
+    pendingData = false;
+    render();
+    showToast("✅ 資料已更新");
   }
 }
+function checkSoon() { if (document.visibilityState !== "hidden") checkUpdates(); }
 
 // Pull-to-refresh: high threshold; disabled during workout / busy (set/rest/forms).
 // Visual: arrow follows pull → at threshold flips; on release spinner while hardRefresh.
@@ -4075,31 +4184,23 @@ window.addEventListener("touchend", (e) => {
   }
 }, { passive: true });
 
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") checkUpdates();
-});
-setInterval(() => {
-  if (document.visibilityState === "visible") checkUpdates();
-}, 10 * 60 * 1000);
+// iOS standalone may skip visibilitychange on resume: listen to every resume signal.
+document.addEventListener("visibilitychange", checkSoon);
+window.addEventListener("pageshow", checkSoon);
+window.addEventListener("focus", checkSoon);
+window.addEventListener("online", checkSoon);
+setInterval(checkSoon, UPD_POLL_MS);
+// Deferred update applies as soon as not busy.
+setInterval(() => { if (pendingVersion || pendingData) maybeApplyDeferredUpdate(); }, 3000);
 
+// SW replaced (new sw.js): the page re-checks version.json and reloads only if the app version changed.
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!navigator.serviceWorker.__hadController) return;
-    if (!isBusy()) safeReload();
-    else pendingReload = true;
-  });
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (navigator.serviceWorker.__hadController) checkUpdates({}); });
   navigator.serviceWorker.__hadController = !!navigator.serviceWorker.controller;
-}
-
-if (navigator.serviceWorker) {
-  navigator.serviceWorker.addEventListener("message", (e) => {
-    if (e.data && e.data.type === "SW_UPDATED") {
-      if (!isBusy()) safeReload(); else pendingReload = true;
-    }
-  });
+  navigator.serviceWorker.addEventListener("message", (e) => { if (e.data && e.data.type === "SW_UPDATED") checkUpdates({}); });
 }
 window.__fatmiHardRefresh = hardRefresh;
-window.__fatmiCheckUpdates = checkUpdates;
+window.__fatmiCheckUpdates = (o) => checkUpdates({ now: true, ...(o || {}) });
 
 function migrateGrocery() {
   try {
@@ -4116,23 +4217,20 @@ async function boot() {
   if (DEMO) { const h = document.querySelector(".ttl"); if (h) h.parentElement.insertAdjacentHTML("afterend", `<span class="demo-tag" data-testid="demo-tag">示範舊資料（不影響你的資料）</span>`); }
   if (SITE === "staging") { const h = document.querySelector(".ttl"); if (h) h.insertAdjacentHTML("beforeend", ` <span class="stg-tag" data-testid="staging-tag">測試</span>`); }
   migrateGrocery();
+  announceUpdate();
   try {
-    const v = await fetch("./version.json", { cache: "no-store" });
+    const v = await fetchNoStore("./version.json");
     if (v.ok) {
       const ver = await v.json();
       loadedVersion = ver && ver.version;
       if (loadedVersion && loadedVersion !== APP_VERSION) {
-        const k = "fatmi-ver-fix";
-        if (sessionStorage.getItem(k) !== loadedVersion) {
-          sessionStorage.setItem(k, loadedVersion);
-          if (!isBusy()) { hardRefresh(); return; }
-          pendingReload = true;
-        }
+        pendingVersion = loadedVersion;
+        if (!isBusy() && await applyUpdate(loadedVersion)) return;
       }
     }
   } catch (_) {}
   try {
-    const r = await fetch("./data.json", { cache: "no-store" });
+    const r = await fetchNoStore("./data.json");
     if (r.ok) {
       LIVE = await r.json();
       try {
@@ -4148,6 +4246,7 @@ async function boot() {
   }
   tick();
   render();
+  lastCheck = Date.now();
 }
 
 if ("serviceWorker" in navigator) {
@@ -4210,3 +4309,12 @@ document.getElementById("main").addEventListener("change", (e) => {
   }
   render();
 });
+
+// Real tab-bar height (incl. safe area) → --navh, so sticky buttons and page bottoms clear it exactly.
+(function trackNavHeight() {
+  const set = () => { const n = document.getElementById("tabs"); if (n && n.offsetHeight) document.documentElement.style.setProperty("--navh", n.offsetHeight + "px"); };
+  set();
+  window.addEventListener("resize", set);
+  window.addEventListener("orientationchange", set);
+  if (window.ResizeObserver) { const n = document.getElementById("tabs"); if (n) new ResizeObserver(set).observe(n); }
+})();
