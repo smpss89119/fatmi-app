@@ -1,17 +1,8 @@
 {
-  "exportedAt": "2026-11-14T22:11:18+07:00",
+  "exportedAt": "2026-11-14T23:04:06+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-16",
-        "kcal": 2298.0,
-        "steps": 8530,
-        "sleepHours": 6.4,
-        "restingHR": 51.0,
-        "weightKg": null,
-        "bodyBattery": 5.0
-      },
       {
         "date": "2026-10-17",
         "kcal": 2720.0,
@@ -154,92 +145,7 @@
         "sleepHours": 5.4,
         "restingHR": 53.0,
         "weightKg": null,
-        "bodyBattery": 5.0,
-        "sleep": {
-          "start": "2026-11-01T01:41",
-          "end": "2026-11-01T07:10",
-          "deepMin": 41,
-          "coreMin": 223,
-          "remMin": 61,
-          "awakeMin": 4,
-          "segments": [
-            [
-              0,
-              10,
-              "core"
-            ],
-            [
-              10,
-              26,
-              "deep"
-            ],
-            [
-              26,
-              27,
-              "awake"
-            ],
-            [
-              27,
-              70,
-              "core"
-            ],
-            [
-              70,
-              93,
-              "rem"
-            ],
-            [
-              93,
-              103,
-              "core"
-            ],
-            [
-              103,
-              105,
-              "awake"
-            ],
-            [
-              105,
-              120,
-              "core"
-            ],
-            [
-              120,
-              145,
-              "deep"
-            ],
-            [
-              145,
-              183,
-              "core"
-            ],
-            [
-              183,
-              206,
-              "rem"
-            ],
-            [
-              206,
-              298,
-              "core"
-            ],
-            [
-              298,
-              313,
-              "rem"
-            ],
-            [
-              313,
-              314,
-              "awake"
-            ],
-            [
-              314,
-              329,
-              "core"
-            ]
-          ]
-        }
+        "bodyBattery": 5.0
       },
       {
         "date": "2026-11-02",
@@ -1456,24 +1362,24 @@
       },
       {
         "date": "2026-11-14",
-        "kcal": 1805.0,
-        "steps": 3446,
+        "kcal": 3300.0,
+        "steps": 9083,
         "sleepHours": null,
         "restingHR": 55.0,
         "weightKg": null,
-        "bodyBattery": 27.0
+        "bodyBattery": 5.0
+      },
+      {
+        "date": "2026-11-15",
+        "kcal": null,
+        "steps": null,
+        "sleepHours": null,
+        "restingHR": null,
+        "weightKg": null,
+        "bodyBattery": null
       }
     ],
     "activities": [
-      {
-        "type": "strength_training",
-        "date": "2026-10-15",
-        "startTime": "2026-10-15 22:27:17",
-        "durationMin": 38.8,
-        "avgHR": 117.0,
-        "kcal": 352.0,
-        "name": "肌力訓練"
-      },
       {
         "type": "multi_sport",
         "date": "2026-10-17",
@@ -1481,7 +1387,104 @@
         "durationMin": 95.9,
         "avgHR": null,
         "kcal": 646.0,
-        "name": "複合式運動"
+        "name": "複合式運動",
+        "id": 24750615397,
+        "children": [
+          {
+            "id": 24750615380,
+            "type": "strength_training",
+            "durationMin": 57.0,
+            "avgHR": 89.0,
+            "kcal": 259.0
+          },
+          {
+            "id": 24750615381,
+            "type": "stair_climbing",
+            "durationMin": 39.0,
+            "avgHR": 125.0,
+            "kcal": 387.0
+          }
+        ],
+        "sets": [
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 26
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 38.0,
+            "reps": 14
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 47.0,
+            "reps": 8
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 47.0,
+            "reps": 8
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 38.0,
+            "reps": 11
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 35.0,
+            "reps": 31
+          },
+          {
+            "name": null,
+            "cat": "ROW",
+            "kg": 50.0,
+            "reps": 14
+          },
+          {
+            "name": null,
+            "cat": "UNKNOWN",
+            "kg": 55.0,
+            "reps": 12
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 60.0,
+            "reps": 10
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 60.0,
+            "reps": 7
+          },
+          {
+            "name": "LAT_PULLDOWN",
+            "cat": "PULL_UP",
+            "kg": 40.0,
+            "reps": 10
+          },
+          {
+            "name": "LAT_PULLDOWN",
+            "cat": "PULL_UP",
+            "kg": 40.0,
+            "reps": 12
+          },
+          {
+            "name": "LAT_PULLDOWN",
+            "cat": "PULL_UP",
+            "kg": 40.0,
+            "reps": 8
+          }
+        ]
       },
       {
         "type": "multi_sport",
@@ -1490,7 +1493,56 @@
         "durationMin": 42.7,
         "avgHR": null,
         "kcal": 478.0,
-        "name": "複合式運動"
+        "name": "複合式運動",
+        "id": 24762623235,
+        "children": [
+          {
+            "id": 24762623230,
+            "type": "strength_training",
+            "durationMin": 22.0,
+            "avgHR": 123.0,
+            "kcal": 230.0
+          },
+          {
+            "id": 24762623232,
+            "type": "walking",
+            "durationMin": 20.6,
+            "avgHR": 136.0,
+            "kcal": 248.0
+          }
+        ],
+        "sets": [
+          {
+            "name": null,
+            "cat": "SQUAT",
+            "kg": 20.0,
+            "reps": 20
+          },
+          {
+            "name": null,
+            "cat": "SQUAT",
+            "kg": 30.0,
+            "reps": 21
+          },
+          {
+            "name": null,
+            "cat": "SQUAT",
+            "kg": 40.0,
+            "reps": 17
+          },
+          {
+            "name": null,
+            "cat": "SQUAT",
+            "kg": 40.0,
+            "reps": 12
+          },
+          {
+            "name": null,
+            "cat": "SQUAT",
+            "kg": 50.0,
+            "reps": 7
+          }
+        ]
       },
       {
         "type": "strength_training",
@@ -1499,7 +1551,58 @@
         "durationMin": 16.4,
         "avgHR": 98.0,
         "kcal": 102.0,
-        "name": "肌力訓練"
+        "name": "肌力訓練",
+        "id": 25032392288,
+        "sets": [
+          {
+            "name": "GOBLET_SQUAT",
+            "cat": "SQUAT",
+            "kg": 13.5,
+            "reps": 10
+          },
+          {
+            "name": null,
+            "cat": "PUSH_UP",
+            "kg": null,
+            "reps": 10
+          },
+          {
+            "name": null,
+            "cat": "HIP_RAISE",
+            "kg": null,
+            "reps": 10
+          },
+          {
+            "name": "WEIGHTED_DEAD_BUG",
+            "cat": "HIP_STABILITY",
+            "kg": null,
+            "reps": 24
+          },
+          {
+            "name": "GOBLET_SQUAT",
+            "cat": "SQUAT",
+            "kg": 13.5,
+            "reps": 12
+          },
+          {
+            "name": null,
+            "cat": "PUSH_UP",
+            "kg": null,
+            "reps": 10
+          },
+          {
+            "name": null,
+            "cat": "HIP_RAISE",
+            "kg": null,
+            "reps": 12
+          },
+          {
+            "name": "WEIGHTED_DEAD_BUG",
+            "cat": "HIP_STABILITY",
+            "kg": null,
+            "reps": 24
+          }
+        ]
       },
       {
         "type": "multi_sport",
@@ -1508,7 +1611,116 @@
         "durationMin": 95.4,
         "avgHR": null,
         "kcal": 954.0,
-        "name": "複合式運動"
+        "name": "複合式運動",
+        "id": 25077331454,
+        "children": [
+          {
+            "id": 25077331410,
+            "type": "strength_training",
+            "durationMin": 65.2,
+            "avgHR": 114.0,
+            "kcal": 491.0
+          },
+          {
+            "id": 25077331411,
+            "type": "walking",
+            "durationMin": 30.2,
+            "avgHR": 162.0,
+            "kcal": 463.0
+          }
+        ],
+        "sets": [
+          {
+            "name": "BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 26
+          },
+          {
+            "name": "BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 38.0,
+            "reps": 14
+          },
+          {
+            "name": "BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 38.0,
+            "reps": 11
+          },
+          {
+            "name": "BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 38.0,
+            "reps": 13
+          },
+          {
+            "name": "INCLINE_BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 38.0,
+            "reps": 9
+          },
+          {
+            "name": "INCLINE_BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 13
+          },
+          {
+            "name": "INCLINE_BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 13
+          },
+          {
+            "name": "INCLINE_BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 10
+          },
+          {
+            "name": "INCLINE_BARBELL_BENCH_PRESS",
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 8
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 27.5,
+            "reps": 33
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 42.5,
+            "reps": 21
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 50.0,
+            "reps": 10
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 50.0,
+            "reps": 10
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 50.0,
+            "reps": 11
+          },
+          {
+            "name": "SEATED_CABLE_ROW",
+            "cat": "ROW",
+            "kg": 50.0,
+            "reps": 13
+          }
+        ]
       }
     ]
   },
