@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-14T22:05:47+07:00",
+  "exportedAt": "2026-11-14T22:11:18+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1500,6 +1500,15 @@
         "avgHR": 98.0,
         "kcal": 102.0,
         "name": "肌力訓練"
+      },
+      {
+        "type": "multi_sport",
+        "date": "2026-11-14",
+        "startTime": "2026-11-14 21:33:07",
+        "durationMin": 95.4,
+        "avgHR": null,
+        "kcal": 954.0,
+        "name": "複合式運動"
       }
     ]
   },
