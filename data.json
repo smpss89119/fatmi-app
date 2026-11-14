@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-15T01:36:08+07:00",
+  "exportedAt": "2026-11-15T01:58:36+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -10,7 +10,46 @@
         "sleepHours": 5.0,
         "restingHR": 47.0,
         "weightKg": null,
-        "bodyBattery": 11.0
+        "bodyBattery": 11.0,
+        "sleepScore": 58,
+        "sleepDeepMin": 98,
+        "sleepLightMin": 129,
+        "sleepRemMin": 75,
+        "sleepAwakeMin": 3,
+        "bodyBatteryHigh": 72.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 69.0,
+        "bodyBatteryDrained": 63.0,
+        "stressAvg": 35.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 61.0,
+          "weeklyAvg": 57.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 156.0,
+          "chronic": 219.0,
+          "acwr": 0.7,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 328.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 0.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 31,
+          "vigorous": 30,
+          "total": 91
+        },
+        "floors": {
+          "up": 2.0,
+          "down": 1.4
+        }
       },
       {
         "date": "2026-10-18",
@@ -19,7 +58,46 @@
         "sleepHours": 5.2,
         "restingHR": 47.0,
         "weightKg": null,
-        "bodyBattery": 7.0
+        "bodyBattery": 7.0,
+        "sleepScore": 78,
+        "sleepDeepMin": 63,
+        "sleepLightMin": 162,
+        "sleepRemMin": 88,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 87.0,
+        "bodyBatteryLow": 7.0,
+        "bodyBatteryCharged": 77.0,
+        "bodyBatteryDrained": 84.0,
+        "stressAvg": 35.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 72.0,
+          "weeklyAvg": 60.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 218.0,
+          "chronic": 219.0,
+          "acwr": 0.9,
+          "acwrStatus": "OPTIMAL",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 8,
+          "vigorous": 50,
+          "total": 108
+        },
+        "floors": {
+          "up": 4.4,
+          "down": 4.8
+        }
       },
       {
         "date": "2026-10-19",
@@ -28,7 +106,46 @@
         "sleepHours": 7.3,
         "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 27.0
+        "bodyBattery": 27.0,
+        "sleepScore": 99,
+        "sleepDeepMin": 82,
+        "sleepLightMin": 246,
+        "sleepRemMin": 110,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 96.0,
+        "bodyBatteryLow": 7.0,
+        "bodyBatteryCharged": 89.0,
+        "bodyBatteryDrained": 69.0,
+        "stressAvg": 21.0,
+        "stressMax": 89.0,
+        "hrv": {
+          "lastNightAvg": 76.0,
+          "weeklyAvg": 63.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 185.0,
+          "chronic": 219.0,
+          "acwr": 0.8,
+          "acwrStatus": "OPTIMAL",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 10.6,
+          "down": 8.7
+        }
       },
       {
         "date": "2026-10-20",
@@ -37,7 +154,46 @@
         "sleepHours": 7.8,
         "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 24.0
+        "bodyBattery": 24.0,
+        "sleepScore": 98,
+        "sleepDeepMin": 100,
+        "sleepLightMin": 253,
+        "sleepRemMin": 114,
+        "sleepAwakeMin": 2,
+        "bodyBatteryHigh": 100.0,
+        "bodyBatteryLow": 24.0,
+        "bodyBatteryCharged": 76.0,
+        "bodyBatteryDrained": 79.0,
+        "stressAvg": 26.0,
+        "stressMax": 89.0,
+        "hrv": {
+          "lastNightAvg": 65.0,
+          "weeklyAvg": 63.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 152.0,
+          "chronic": 219.0,
+          "acwr": 0.6,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 6.1,
+          "down": 6.9
+        }
       },
       {
         "date": "2026-10-21",
@@ -46,7 +202,46 @@
         "sleepHours": 6.0,
         "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 13.0
+        "bodyBattery": 13.0,
+        "sleepScore": 85,
+        "sleepDeepMin": 76,
+        "sleepLightMin": 211,
+        "sleepRemMin": 76,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 98.0,
+        "bodyBatteryLow": 13.0,
+        "bodyBatteryCharged": 78.0,
+        "bodyBatteryDrained": 89.0,
+        "stressAvg": 37.0,
+        "stressMax": 90.0,
+        "hrv": {
+          "lastNightAvg": 71.0,
+          "weeklyAvg": 66.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 120.0,
+          "chronic": 219.0,
+          "acwr": 0.5,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 12.1,
+          "down": 4.7
+        }
       },
       {
         "date": "2026-10-22",
@@ -55,7 +250,46 @@
         "sleepHours": 6.7,
         "restingHR": 45.0,
         "weightKg": null,
-        "bodyBattery": 6.0
+        "bodyBattery": 6.0,
+        "sleepScore": 79,
+        "sleepDeepMin": 63,
+        "sleepLightMin": 192,
+        "sleepRemMin": 146,
+        "sleepAwakeMin": 5,
+        "bodyBatteryHigh": 54.0,
+        "bodyBatteryLow": 6.0,
+        "bodyBatteryCharged": 42.0,
+        "bodyBatteryDrained": 49.0,
+        "stressAvg": 41.0,
+        "stressMax": 94.0,
+        "hrv": {
+          "lastNightAvg": 34.0,
+          "weeklyAvg": 61.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 94.0,
+          "chronic": 219.0,
+          "acwr": 0.4,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 15.4,
+          "down": 13.9
+        }
       },
       {
         "date": "2026-10-23",
@@ -64,7 +298,46 @@
         "sleepHours": 5.4,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 5.0
+        "bodyBattery": 5.0,
+        "sleepScore": 58,
+        "sleepDeepMin": 61,
+        "sleepLightMin": 227,
+        "sleepRemMin": 37,
+        "sleepAwakeMin": 23,
+        "bodyBatteryHigh": 27.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 23.0,
+        "bodyBatteryDrained": 23.0,
+        "stressAvg": 48.0,
+        "stressMax": 97.0,
+        "hrv": {
+          "lastNightAvg": 36.0,
+          "weeklyAvg": 57.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 71.0,
+          "chronic": 219.0,
+          "acwr": 0.3,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 18.0,
+          "down": 22.3
+        }
       },
       {
         "date": "2026-10-24",
@@ -73,7 +346,46 @@
         "sleepHours": 7.0,
         "restingHR": 47.0,
         "weightKg": null,
-        "bodyBattery": 5.0
+        "bodyBattery": 5.0,
+        "sleepScore": 91,
+        "sleepDeepMin": 79,
+        "sleepLightMin": 244,
+        "sleepRemMin": 97,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 66.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 61.0,
+        "bodyBatteryDrained": 61.0,
+        "stressAvg": 44.0,
+        "stressMax": 98.0,
+        "hrv": {
+          "lastNightAvg": 59.0,
+          "weeklyAvg": 56.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 54.0,
+          "chronic": 219.0,
+          "acwr": 0.2,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 1,
+          "total": 2
+        },
+        "floors": {
+          "up": 9.0,
+          "down": 1.1
+        }
       },
       {
         "date": "2026-10-25",
@@ -82,7 +394,46 @@
         "sleepHours": null,
         "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": 5.0
+        "bodyBattery": 5.0,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": 48.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 43.0,
+        "bodyBatteryDrained": 43.0,
+        "stressAvg": 64.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": null,
+          "weeklyAvg": 54.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 36.0,
+          "chronic": 219.0,
+          "acwr": 0.1,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 4.4,
+          "down": 3.7
+        }
       },
       {
         "date": "2026-10-26",
@@ -91,7 +442,46 @@
         "sleepHours": 6.9,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 8.0
+        "bodyBattery": 8.0,
+        "sleepScore": 79,
+        "sleepDeepMin": 83,
+        "sleepLightMin": 238,
+        "sleepRemMin": 92,
+        "sleepAwakeMin": 20,
+        "bodyBatteryHigh": 48.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 45.0,
+        "bodyBatteryDrained": 42.0,
+        "stressAvg": 37.0,
+        "stressMax": 91.0,
+        "hrv": {
+          "lastNightAvg": 49.0,
+          "weeklyAvg": 50.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 22.0,
+          "chronic": 219.0,
+          "acwr": 0.1,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 0.7,
+          "down": 0.0
+        }
       },
       {
         "date": "2026-10-27",
@@ -100,7 +490,46 @@
         "sleepHours": 6.8,
         "restingHR": 49.0,
         "weightKg": null,
-        "bodyBattery": 17.0
+        "bodyBattery": 17.0,
+        "sleepScore": 87,
+        "sleepDeepMin": 43,
+        "sleepLightMin": 279,
+        "sleepRemMin": 86,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 80.0,
+        "bodyBatteryLow": 6.0,
+        "bodyBatteryCharged": 76.0,
+        "bodyBatteryDrained": 67.0,
+        "stressAvg": 29.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 63.0,
+          "weeklyAvg": 50.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 9.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 5.0,
+          "down": 7.5
+        }
       },
       {
         "date": "2026-10-28",
@@ -109,7 +538,46 @@
         "sleepHours": 5.4,
         "restingHR": 49.0,
         "weightKg": null,
-        "bodyBattery": 14.0
+        "bodyBattery": 14.0,
+        "sleepScore": 75,
+        "sleepDeepMin": 48,
+        "sleepLightMin": 206,
+        "sleepRemMin": 69,
+        "sleepAwakeMin": 8,
+        "bodyBatteryHigh": 67.0,
+        "bodyBatteryLow": 13.0,
+        "bodyBatteryCharged": 55.0,
+        "bodyBatteryDrained": 58.0,
+        "stressAvg": 33.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 54.0,
+          "weeklyAvg": 48.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 7.3,
+          "down": 7.2
+        }
       },
       {
         "date": "2026-10-29",
@@ -118,7 +586,46 @@
         "sleepHours": 6.5,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 6.0
+        "bodyBattery": 6.0,
+        "sleepScore": 83,
+        "sleepDeepMin": 92,
+        "sleepLightMin": 211,
+        "sleepRemMin": 90,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 72.0,
+        "bodyBatteryLow": 6.0,
+        "bodyBatteryCharged": 61.0,
+        "bodyBatteryDrained": 69.0,
+        "stressAvg": 41.0,
+        "stressMax": 93.0,
+        "hrv": {
+          "lastNightAvg": 56.0,
+          "weeklyAvg": 52.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 9.5,
+          "down": 2.2
+        }
       },
       {
         "date": "2026-10-30",
@@ -127,7 +634,46 @@
         "sleepHours": 6.7,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 17.0
+        "bodyBattery": 18.0,
+        "sleepScore": 82,
+        "sleepDeepMin": 94,
+        "sleepLightMin": 219,
+        "sleepRemMin": 88,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 61.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 57.0,
+        "bodyBatteryDrained": 45.0,
+        "stressAvg": 31.0,
+        "stressMax": 92.0,
+        "hrv": {
+          "lastNightAvg": 52.0,
+          "weeklyAvg": 55.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 5.6,
+          "down": 5.6
+        }
       },
       {
         "date": "2026-10-31",
@@ -136,7 +682,46 @@
         "sleepHours": 4.2,
         "restingHR": 48.0,
         "weightKg": null,
-        "bodyBattery": 5.0
+        "bodyBattery": 5.0,
+        "sleepScore": 60,
+        "sleepDeepMin": 92,
+        "sleepLightMin": 133,
+        "sleepRemMin": 26,
+        "sleepAwakeMin": 6,
+        "bodyBatteryHigh": 75.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 54.0,
+        "bodyBatteryDrained": 72.0,
+        "stressAvg": 47.0,
+        "stressMax": 99.0,
+        "hrv": {
+          "lastNightAvg": 60.0,
+          "weeklyAvg": 55.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 381.0,
+            "aerobicHigh": 58.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 2,
+          "total": 4
+        },
+        "floors": {
+          "up": 9.0,
+          "down": 12.8
+        }
       },
       {
         "date": "2026-11-01",
@@ -145,7 +730,46 @@
         "sleepHours": 5.4,
         "restingHR": 53.0,
         "weightKg": null,
-        "bodyBattery": 5.0
+        "bodyBattery": 5.0,
+        "sleepScore": 65,
+        "sleepDeepMin": 41,
+        "sleepLightMin": 223,
+        "sleepRemMin": 61,
+        "sleepAwakeMin": 4,
+        "bodyBatteryHigh": 26.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 22.0,
+        "bodyBatteryDrained": 22.0,
+        "stressAvg": 48.0,
+        "stressMax": 93.0,
+        "hrv": {
+          "lastNightAvg": 36.0,
+          "weeklyAvg": 52.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 323.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 22.1,
+          "down": 22.6
+        }
       },
       {
         "date": "2026-11-02",
@@ -155,6 +779,45 @@
         "restingHR": 52.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 51,
+        "sleepDeepMin": 57,
+        "sleepLightMin": 231,
+        "sleepRemMin": 40,
+        "sleepAwakeMin": 11,
+        "bodyBatteryHigh": 25.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 20.0,
+        "bodyBatteryDrained": 20.0,
+        "stressAvg": 54.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 38.0,
+          "weeklyAvg": 50.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 323.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 14.2,
+          "down": 10.6
+        },
         "sleep": {
           "start": "2026-11-02T01:07",
           "end": "2026-11-02T06:46",
@@ -238,7 +901,8 @@
               339,
               "rem"
             ]
-          ]
+          ],
+          "lightMin": 231
         }
       },
       {
@@ -249,6 +913,45 @@
         "restingHR": 52.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 59,
+        "sleepDeepMin": 62,
+        "sleepLightMin": 330,
+        "sleepRemMin": 101,
+        "sleepAwakeMin": 20,
+        "bodyBatteryHigh": 38.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 33.0,
+        "bodyBatteryDrained": 33.0,
+        "stressAvg": 51.0,
+        "stressMax": 95.0,
+        "hrv": {
+          "lastNightAvg": 38.0,
+          "weeklyAvg": 47.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 241.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 11.7,
+          "down": 14.7
+        },
         "sleep": {
           "start": "2026-11-02T23:15",
           "end": "2026-11-03T07:48",
@@ -362,7 +1065,8 @@
               512,
               "rem"
             ]
-          ]
+          ],
+          "lightMin": 330
         }
       },
       {
@@ -373,6 +1077,45 @@
         "restingHR": 53.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 49,
+        "sleepDeepMin": 74,
+        "sleepLightMin": 254,
+        "sleepRemMin": 45,
+        "sleepAwakeMin": 2,
+        "bodyBatteryHigh": 38.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 33.0,
+        "bodyBatteryDrained": 33.0,
+        "stressAvg": 42.0,
+        "stressMax": 90.0,
+        "hrv": {
+          "lastNightAvg": 45.0,
+          "weeklyAvg": 46.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 241.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 48.0,
+          "down": 49.0
+        },
         "sleep": {
           "start": "2026-11-03T23:20",
           "end": "2026-11-04T05:35",
@@ -481,7 +1224,8 @@
               375,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 254
         }
       },
       {
@@ -492,6 +1236,45 @@
         "restingHR": 51.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 85,
+        "sleepDeepMin": 90,
+        "sleepLightMin": 220,
+        "sleepRemMin": 126,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 49.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 45.0,
+        "bodyBatteryDrained": 45.0,
+        "stressAvg": 44.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 45.0,
+          "weeklyAvg": 44.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 241.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 17.3,
+          "down": 17.4
+        },
         "sleep": {
           "start": "2026-11-04T23:48",
           "end": "2026-11-05T07:04",
@@ -580,7 +1363,8 @@
               436,
               "rem"
             ]
-          ]
+          ],
+          "lightMin": 220
         }
       },
       {
@@ -591,6 +1375,45 @@
         "restingHR": 53.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 63,
+        "sleepDeepMin": 72,
+        "sleepLightMin": 210,
+        "sleepRemMin": 38,
+        "sleepAwakeMin": 13,
+        "bodyBatteryHigh": 30.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 25.0,
+        "bodyBatteryDrained": 25.0,
+        "stressAvg": 45.0,
+        "stressMax": 97.0,
+        "hrv": {
+          "lastNightAvg": 40.0,
+          "weeklyAvg": 43.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 241.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 13.0,
+          "down": 11.4
+        },
         "sleep": {
           "start": "2026-11-06T02:22",
           "end": "2026-11-06T07:55",
@@ -689,7 +1512,8 @@
               333,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 210
         }
       },
       {
@@ -700,6 +1524,45 @@
         "restingHR": 51.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 79,
+        "sleepDeepMin": 65,
+        "sleepLightMin": 281,
+        "sleepRemMin": 90,
+        "sleepAwakeMin": 12,
+        "bodyBatteryHigh": 51.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 49.0,
+        "bodyBatteryDrained": 49.0,
+        "stressAvg": 45.0,
+        "stressMax": 94.0,
+        "hrv": {
+          "lastNightAvg": 47.0,
+          "weeklyAvg": 41.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 241.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_HIGH_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 3.7,
+          "down": 1.5
+        },
         "sleep": {
           "start": "2026-11-07T01:05",
           "end": "2026-11-07T08:33",
@@ -813,7 +1676,8 @@
               448,
               "rem"
             ]
-          ]
+          ],
+          "lightMin": 281
         }
       },
       {
@@ -824,6 +1688,45 @@
         "restingHR": 55.0,
         "weightKg": null,
         "bodyBattery": 21.0,
+        "sleepScore": 75,
+        "sleepDeepMin": 44,
+        "sleepLightMin": 277,
+        "sleepRemMin": 61,
+        "sleepAwakeMin": 3,
+        "bodyBatteryHigh": 66.0,
+        "bodyBatteryLow": 21.0,
+        "bodyBatteryCharged": 22.0,
+        "bodyBatteryDrained": 45.0,
+        "stressAvg": 38.0,
+        "stressMax": 94.0,
+        "hrv": {
+          "lastNightAvg": 41.0,
+          "weeklyAvg": 42.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 183.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 1.3,
+          "down": 1.1
+        },
         "sleep": {
           "start": "2026-11-08T04:15",
           "end": "2026-11-08T10:39",
@@ -917,7 +1820,8 @@
               384,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 277
         }
       },
       {
@@ -928,6 +1832,45 @@
         "restingHR": 50.0,
         "weightKg": null,
         "bodyBattery": 17.0,
+        "sleepScore": 71,
+        "sleepDeepMin": 72,
+        "sleepLightMin": 252,
+        "sleepRemMin": 28,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 64.0,
+        "bodyBatteryLow": 17.0,
+        "bodyBatteryCharged": 47.0,
+        "bodyBatteryDrained": 51.0,
+        "stressAvg": 32.0,
+        "stressMax": 93.0,
+        "hrv": {
+          "lastNightAvg": 50.0,
+          "weeklyAvg": 44.0,
+          "status": "LOW"
+        },
+        "vo2max": 53.9,
+        "trainingStatus": "Detraining",
+        "trainingLoad": {
+          "acute": 0.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 167.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 6.0,
+          "down": 5.4
+        },
         "sleep": {
           "start": "2026-11-09T01:52",
           "end": "2026-11-09T07:44",
@@ -1011,7 +1954,8 @@
               352,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 252
         }
       },
       {
@@ -1022,6 +1966,45 @@
         "restingHR": 51.0,
         "weightKg": null,
         "bodyBattery": 7.0,
+        "sleepScore": 82,
+        "sleepDeepMin": 119,
+        "sleepLightMin": 184,
+        "sleepRemMin": 72,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 70.0,
+        "bodyBatteryLow": 7.0,
+        "bodyBatteryCharged": 57.0,
+        "bodyBatteryDrained": 67.0,
+        "stressAvg": 37.0,
+        "stressMax": 99.0,
+        "hrv": {
+          "lastNightAvg": 55.0,
+          "weeklyAvg": 46.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": null,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 12.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 128.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 13,
+          "vigorous": 1,
+          "total": 15
+        },
+        "floors": {
+          "up": 4.7,
+          "down": 4.6
+        },
         "sleep": {
           "start": "2026-11-10T01:51",
           "end": "2026-11-10T08:06",
@@ -1095,7 +2078,8 @@
               374,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 184
         }
       },
       {
@@ -1106,6 +2090,45 @@
         "restingHR": 50.0,
         "weightKg": null,
         "bodyBattery": 14.0,
+        "sleepScore": 83,
+        "sleepDeepMin": 79,
+        "sleepLightMin": 250,
+        "sleepRemMin": 57,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 76.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 71.0,
+        "bodyBatteryDrained": 64.0,
+        "stressAvg": 32.0,
+        "stressMax": 97.0,
+        "hrv": {
+          "lastNightAvg": 62.0,
+          "weeklyAvg": 48.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": null,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 10.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 128.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 4.3,
+          "down": 4.1
+        },
         "sleep": {
           "start": "2026-11-11T01:34",
           "end": "2026-11-11T08:00",
@@ -1179,7 +2202,8 @@
               385,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 250
         }
       },
       {
@@ -1190,6 +2214,45 @@
         "restingHR": 51.0,
         "weightKg": null,
         "bodyBattery": 5.0,
+        "sleepScore": 80,
+        "sleepDeepMin": 59,
+        "sleepLightMin": 239,
+        "sleepRemMin": 73,
+        "sleepAwakeMin": 5,
+        "bodyBatteryHigh": 63.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 53.0,
+        "bodyBatteryDrained": 62.0,
+        "stressAvg": 41.0,
+        "stressMax": 99.0,
+        "hrv": {
+          "lastNightAvg": 51.0,
+          "weeklyAvg": 49.0,
+          "status": "UNBALANCED"
+        },
+        "vo2max": null,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 9.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 98.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 4.1,
+          "down": 4.8
+        },
         "sleep": {
           "start": "2026-11-12T01:56",
           "end": "2026-11-12T08:12",
@@ -1263,7 +2326,8 @@
               375,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 239
         }
       },
       {
@@ -1274,6 +2338,45 @@
         "restingHR": 49.0,
         "weightKg": null,
         "bodyBattery": 14.0,
+        "sleepScore": 79,
+        "sleepDeepMin": 108,
+        "sleepLightMin": 177,
+        "sleepRemMin": 68,
+        "sleepAwakeMin": 0,
+        "bodyBatteryHigh": 64.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 61.0,
+        "bodyBatteryDrained": 52.0,
+        "stressAvg": 32.0,
+        "stressMax": 96.0,
+        "hrv": {
+          "lastNightAvg": 54.0,
+          "weeklyAvg": 51.0,
+          "status": "BALANCED"
+        },
+        "vo2max": null,
+        "trainingStatus": "Recovery",
+        "trainingLoad": {
+          "acute": 8.0,
+          "chronic": 219.0,
+          "acwr": 0.0,
+          "acwrStatus": "LOW",
+          "focus": {
+            "aerobicLow": 98.0,
+            "aerobicHigh": 0.0,
+            "anaerobic": 15.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 3.5,
+          "down": 1.6
+        },
         "sleep": {
           "start": "2026-11-13T02:19",
           "end": "2026-11-13T08:12",
@@ -1357,7 +2460,8 @@
               353,
               "core"
             ]
-          ]
+          ],
+          "lightMin": 177
         }
       },
       {
@@ -1367,7 +2471,42 @@
         "sleepHours": null,
         "restingHR": 55.0,
         "weightKg": null,
-        "bodyBattery": 5.0
+        "bodyBattery": 5.0,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": 72.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 0.0,
+        "bodyBatteryDrained": 72.0,
+        "stressAvg": 66.0,
+        "stressMax": 98.0,
+        "hrv": null,
+        "vo2max": null,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 239.0,
+          "chronic": 219.0,
+          "acwr": 1.0,
+          "acwrStatus": "OPTIMAL",
+          "focus": {
+            "aerobicLow": 58.0,
+            "aerobicHigh": 164.0,
+            "anaerobic": 33.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": {
+          "moderate": 56,
+          "vigorous": 49,
+          "total": 154
+        },
+        "floors": {
+          "up": 4.4,
+          "down": 2.9
+        }
       },
       {
         "date": "2026-11-15",
@@ -1376,7 +2515,39 @@
         "sleepHours": null,
         "restingHR": null,
         "weightKg": null,
-        "bodyBattery": null
+        "bodyBattery": null,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": null,
+        "bodyBatteryLow": null,
+        "bodyBatteryCharged": null,
+        "bodyBatteryDrained": null,
+        "stressAvg": null,
+        "stressMax": null,
+        "hrv": {
+          "lastNightAvg": null,
+          "weeklyAvg": 54.0,
+          "status": "BALANCED"
+        },
+        "vo2max": null,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 214.0,
+          "chronic": 219.0,
+          "acwr": 0.9,
+          "acwrStatus": "OPTIMAL",
+          "focus": {
+            "aerobicLow": 5.0,
+            "aerobicHigh": 164.0,
+            "anaerobic": 18.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
+        "intensityMinutes": null,
+        "floors": null
       }
     ],
     "activities": [
@@ -1395,7 +2566,121 @@
             "type": "strength_training",
             "durationMin": 57.0,
             "avgHR": 89.0,
-            "kcal": 259.0
+            "kcal": 259.0,
+            "sets": [
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 26
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 14
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 47.0,
+                "reps": 8
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 47.0,
+                "reps": 8
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 11
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 35.0,
+                "reps": 31
+              },
+              {
+                "name": null,
+                "cat": "ROW",
+                "kg": 50.0,
+                "reps": 14
+              },
+              {
+                "name": null,
+                "cat": "UNKNOWN",
+                "kg": 55.0,
+                "reps": 12
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 60.0,
+                "reps": 10
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 60.0,
+                "reps": 7
+              },
+              {
+                "name": "LAT_PULLDOWN",
+                "cat": "PULL_UP",
+                "kg": 40.0,
+                "reps": 10
+              },
+              {
+                "name": "LAT_PULLDOWN",
+                "cat": "PULL_UP",
+                "kg": 40.0,
+                "reps": 12
+              },
+              {
+                "name": "LAT_PULLDOWN",
+                "cat": "PULL_UP",
+                "kg": 40.0,
+                "reps": 8
+              }
+            ],
+            "zones": [
+              {
+                "z": 1,
+                "min": 12.3,
+                "low": 95
+              },
+              {
+                "z": 2,
+                "min": 1.0,
+                "low": 114
+              },
+              {
+                "z": 3,
+                "min": 0.0,
+                "low": 133
+              },
+              {
+                "z": 4,
+                "min": 0.0,
+                "low": 152
+              },
+              {
+                "z": 5,
+                "min": 0.0,
+                "low": 171
+              }
+            ],
+            "laps": [
+              {
+                "km": 0.0,
+                "sec": 3418,
+                "hr": 89.0
+              }
+            ]
           },
           {
             "id": 24750615381,
@@ -1448,7 +2733,121 @@
                   "hr": 125.0
                 }
               ]
-            }
+            },
+            "sets": [
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 26
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 14
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 47.0,
+                "reps": 8
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 47.0,
+                "reps": 8
+              },
+              {
+                "name": null,
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 11
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 35.0,
+                "reps": 31
+              },
+              {
+                "name": null,
+                "cat": "ROW",
+                "kg": 50.0,
+                "reps": 14
+              },
+              {
+                "name": null,
+                "cat": "UNKNOWN",
+                "kg": 55.0,
+                "reps": 12
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 60.0,
+                "reps": 10
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 60.0,
+                "reps": 7
+              },
+              {
+                "name": "LAT_PULLDOWN",
+                "cat": "PULL_UP",
+                "kg": 40.0,
+                "reps": 10
+              },
+              {
+                "name": "LAT_PULLDOWN",
+                "cat": "PULL_UP",
+                "kg": 40.0,
+                "reps": 12
+              },
+              {
+                "name": "LAT_PULLDOWN",
+                "cat": "PULL_UP",
+                "kg": 40.0,
+                "reps": 8
+              }
+            ],
+            "zones": [
+              {
+                "z": 1,
+                "min": 6.0,
+                "low": 95
+              },
+              {
+                "z": 2,
+                "min": 22.8,
+                "low": 114
+              },
+              {
+                "z": 3,
+                "min": 8.5,
+                "low": 133
+              },
+              {
+                "z": 4,
+                "min": 0.0,
+                "low": 152
+              },
+              {
+                "z": 5,
+                "min": 0.0,
+                "low": 171
+              }
+            ],
+            "laps": [
+              {
+                "km": 0.0,
+                "sec": 2337,
+                "hr": 125.0
+              }
+            ]
           }
         ],
         "sets": [
@@ -1530,6 +2929,45 @@
             "kg": 40.0,
             "reps": 8
           }
+        ],
+        "zones": [
+          {
+            "z": 1,
+            "min": 18.3,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 23.8,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 8.5,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 0.0,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 0.0,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 0.0,
+            "sec": 3418,
+            "hr": 89.0
+          },
+          {
+            "km": 0.0,
+            "sec": 2337,
+            "hr": 125.0
+          }
         ]
       },
       {
@@ -1547,7 +2985,73 @@
             "type": "strength_training",
             "durationMin": 22.0,
             "avgHR": 123.0,
-            "kcal": 230.0
+            "kcal": 230.0,
+            "sets": [
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 20.0,
+                "reps": 20
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 30.0,
+                "reps": 21
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 40.0,
+                "reps": 17
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 40.0,
+                "reps": 12
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 50.0,
+                "reps": 7
+              }
+            ],
+            "zones": [
+              {
+                "z": 1,
+                "min": 1.6,
+                "low": 95
+              },
+              {
+                "z": 2,
+                "min": 15.9,
+                "low": 114
+              },
+              {
+                "z": 3,
+                "min": 3.5,
+                "low": 133
+              },
+              {
+                "z": 4,
+                "min": 0.0,
+                "low": 152
+              },
+              {
+                "z": 5,
+                "min": 0.0,
+                "low": 171
+              }
+            ],
+            "laps": [
+              {
+                "km": 0.0,
+                "sec": 1323,
+                "hr": 123.0
+              }
+            ]
           },
           {
             "id": 24762623232,
@@ -1609,7 +3113,78 @@
                   "hr": 140.0
                 }
               ]
-            }
+            },
+            "sets": [
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 20.0,
+                "reps": 20
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 30.0,
+                "reps": 21
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 40.0,
+                "reps": 17
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 40.0,
+                "reps": 12
+              },
+              {
+                "name": null,
+                "cat": "SQUAT",
+                "kg": 50.0,
+                "reps": 7
+              }
+            ],
+            "zones": [
+              {
+                "z": 1,
+                "min": 0.0,
+                "low": 95
+              },
+              {
+                "z": 2,
+                "min": 2.9,
+                "low": 114
+              },
+              {
+                "z": 3,
+                "min": 17.8,
+                "low": 133
+              },
+              {
+                "z": 4,
+                "min": 0.0,
+                "low": 152
+              },
+              {
+                "z": 5,
+                "min": 0.0,
+                "low": 171
+              }
+            ],
+            "laps": [
+              {
+                "km": 1.0,
+                "sec": 868,
+                "hr": 135.0
+              },
+              {
+                "km": 0.53,
+                "sec": 371,
+                "hr": 140.0
+              }
+            ]
           }
         ],
         "sets": [
@@ -1642,6 +3217,45 @@
             "cat": "SQUAT",
             "kg": 50.0,
             "reps": 7
+          }
+        ],
+        "zones": [
+          {
+            "z": 1,
+            "min": 1.6,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 18.8,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 21.3,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 0.0,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 0.0,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 0.0,
+            "sec": 1323,
+            "hr": 123.0
+          },
+          {
+            "km": 1.53,
+            "sec": 1239,
+            "hr": 136.0
           }
         ]
       },
@@ -1703,6 +3317,40 @@
             "kg": null,
             "reps": 24
           }
+        ],
+        "zones": [
+          {
+            "z": 1,
+            "min": 8.7,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 1.2,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 0.1,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 0.0,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 0.0,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 0.0,
+            "sec": 982,
+            "hr": 98.0
+          }
         ]
       },
       {
@@ -1720,7 +3368,133 @@
             "type": "strength_training",
             "durationMin": 65.2,
             "avgHR": 114.0,
-            "kcal": 491.0
+            "kcal": 491.0,
+            "sets": [
+              {
+                "name": "BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 26
+              },
+              {
+                "name": "BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 14
+              },
+              {
+                "name": "BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 11
+              },
+              {
+                "name": "BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 13
+              },
+              {
+                "name": "INCLINE_BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 38.0,
+                "reps": 9
+              },
+              {
+                "name": "INCLINE_BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 13
+              },
+              {
+                "name": "INCLINE_BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 13
+              },
+              {
+                "name": "INCLINE_BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 10
+              },
+              {
+                "name": "INCLINE_BARBELL_BENCH_PRESS",
+                "cat": "BENCH_PRESS",
+                "kg": 29.0,
+                "reps": 8
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 27.5,
+                "reps": 33
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 42.5,
+                "reps": 21
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 50.0,
+                "reps": 10
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 50.0,
+                "reps": 10
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 50.0,
+                "reps": 11
+              },
+              {
+                "name": "SEATED_CABLE_ROW",
+                "cat": "ROW",
+                "kg": 50.0,
+                "reps": 13
+              }
+            ],
+            "zones": [
+              {
+                "z": 1,
+                "min": 35.7,
+                "low": 95
+              },
+              {
+                "z": 2,
+                "min": 25.0,
+                "low": 114
+              },
+              {
+                "z": 3,
+                "min": 4.1,
+                "low": 133
+              },
+              {
+                "z": 4,
+                "min": 0.0,
+                "low": 152
+              },
+              {
+                "z": 5,
+                "min": 0.0,
+                "low": 171
+              }
+            ],
+            "laps": [
+              {
+                "km": 0.0,
+                "sec": 3915,
+                "hr": 114.0
+              }
+            ]
           },
           {
             "id": 25077331411,
@@ -1792,7 +3566,56 @@
                   "hr": 168.0
                 }
               ]
-            }
+            },
+            "zones": [
+              {
+                "z": 1,
+                "min": 0.1,
+                "low": 95
+              },
+              {
+                "z": 2,
+                "min": 1.0,
+                "low": 114
+              },
+              {
+                "z": 3,
+                "min": 2.3,
+                "low": 133
+              },
+              {
+                "z": 4,
+                "min": 24.9,
+                "low": 152
+              },
+              {
+                "z": 5,
+                "min": 1.9,
+                "low": 171
+              }
+            ],
+            "laps": [
+              {
+                "km": 1.0,
+                "sec": 665,
+                "hr": 153.0
+              },
+              {
+                "km": 1.0,
+                "sec": 551,
+                "hr": 165.0
+              },
+              {
+                "km": 1.0,
+                "sec": 549,
+                "hr": 168.0
+              },
+              {
+                "km": 0.08,
+                "sec": 46,
+                "hr": 168.0
+              }
+            ]
           }
         ],
         "sets": [
@@ -1885,6 +3708,45 @@
             "cat": "ROW",
             "kg": 50.0,
             "reps": 13
+          }
+        ],
+        "zones": [
+          {
+            "z": 1,
+            "min": 35.8,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 26.0,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 6.4,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 24.9,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 1.9,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 0.0,
+            "sec": 3915,
+            "hr": 114.0
+          },
+          {
+            "km": 3.08,
+            "sec": 1811,
+            "hr": 162.0
           }
         ]
       }
