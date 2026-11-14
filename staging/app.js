@@ -1142,6 +1142,9 @@ function musclesFor(name) {
   for (const m of MOVE_MUSCLES) {
     if (m.keys.some((k) => String(name).includes(k))) return m;
   }
+  if (typeof GARMIN_NAME_CAT !== "undefined" && Object.prototype.hasOwnProperty.call(GARMIN_NAME_CAT, name)) {
+    return GARMIN_CAT_MUSCLES[GARMIN_NAME_CAT[name]] || GARMIN_DEFAULT_MUSCLES;
+  }
   return { primary: [], secondary: [] };
 }
 function moveKey(name) {
@@ -1263,7 +1266,7 @@ function matchGarmin(date) {
 const GARMIN_EX = {
   BARBELL_BENCH_PRESS: "槓鈴臥推", INCLINE_BARBELL_BENCH_PRESS: "上斜槓鈴臥推", DECLINE_BARBELL_BENCH_PRESS: "下斜槓鈴臥推",
   DUMBBELL_BENCH_PRESS: "啞鈴臥推", INCLINE_DUMBBELL_BENCH_PRESS: "上斜啞鈴臥推", SMITH_MACHINE_BENCH_PRESS: "史密斯臥推",
-  CHEST_PRESS: "胸推", MACHINE_CHEST_PRESS: "胸推", PUSH_UP: "伏地挺身", KNEELING_PUSH_UP: "跪姿伏地挺身",
+  CHEST_PRESS: "胸推", MACHINE_CHEST_PRESS: "胸推", CHEST_PRESS_MACHINE: "胸推", PUSH_UP: "伏地挺身", KNEELING_PUSH_UP: "跪姿伏地挺身",
   SEATED_CABLE_ROW: "坐姿划船", CABLE_ROW: "坐姿划船", ONE_ARM_DUMBBELL_ROW: "單臂划船", DUMBBELL_ROW: "單臂划船",
   BENT_OVER_ROW: "彎腰划船", BARBELL_ROW: "槓鈴划船", CHEST_SUPPORTED_DUMBBELL_ROW: "胸靠划船", T_BAR_ROW: "T 槓划船",
   LAT_PULLDOWN: "滑輪下拉", WIDE_GRIP_LAT_PULLDOWN: "寬握下拉", CLOSE_GRIP_LAT_PULLDOWN: "窄握下拉", PULL_UP: "引體向上",
@@ -1275,7 +1278,32 @@ const GARMIN_EX = {
   OVERHEAD_PRESS: "肩推", SEATED_DUMBBELL_SHOULDER_PRESS: "坐姿啞鈴肩推", DUMBBELL_SHOULDER_PRESS: "啞鈴肩推", FACE_PULL: "面拉",
   LATERAL_RAISE: "側平舉", DUMBBELL_LATERAL_RAISE: "側平舉", BARBELL_BICEPS_CURL: "槓鈴彎舉", DUMBBELL_BICEPS_CURL: "啞鈴彎舉",
   TRICEPS_PRESSDOWN: "三頭下壓", LEG_EXTENSION: "腿伸屈", LEG_CURL: "腿後勾", LYING_LEG_CURL: "腿後勾", WALKING_LUNGE: "弓箭步",
+  BACK_SQUATS: "槓鈴背蹲", BARBELL_BACK_SQUATS: "槓鈴背蹲", SMITH_MACHINE_SQUAT: "史密斯深蹲", DUMBBELL_SQUAT: "啞鈴深蹲",
+  SINGLE_LEG_ROMANIAN_DEADLIFT: "單腳羅馬尼亞硬舉", STRAIGHT_LEG_DEADLIFT: "直腿硬舉", SUMO_DEADLIFT: "相撲硬舉", TRAP_BAR_DEADLIFT: "六角槓硬舉",
+  BARBELL_HIP_THRUST_ON_FLOOR: "髖推", BARBELL_HIP_THRUST_WITH_BENCH: "髖推", SINGLE_LEG_HIP_RAISE: "單腳臀橋",
+  CABLE_CORE_PRESS: "抗旋轉推", KNEELING_PALLOF_PRESS: "抗旋轉推", HANGING_LEG_RAISE: "懸吊抬腿", CAPTAINS_CHAIR_KNEE_RAISE: "懸吊抬膝",
+  BIRD_DOGS: "鳥狗", WEIGHTED_BIRD_DOG: "鳥狗", SEATED_ROW: "坐姿划船", MACHINE_ROW: "坐姿划船", LAT_PULL_DOWN: "滑輪下拉",
+  INCLINE_CHEST_PRESS: "上斜胸推", SEATED_CHEST_PRESS: "胸推", KETTLEBELL_SWING: "壺鈴擺盪", BACK_EXTENSION: "背伸展",
 };
+// Body parts per Garmin category: used when a translated name hits no MOVE_MUSCLES key, so the chart is never empty.
+const GARMIN_CAT_MUSCLES = {
+  SQUAT: { primary: ["quads", "glutes"], secondary: ["core"] }, LUNGE: { primary: ["quads", "glutes"], secondary: ["hams"] },
+  DEADLIFT: { primary: ["glutes", "hams"], secondary: ["lowback"] }, HIP_RAISE: { primary: ["glutes"], secondary: ["hams"] },
+  HIP_SWING: { primary: ["glutes", "hams"], secondary: ["core"] }, LEG_CURL: { primary: ["hams"], secondary: [] },
+  CALF_RAISE: { primary: ["calves"], secondary: [] }, HYPEREXTENSION: { primary: ["lowback"], secondary: ["glutes", "hams"] },
+  BENCH_PRESS: { primary: ["chest"], secondary: ["tris", "frontDelts"] }, PUSH_UP: { primary: ["chest"], secondary: ["tris", "frontDelts"] },
+  FLYE: { primary: ["chest"], secondary: ["frontDelts"] }, ROW: { primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
+  PULL_UP: { primary: ["lats"], secondary: ["bis"] }, SHOULDER_PRESS: { primary: ["delts"], secondary: ["tris"] },
+  LATERAL_RAISE: { primary: ["delts"], secondary: [] }, SHOULDER_STABILITY: { primary: ["rearDelts", "rotator"], secondary: [] },
+  SHRUG: { primary: ["upperback"], secondary: [] }, CURL: { primary: ["bis"], secondary: ["forearms"] },
+  TRICEPS_EXTENSION: { primary: ["tris"], secondary: [] }, CORE: { primary: ["core"], secondary: ["obliques"] },
+  CRUNCH: { primary: ["core"], secondary: [] }, SIT_UP: { primary: ["core"], secondary: [] }, LEG_RAISE: { primary: ["core"], secondary: [] },
+  PLANK: { primary: ["core"], secondary: ["obliques"] }, CHOP: { primary: ["core", "obliques"], secondary: [] },
+  HIP_STABILITY: { primary: ["core", "glutes"], secondary: ["lowback"] }, CARRY: { primary: ["core", "forearms"], secondary: ["upperback"] },
+  OLYMPIC_LIFT: { primary: ["quads", "glutes", "hams"], secondary: ["upperback"] }, TOTAL_BODY: { primary: ["quads", "glutes", "core"], secondary: ["chest", "lats"] },
+};
+const GARMIN_DEFAULT_MUSCLES = { primary: ["core"], secondary: [] };
+var GARMIN_NAME_CAT = {};
 const GARMIN_CAT = {
   BENCH_PRESS: "臥推", ROW: "划船", PULL_UP: "引體向上", SQUAT: "深蹲", DEADLIFT: "硬舉", LUNGE: "弓箭步",
   PUSH_UP: "伏地挺身", HIP_RAISE: "臀橋", HIP_STABILITY: "核心穩定", PLANK: "棒式", CORE: "核心", CRUNCH: "捲腹",
@@ -1294,6 +1322,7 @@ function garminMovesOn(date) {
     if (a.date !== date || !Array.isArray(a.sets)) continue;
     for (const x of a.sets) {
       const name = garminExName(x);
+      if (!(name in GARMIN_NAME_CAT)) GARMIN_NAME_CAT[name] = x.cat || null;
       (moves[name] ||= []).push({ weight: x.kg != null ? Number(x.kg) : null, reps: x.reps != null ? Number(x.reps) : null, done: true, garmin: true });
     }
   }
@@ -3746,7 +3775,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.14-1";
+const APP_VERSION = "2026.11.15-1";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
