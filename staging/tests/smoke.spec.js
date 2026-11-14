@@ -1,4 +1,6 @@
 const { test, expect } = require("@playwright/test");
+const { fixData } = require("./_fixed-data");
+test.beforeEach(async ({ page }) => { await fixData(page); });
 
 const TUE_10 = "2026-11-14T10:00:00+07:00";
 const TUE_15 = "2026-11-14T15:00:00+07:00";

@@ -178,7 +178,17 @@ const MOVE_MUSCLES = [
   { keys: ["胸靠划船", "胸部支撐划船", "坐姿划船", "單臂划船", "單手划船", "划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
   { keys: ["下拉", "滑輪下拉"], primary: ["lats"], secondary: ["bis"] },
   { keys: ["面拉"], primary: ["rearDelts", "upperback"], secondary: ["rotator"] },
+  { keys: ["羅馬尼亞硬舉", "硬舉"], primary: ["glutes", "hams"], secondary: ["lowback"] },
+  { keys: ["弓箭步", "前蹲"], primary: ["quads", "glutes"], secondary: ["hams"] },
+  { keys: ["腿伸屈"], primary: ["quads"], secondary: [] },
+  { keys: ["腿後勾"], primary: ["hams"], secondary: [] },
+  { keys: ["引體向上"], primary: ["lats"], secondary: ["bis"] },
+  { keys: ["側平舉"], primary: ["delts"], secondary: [] },
+  { keys: ["彎舉"], primary: ["bis"], secondary: ["forearms"] },
+  { keys: ["三頭"], primary: ["tris"], secondary: [] },
+  { keys: ["飛鳥"], primary: ["chest"], secondary: ["frontDelts"] },
   { keys: ["死蟲"], primary: ["core"], secondary: ["lowback"] },
+  { keys: ["抗旋轉", "棒式", "抬膝", "捲腹", "核心"], primary: ["core"], secondary: ["obliques"] },
   { keys: ["鳥狗"], primary: ["core"], secondary: ["lowback"] },
 ];
 

@@ -17,7 +17,7 @@ test("stale stored trainDays [1,4] → Tuesday is a training day after load (one
   await expect(page.locator("[data-testid=train-card]")).toContainText("平日在家");
   const s = await page.evaluate(() => JSON.parse(localStorage.getItem("fatcat-v2")));
   expect(s.trainDays).toEqual([2, 4, 6, 0]);
-  expect(s.migV).toBe(2);
+  expect(s.migV).toBe(3);
   expect(s.grocery).toEqual({ chicken: true });
   // runs once: a later change is not overwritten
   await page.evaluate(() => {

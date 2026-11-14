@@ -1,4 +1,6 @@
 const { test, expect } = require("@playwright/test");
+const { fixData } = require("./_fixed-data");
+test.beforeEach(async ({ page }) => { await fixData(page); });
 const P = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/staging/"}`;
 const u = (now) => `${P}?debug=1&rest=0&sleep=8&now=${encodeURIComponent(now)}`;
 const TUE = "2026-11-14T10:00:00+07:00";
