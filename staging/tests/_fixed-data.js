@@ -9,9 +9,11 @@ const strip = (d) => {
 };
 async function fixData(page) {
   await page.route("**/data.json*", async (route) => {
-    const r = await route.fetch();
-    let d; try { d = await r.json(); } catch { return route.fulfill({ response: r }); }
-    await route.fulfill({ response: r, json: strip(d) });
+    try { // page may close while a background poll is in flight
+      const r = await route.fetch();
+      let d; try { d = await r.json(); } catch { return await route.fulfill({ response: r }); }
+      await route.fulfill({ response: r, json: strip(d) });
+    } catch (_) {}
   });
 }
 module.exports = { fixData, strip };
