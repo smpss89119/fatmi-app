@@ -223,6 +223,14 @@ function isGymDay(st, d = now()) {
   const id = plannedWorkoutFor(st, d);
   return !!id && String(id).startsWith("gym");
 }
+// Food follows today's ACTUAL plan (Nutri): a gym day switched to the quick / non-gym version eats like a
+// non-gym day (target 1950, rest-day portions for meals not yet eaten). Eaten meals are stored snapshots in
+// mealLogs, so they stay exactly as logged — no deduction, no negative adjustment.
+function gymFuelDay(st, d = now()) {
+  if (!isGymDay(st, d)) return false;
+  const plan = todayPlan(st, d);
+  return !(plan && plan.train && plan.id && !String(plan.id).startsWith("gym"));
+}
 function isGarminWorkout(a) {
   if (!a) return false;
   return /strength|multi_sport|training|fitness_equipment/i.test(a.type || "")
@@ -388,7 +396,7 @@ function twoScoopMeal(st, d = now()) {
 }
 function dinnerFor(st, d = now()) {
   const shake = twoScoopMeal(st, d);
-  const grams = (shake.hasPlant && !isGymDay(st, d)) ? 150 : 200;
+  const grams = (shake.hasPlant && !gymFuelDay(st, d)) ? 150 : 200;
   const chickenId = grams === 150 ? "chicken150" : "chicken200";
   const meal = composeSwapMeal(chickenId, "rice150");
   meal.name = `18:30 雞胸 ${grams}g＋飯 150g＋青菜`;
@@ -540,7 +548,8 @@ function computeKcalAdjust(st, d = now()) {
   return { adj: 0, note: null };
 }
 function kcalInfo(st, d = now()) {
-  const trainLike = isGymDay(st, d);
+  const trainLike = gymFuelDay(st, d);
+  const quickToday = isGymDay(st, d) && !trainLike;
   const y = dailyOn(todayKey(addDays(d, -1)));
   const adj = computeKcalAdjust(st, d);
   let target = trainLike ? 2150 : 1950;
@@ -549,7 +558,7 @@ function kcalInfo(st, d = now()) {
   const label = String(target);
   return {
     target,
-    source: trainLike ? `健身房日 ${target}` : (isActiveTrainDay(st, d) ? `在家練日 ${target}` : `休息日 ${target}`),
+    source: trainLike ? `健身房日 ${target}` : quickToday ? `改快版 ${target}` : (isActiveTrainDay(st, d) ? `在家練日 ${target}` : `休息日 ${target}`),
     adj,
     trainLike,
     band: label,
@@ -647,7 +656,7 @@ function suggestionOf(st, id, d = now()) {
   if (id === "snack") return { ...twoScoopMeal(st, d), eaten: false };
   if (id === "dinner") return { ...dinnerFor(st, d), eaten: false };
   if (id === "eggs21") {
-    if (isGymDay(st, d)) {
+    if (gymFuelDay(st, d)) {
       // Nutri: 健身房日 21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g
       return { name: "21:00 蝦仁或吳郭魚 150g＋飯 2/3 碗＋青菜＋毛豆 100g", kcal: 435, protein: 48, id: "gymNight", eaten: false };
     }
@@ -656,7 +665,7 @@ function suggestionOf(st, id, d = now()) {
   }
   const def = MEAL_DEFS[id];
   if (!def) return { name: "", kcal: 0, protein: 0, eaten: false };
-  return { ...mealOf(def, isGymDay(st, d)), id: "default", eaten: false };
+  return { ...mealOf(def, gymFuelDay(st, d)), id: "default", eaten: false };
 }
 function hasCustomPortions(m) {
   if (!m) return false;
@@ -2126,7 +2135,12 @@ function renderElse(st) {
         <button type="button" class="btn primary" data-else-free-add data-testid="else-free-add">加入</button></div>`
       : `<button type="button" class="btn full" data-else-free-open data-testid="else-free-open">＋ 其他</button>`}
     <div class="else-total" data-testid="else-total">${tot.kcal} kcal · 蛋白 ${tot.protein} g</div>
-    <div class="sticky-cta tabbed"><button type="button" class="btn primary xl" data-else-save data-testid="else-save"${tot.kcal || tot.protein || tot.name ? "" : " disabled"}>✓ 吃了</button></div>`;
+    ${(() => {
+      // Nothing picked yet → plain in-flow (disabled) button, so no bar floats over the list.
+      // Once something is picked, the save bar sticks above the tab bar (list keeps 72px clearance to scroll past it).
+      const has = !!(tot.kcal || tot.protein || tot.name);
+      return `<div class="${has ? "sticky-cta tabbed" : "else-cta-idle"}" data-testid="else-cta"><button type="button" class="btn primary xl" data-else-save data-testid="else-save"${has ? "" : " disabled"}>✓ 吃了</button></div>`;
+    })()}`;
 }
 function renderSwap(st) {
   if (ui.elseMeal) return renderElse(st);
@@ -2496,7 +2510,7 @@ function renderSleep(st) {
   const rows = sleepRows();
   const range = ui.sleepRange || "D";
   const seg = ["D", "W", "M"].map((r) => `<button type="button" class="${range === r ? "on" : ""}" data-sleep-range="${r}" data-testid="sleep-range-${r}">${{ D: "日", W: "週", M: "月" }[r]}</button>`).join("");
-  const head = `<div class="sl-top"><button type="button" class="sl-back" data-go="today">← 回到今天</button><b>睡眠</b><span></span></div>
+  const head = `<button type="button" class="btn back-today" data-go="today" data-testid="sleep-back">← 回到今天</button><div class="sl-top"><b>睡眠</b></div>
     <div class="sl-seg">${seg}</div>`;
   if (!rows.length) return `<div class="sleep-page" data-testid="sleep-page">${head}<div class="sl-card"><div class="sl-k">睡眠時間</div><div class="sl-big">—</div><p class="sl-empty" data-testid="sleep-empty">還沒有睡眠資料</p></div></div>`;
   let body = "";
@@ -3128,6 +3142,10 @@ function render() {
   document.body.classList.toggle("mode-workout", st.tab === "workout");
   document.body.classList.toggle("mode-sleep", st.tab === "sleep");
   document.documentElement.classList.toggle("mode-sleep", st.tab === "sleep");
+  { // status-bar tint follows the page: black on the sleep page, brand orange elsewhere
+    const m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute("content", st.tab === "sleep" ? "#000000" : (matchMedia("(prefers-color-scheme: dark)").matches ? "#000000" : "#C2410C"));
+  }
   const tabHi = st.tab === "body" || st.tab === "workout" || st.tab === "sleep" || st.tab === "log" ? "today" : st.tab;
   document.querySelectorAll("#tabs button").forEach((b) => {
     b.classList.toggle("on", b.dataset.tab === tabHi);
@@ -3143,7 +3161,12 @@ function render() {
   else if (st.tab === "sleep") main.innerHTML = renderSleep(st);
   else main.innerHTML = renderHome(st);
   if (ui.shareSheet) main.insertAdjacentHTML("beforeend", renderShareSheet());
-  if (st.tab !== "workout") main.insertAdjacentHTML("beforeend", `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`);
+  if (st.tab !== "workout") {
+    // version line goes above a bottom sticky bar (else it would sit under the bar at the end of the page)
+    const ver = `<p class="app-ver" data-testid="app-version">v${APP_VERSION}</p>`;
+    const stick = main.lastElementChild && main.lastElementChild.classList.contains("sticky-cta") ? main.lastElementChild : null;
+    if (stick) stick.insertAdjacentHTML("beforebegin", ver); else main.insertAdjacentHTML("beforeend", ver);
+  }
 }
 
 function tick() {
@@ -3942,7 +3965,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.15-3";
+const APP_VERSION = "2026.11.15-4";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let reloading = false;

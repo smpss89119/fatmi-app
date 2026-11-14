@@ -95,7 +95,7 @@ test("吃了別的: 儲存 stays on screen (sticky above the tab bar)", async ({
 
 test("sleep page: dark tab bar, 「← 回到今天」 back", async ({ page }) => {
   await page.goto(u("sleep")); await page.waitForSelector(".sleep-page");
-  await expect(page.locator(".sl-back")).toHaveText("← 回到今天");
+  await expect(page.locator("#main [data-go=today]").first()).toHaveText("← 回到今天");
   const bg = await page.evaluate(() => getComputedStyle(document.querySelector("nav#tabs")).backgroundColor);
   expect(bg).toBe("rgb(0, 0, 0)");
 });

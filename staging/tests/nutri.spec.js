@@ -1,10 +1,12 @@
 const { test, expect } = require("@playwright/test");
+const { fixData } = require("./_fixed-data");
 const P = `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/staging/"}`;
 const TUE_15 = "2026-11-14T15:00:00+07:00";
 const url = (hash = "today") => `${P}?debug=1&sleep=8&now=${encodeURIComponent(TUE_15)}#${hash}`;
 const shot = (n) => (process.env.SHOT_DIR ? { path: `${process.env.SHOT_DIR}/${n}` } : {});
 test.use({ viewport: { width: 390, height: 844 } });
 async function fresh(page, seed) {
+  await fixData(page); // live Body Battery would turn Saturday into the quick plan (→ 1950 since 11.15-4)
   if (seed) await page.addInitScript((d) => { if (!sessionStorage.seeded) { sessionStorage.seeded = 1; localStorage.setItem("fatcat-v2", JSON.stringify(d)); } }, seed);
   await page.goto(url()); await page.waitForSelector(".ttl");
 }

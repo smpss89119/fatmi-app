@@ -519,3 +519,29 @@ main{padding-bottom:calc(var(--tabh) + var(--sb) + 48px)}
 .sticky-cta.tabbed{bottom:var(--navh,calc(var(--tabh) + var(--sb)))}
 main{padding-bottom:calc(var(--navh,calc(var(--tabh) + var(--sb))) + 40px)}
 body.mode-workout main{padding-bottom:calc(var(--sb) + 24px)}
+/* ---- 2026.11.15-4 (Uxi hands-on review) ---- */
+/* Bottom clearance = tab bar + safe area + 24px on every page; scrollIntoView / focus also stop above the tab bar */
+html{scroll-padding-top:calc(var(--st) + 72px);scroll-padding-bottom:calc(var(--navh,calc(var(--tabh) + var(--sb))) + 24px)}
+main{padding-bottom:calc(var(--navh,calc(var(--tabh) + var(--sb))) + 40px)}
+body.mode-log main,.cardio:last-child{scroll-margin-bottom:calc(var(--navh,calc(var(--tabh) + var(--sb))) + 24px)}
+.cardio{margin-bottom:24px}
+/* 吃了別的：±44px steppers, chips ≥44px, last rows clear the sticky 「✓ 吃了」 + tab bar */
+.else-row{grid-template-columns:minmax(0,1fr) 72px 124px}
+.else-row .stp{grid-template-columns:44px 36px 44px}
+.else-row .stp button{width:44px;height:44px;min-width:44px;min-height:44px}
+.chips .chip,.chip[data-else-out],.chip[data-else-size]{min-width:44px;min-height:44px}
+.else-list{padding-bottom:72px}
+/* Workout card ⓘ: solid dark orange, white text (≈7.3:1) */
+.info-i,.hero .info-i{background:#9A3412;color:#fff}
+.hero .btn{background:#9A3412;color:#fff}
+/* Sleep page: one dark surface top to bottom in BOTH schemes (header, staging tag, tab bar) */
+body.mode-sleep header{background:#000!important;border-bottom-color:#1C1C1E!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.mode-sleep header .ttl,body.mode-sleep header .clock{color:#fff}
+body.mode-sleep .stg-tag,body.mode-sleep .demo-tag{background:#3A2210;color:#FED7AA}
+/* Sleep back = same .btn as other pages (dark variant here) */
+.sleep-page .btn.back-today{margin:0 0 8px}
+body.mode-sleep .btn.back-today{background:#2C2C2E;color:#FDBA74}
+.sl-top{grid-template-columns:1fr}
+.sl-top b{text-align:left;font-size:22px}
+.else-cta-idle{margin:12px 0 0;display:flex;flex-direction:column}
+.else-cta-idle .btn[disabled]{opacity:.55}
