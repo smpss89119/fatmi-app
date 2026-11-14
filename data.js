@@ -171,15 +171,29 @@ const MAIN_PARTS = ["quads", "glutes", "hams", "chest", "delts", "lats", "midbac
 
 const MOVE_MUSCLES = [
   { keys: ["腿推"], primary: ["quads", "glutes"], secondary: ["hams"] },
-  { keys: ["高腳杯深蹲", "深蹲"], primary: ["quads", "glutes"], secondary: ["core"] },
+  { keys: ["高腳杯深蹲", "背蹲", "深蹲"], primary: ["quads", "glutes"], secondary: ["core"] },
   { keys: ["臀橋", "臀推", "髖推"], primary: ["glutes"], secondary: ["hams"] },
   { keys: ["胸推", "地板臥推", "臥推", "伏地挺身", "跪姿伏地"], primary: ["chest"], secondary: ["tris", "frontDelts"] },
   { keys: ["坐姿有靠背肩推", "坐姿啞鈴肩推", "肩推"], primary: ["delts"], secondary: ["tris"] },
   { keys: ["胸靠划船", "胸部支撐划船", "坐姿划船", "單臂划船", "單手划船", "划船"], primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
   { keys: ["下拉", "滑輪下拉"], primary: ["lats"], secondary: ["bis"] },
   { keys: ["面拉"], primary: ["rearDelts", "upperback"], secondary: ["rotator"] },
+  { keys: ["羅馬尼亞硬舉", "硬舉"], primary: ["glutes", "hams"], secondary: ["lowback"] },
+  { keys: ["弓箭步", "前蹲"], primary: ["quads", "glutes"], secondary: ["hams"] },
+  { keys: ["腿伸屈"], primary: ["quads"], secondary: [] },
+  { keys: ["腿後勾"], primary: ["hams"], secondary: [] },
+  { keys: ["引體向上"], primary: ["lats"], secondary: ["bis"] },
+  { keys: ["側平舉"], primary: ["delts"], secondary: [] },
+  { keys: ["彎舉"], primary: ["bis"], secondary: ["forearms"] },
+  { keys: ["三頭"], primary: ["tris"], secondary: [] },
+  { keys: ["飛鳥"], primary: ["chest"], secondary: ["frontDelts"] },
   { keys: ["死蟲"], primary: ["core"], secondary: ["lowback"] },
-  { keys: ["鳥狗"], primary: ["core"], secondary: ["lowback"] },
+  { keys: ["抗旋轉", "棒式", "抬膝", "抬腿", "捲腹", "仰臥起坐", "核心"], primary: ["core"], secondary: ["obliques"] },
+  { keys: ["提踵"], primary: ["calves"], secondary: [] },
+  { keys: ["聳肩"], primary: ["upperback"], secondary: [] },
+  { keys: ["背伸展"], primary: ["lowback"], secondary: ["glutes", "hams"] },
+  { keys: ["壺鈴擺盪"], primary: ["glutes", "hams"], secondary: ["core"] },
+  { keys: ["鳥狗"], primary: ["core"], secondary: ["glutes", "lowback"] },
 ];
 
 const BACK_SAFER = [

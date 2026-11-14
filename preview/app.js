@@ -45,13 +45,40 @@ function save(patch) {
   return s;
 }
 // One-time migrations for stored state (versioned). 1: reset stale trainDays to Tue/Fri. 2: Tue/Thu home + Sat A / Sun B.
-const MIG_VERSION = 2;
+// 3: 11/10 was 平日在家 2 輪; 11/14 template 健身房 A was wrong (Garmin sets replace it). Old entries kept in logsBackup.
+const MIG_VERSION = 3;
+function templateMoves(workoutId, rounds, lastLoads) {
+  const w = WORKOUTS[workoutId];
+  const moves = {};
+  for (const step of (w && w.steps) || []) {
+    if (step.optional) continue;
+    const m = String(step.dose || "").match(/(\d+)\s*[×x]\s*(\d+)/);
+    const reps = m ? Number(m[2]) : null;
+    const last = (lastLoads || {})[moveKey(step.name)];
+    moves[step.name] = Array.from({ length: rounds }, () => ({ weight: last && last.weight != null ? last.weight : null, reps, target: reps, done: true, short: false }));
+  }
+  return moves;
+}
 function migrateState() {
   try {
     const s = load();
-    if (!Object.keys(s).length || (Number(s.migV) || 0) >= MIG_VERSION) return;
+    const v = Number(s.migV) || 0;
+    if (!Object.keys(s).length || v >= MIG_VERSION) return;
     const patch = { migV: MIG_VERSION };
-    if ((Number(s.migV) || 0) < 2) patch.trainDays = DEFAULT_DAYS.slice();
+    if (v < 2) patch.trainDays = DEFAULT_DAYS.slice();
+    if (v < 3) {
+      const logs = { ...(s.logs || {}) };
+      const backup = { ...(s.logsBackup || {}) };
+      const a = logs["2026-11-10"];
+      if (a && a.backfill && !(a.workoutId === "homeQ" && Object.values(a.moves || {}).every((x) => (x || []).length === 2))) {
+        backup["2026-11-10@m3"] = a;
+        logs["2026-11-10"] = { workoutId: "homeQ", moves: templateMoves("homeQ", 2, s.lastLoads), backfill: true, finishedAt: a.finishedAt || Date.parse("2026-11-10T23:45:00+08:00") };
+      }
+      const b = logs["2026-11-14"];
+      if (b && b.backfill) { backup["2026-11-14@m3"] = b; delete logs["2026-11-14"]; }
+      patch.logs = logs;
+      patch.logsBackup = backup;
+    }
     save(patch);
   } catch (_) {}
 }
@@ -1115,6 +1142,9 @@ function musclesFor(name) {
   for (const m of MOVE_MUSCLES) {
     if (m.keys.some((k) => String(name).includes(k))) return m;
   }
+  if (typeof GARMIN_NAME_CAT !== "undefined" && Object.prototype.hasOwnProperty.call(GARMIN_NAME_CAT, name)) {
+    return GARMIN_CAT_MUSCLES[GARMIN_NAME_CAT[name]] || GARMIN_DEFAULT_MUSCLES;
+  }
   return { primary: [], secondary: [] };
 }
 function moveKey(name) {
@@ -1232,6 +1262,81 @@ function matchGarmin(date) {
   };
 }
 
+// Garmin strength sets (data.json activities[].sets) → App moves. Chinese names hit MOVE_MUSCLES keys.
+const GARMIN_EX = {
+  BARBELL_BENCH_PRESS: "槓鈴臥推", INCLINE_BARBELL_BENCH_PRESS: "上斜槓鈴臥推", DECLINE_BARBELL_BENCH_PRESS: "下斜槓鈴臥推",
+  DUMBBELL_BENCH_PRESS: "啞鈴臥推", INCLINE_DUMBBELL_BENCH_PRESS: "上斜啞鈴臥推", SMITH_MACHINE_BENCH_PRESS: "史密斯臥推",
+  CHEST_PRESS: "胸推", MACHINE_CHEST_PRESS: "胸推", CHEST_PRESS_MACHINE: "胸推", PUSH_UP: "伏地挺身", KNEELING_PUSH_UP: "跪姿伏地挺身",
+  SEATED_CABLE_ROW: "坐姿划船", CABLE_ROW: "坐姿划船", ONE_ARM_DUMBBELL_ROW: "單臂划船", DUMBBELL_ROW: "單臂划船",
+  BENT_OVER_ROW: "彎腰划船", BARBELL_ROW: "槓鈴划船", CHEST_SUPPORTED_DUMBBELL_ROW: "胸靠划船", T_BAR_ROW: "T 槓划船",
+  LAT_PULLDOWN: "滑輪下拉", WIDE_GRIP_LAT_PULLDOWN: "寬握下拉", CLOSE_GRIP_LAT_PULLDOWN: "窄握下拉", PULL_UP: "引體向上",
+  GOBLET_SQUAT: "高腳杯深蹲", BARBELL_BACK_SQUAT: "槓鈴背蹲", BACK_SQUAT: "槓鈴背蹲", SQUAT: "深蹲", FRONT_SQUAT: "前蹲",
+  LEG_PRESS: "腿推", ROMANIAN_DEADLIFT: "羅馬尼亞硬舉", DUMBBELL_ROMANIAN_DEADLIFT: "啞鈴羅馬尼亞硬舉", BARBELL_DEADLIFT: "硬舉", DEADLIFT: "硬舉",
+  HIP_THRUST: "髖推", BARBELL_HIP_THRUST: "髖推", GLUTE_BRIDGE: "臀橋", HIP_RAISE: "臀橋", WEIGHTED_HIP_RAISE: "臀橋",
+  DEAD_BUG: "死蟲", WEIGHTED_DEAD_BUG: "死蟲", BIRD_DOG: "鳥狗", PLANK: "棒式", SIDE_PLANK: "側棒式",
+  PALLOF_PRESS: "抗旋轉推", CABLE_PALLOF_PRESS: "抗旋轉推", HANGING_KNEE_RAISE: "懸吊抬膝",
+  OVERHEAD_PRESS: "肩推", SEATED_DUMBBELL_SHOULDER_PRESS: "坐姿啞鈴肩推", DUMBBELL_SHOULDER_PRESS: "啞鈴肩推", FACE_PULL: "面拉",
+  LATERAL_RAISE: "側平舉", DUMBBELL_LATERAL_RAISE: "側平舉", BARBELL_BICEPS_CURL: "槓鈴彎舉", DUMBBELL_BICEPS_CURL: "啞鈴彎舉",
+  TRICEPS_PRESSDOWN: "三頭下壓", LEG_EXTENSION: "腿伸屈", LEG_CURL: "腿後勾", LYING_LEG_CURL: "腿後勾", WALKING_LUNGE: "弓箭步",
+  BACK_SQUATS: "槓鈴背蹲", BARBELL_BACK_SQUATS: "槓鈴背蹲", SMITH_MACHINE_SQUAT: "史密斯深蹲", DUMBBELL_SQUAT: "啞鈴深蹲",
+  SINGLE_LEG_ROMANIAN_DEADLIFT: "單腳羅馬尼亞硬舉", STRAIGHT_LEG_DEADLIFT: "直腿硬舉", SUMO_DEADLIFT: "相撲硬舉", TRAP_BAR_DEADLIFT: "六角槓硬舉",
+  BARBELL_HIP_THRUST_ON_FLOOR: "髖推", BARBELL_HIP_THRUST_WITH_BENCH: "髖推", SINGLE_LEG_HIP_RAISE: "單腳臀橋",
+  CABLE_CORE_PRESS: "抗旋轉推", KNEELING_PALLOF_PRESS: "抗旋轉推", HANGING_LEG_RAISE: "懸吊抬腿", CAPTAINS_CHAIR_KNEE_RAISE: "懸吊抬膝",
+  BIRD_DOGS: "鳥狗", WEIGHTED_BIRD_DOG: "鳥狗", SEATED_ROW: "坐姿划船", MACHINE_ROW: "坐姿划船", LAT_PULL_DOWN: "滑輪下拉",
+  INCLINE_CHEST_PRESS: "上斜胸推", SEATED_CHEST_PRESS: "胸推", KETTLEBELL_SWING: "壺鈴擺盪", BACK_EXTENSION: "背伸展",
+};
+// Body parts per Garmin category: used when a translated name hits no MOVE_MUSCLES key, so the chart is never empty.
+const GARMIN_CAT_MUSCLES = {
+  SQUAT: { primary: ["quads", "glutes"], secondary: ["core"] }, LUNGE: { primary: ["quads", "glutes"], secondary: ["hams"] },
+  DEADLIFT: { primary: ["glutes", "hams"], secondary: ["lowback"] }, HIP_RAISE: { primary: ["glutes"], secondary: ["hams"] },
+  HIP_SWING: { primary: ["glutes", "hams"], secondary: ["core"] }, LEG_CURL: { primary: ["hams"], secondary: [] },
+  CALF_RAISE: { primary: ["calves"], secondary: [] }, HYPEREXTENSION: { primary: ["lowback"], secondary: ["glutes", "hams"] },
+  BENCH_PRESS: { primary: ["chest"], secondary: ["tris", "frontDelts"] }, PUSH_UP: { primary: ["chest"], secondary: ["tris", "frontDelts"] },
+  FLYE: { primary: ["chest"], secondary: ["frontDelts"] }, ROW: { primary: ["lats", "midback"], secondary: ["bis", "rearDelts"] },
+  PULL_UP: { primary: ["lats"], secondary: ["bis"] }, SHOULDER_PRESS: { primary: ["delts"], secondary: ["tris"] },
+  LATERAL_RAISE: { primary: ["delts"], secondary: [] }, SHOULDER_STABILITY: { primary: ["rearDelts", "rotator"], secondary: [] },
+  SHRUG: { primary: ["upperback"], secondary: [] }, CURL: { primary: ["bis"], secondary: ["forearms"] },
+  TRICEPS_EXTENSION: { primary: ["tris"], secondary: [] }, CORE: { primary: ["core"], secondary: ["obliques"] },
+  CRUNCH: { primary: ["core"], secondary: [] }, SIT_UP: { primary: ["core"], secondary: [] }, LEG_RAISE: { primary: ["core"], secondary: [] },
+  PLANK: { primary: ["core"], secondary: ["obliques"] }, CHOP: { primary: ["core", "obliques"], secondary: [] },
+  HIP_STABILITY: { primary: ["core", "glutes"], secondary: ["lowback"] }, CARRY: { primary: ["core", "forearms"], secondary: ["upperback"] },
+  OLYMPIC_LIFT: { primary: ["quads", "glutes", "hams"], secondary: ["upperback"] }, TOTAL_BODY: { primary: ["quads", "glutes", "core"], secondary: ["chest", "lats"] },
+};
+const GARMIN_DEFAULT_MUSCLES = { primary: ["core"], secondary: [] };
+var GARMIN_NAME_CAT = {};
+const GARMIN_CAT = {
+  BENCH_PRESS: "臥推", ROW: "划船", PULL_UP: "引體向上", SQUAT: "深蹲", DEADLIFT: "硬舉", LUNGE: "弓箭步",
+  PUSH_UP: "伏地挺身", HIP_RAISE: "臀橋", HIP_STABILITY: "核心穩定", PLANK: "棒式", CORE: "核心", CRUNCH: "捲腹",
+  SHOULDER_PRESS: "肩推", LATERAL_RAISE: "側平舉", CURL: "二頭彎舉", TRICEPS_EXTENSION: "三頭下壓",
+  LEG_CURL: "腿後勾", CHOP: "抗旋轉", FLYE: "飛鳥", CALF_RAISE: "提踵", SHRUG: "聳肩",
+};
+function garminExName(x) {
+  if (x.name && GARMIN_EX[x.name]) return GARMIN_EX[x.name];
+  if (x.cat && GARMIN_CAT[x.cat]) return GARMIN_CAT[x.cat];
+  const raw = String(x.name || x.cat || "其他動作").toLowerCase().replace(/_/g, " ");
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+function garminMovesOn(date) {
+  const moves = {};
+  for (const a of LIVE.garmin.activities || []) {
+    if (a.date !== date || !Array.isArray(a.sets)) continue;
+    for (const x of a.sets) {
+      const name = garminExName(x);
+      if (!(name in GARMIN_NAME_CAT)) GARMIN_NAME_CAT[name] = x.cat || null;
+      (moves[name] ||= []).push({ weight: x.kg != null ? Number(x.kg) : null, reps: x.reps != null ? Number(x.reps) : null, done: true, garmin: true });
+    }
+  }
+  return moves;
+}
+function hasGarminSets(date) {
+  return (LIVE.garmin.activities || []).some((a) => a.date === date && Array.isArray(a.sets) && a.sets.length);
+}
+// One rule everywhere: Garmin sets for that day win; otherwise the App log for that exact date.
+function dayMoves(st, date) {
+  if (hasGarminSets(date)) return garminMovesOn(date);
+  const l = (st.logs || {})[date];
+  return (l && l.moves) || {};
+}
 function bumpPart(counts, part, n) {
   counts[part] = (counts[part] || 0) + n;
   if (part === "frontDelts" || part === "rearDelts") counts.delts = (counts.delts || 0) + n;
@@ -1286,8 +1391,7 @@ function weekPartSources(st, d = now(), opts = {}) {
       addMoves(st.session.moves);
       continue;
     }
-    const log = (st.logs || {})[key];
-    if (log) addMoves(log.moves);
+    addMoves(dayMoves(st, key));
   }
   const lists = {};
   for (const [k, set] of Object.entries(sources)) lists[k] = [...set];
@@ -1371,7 +1475,7 @@ function partClass(id, pri, sec, week, selected) {
   let cls = "m";
   if (isPri) cls += " pri";
   else if (isSec) cls += " sec";
-  if (MAIN_PARTS.includes(mapped) && (week[mapped] || 0) < 6) cls += " low";
+  if (week && MAIN_PARTS.includes(mapped) && (week[mapped] || 0) < 6) cls += " low";
   if (selected === id) cls += " is-on";
   return cls;
 }
@@ -1418,19 +1522,20 @@ function muscleIdFromEvent(e) {
   }
   return null;
 }
-function bodyMap(priList, secList, weekCounts, sourceMap) {
+function bodyMap(priList, secList, weekCounts, sourceMap, opts = {}) {
   const pri = new Set(priList || []);
   const sec = new Set(secList || []);
-  const detail = weekPartSources(state(), now(), { includeSession: true });
+  const detail = opts.day ? { counts: weekCounts || {}, sources: sourceMap || {} } : weekPartSources(state(), now(), { includeSession: true });
   const week = detail.counts;
   const sources = detail.sources;
   const selected = ui.bodyPart || null;
   const svg = (typeof bodySvgMarkup === "function")
-    ? bodySvgMarkup((id) => partClass(id, pri, sec, week, selected))
+    ? bodySvgMarkup((id) => partClass(id, pri, sec, opts.day ? null : week, selected))
     : `<svg class="body-svg" viewBox="0 0 100 40"></svg>`;
-  const tip = selected ? partTip(selected, week, sources) : "點一下部位，看本週練了幾組";
+  let tip = selected ? partTip(selected, week, sources) : (opts.day ? `點一下部位，看 ${opts.day} 練了幾組` : "點一下部位，看本週練了幾組");
+  if (selected && opts.day) tip = tip.replace("本週", opts.day);
   return `<div class="body-wrap">
-    <div class="legend"><span><i class="p"></i>主要</span><span><i class="s"></i>輔助</span><span>不到 6 組會標橘色外框</span></div>
+    <div class="legend"><span><i class="p"></i>主要</span><span><i class="s"></i>輔助</span>${opts.day ? "" : "<span>不到 6 組會標橘色外框</span>"}</div>
     ${svg}
     <div class="body-tip" data-testid="body-tip"${selected ? "" : " data-empty=\"1\""}>${esc(tip)}</div>
     <p class="body-credit">輪廓改編自 react-body-highlighter（MIT）</p>
@@ -1755,7 +1860,8 @@ function renderHome(st) {
   const smm = scans.map((s) => s.smmKg);
   const week = weekSetCounts(st, t, { includeSession: true });
   const todayLog = (st.logs || {})[todayKey()];
-  const parts = todayLog ? todayPartsFromMoves(todayLog.moves) : { pri: [], sec: [] };
+  const parts = todayPartsFromMoves(dayMoves(st, todayKey()));
+  const gSetsToday = hasGarminSets(todayKey());
   const session = st.session && st.session.date === todayKey() && st.session.phase !== "done" ? st.session : null;
   const returning = isReturnWeek(st);
 
@@ -1764,7 +1870,7 @@ function renderHome(st) {
   const gDone = gToday
     ? `<p data-testid="garmin-done" style="color:rgba(255,255,255,.9);margin:6px 0 0">Garmin · ${esc(gToday.name || "運動")}：${gToday.durationMin != null ? `${gToday.durationMin} 分` : ""}${gToday.avgHR != null ? ` · 心率 ${Math.round(gToday.avgHR)}` : ""}${gToday.kcal != null ? ` · ${Math.round(gToday.kcal)} kcal` : ""}</p>`
     : "";
-  const bfId = gToday && !(todayLog && todayLog.finishedAt) ? (plannedWorkoutFor(st) || "homeQ") : null;
+  const bfId = gToday && !gSetsToday && !(todayLog && todayLog.finishedAt) ? (plannedWorkoutFor(st) || "homeQ") : null;
   const bfBtn = bfId && WORKOUTS[bfId]
     ? `<button type="button" class="btn primary xl" data-backfill="${bfId}" data-testid="backfill">補登：${esc(WORKOUTS[bfId].name)} 💪</button>`
     : "";
@@ -1780,6 +1886,7 @@ function renderHome(st) {
     trainCard = `<section class="card hero" data-testid="train-card">
       <div class="big" data-testid="trained-today" data-log-row="${todayKey()}">今天已練 ✓</div>
       ${gDone}
+      ${gSetsToday ? `<p data-testid="garmin-sets-today" style="color:rgba(255,255,255,.9);margin:6px 0 0">⌚ 已帶入 Garmin 動作 ${Object.values(garminMovesOn(todayKey())).reduce((s, x) => s + x.length, 0)} 組</p>` : ""}
       ${bfBtn ? `<div class="acts">${bfBtn}</div>` : ""}
       <div class="acts">${pickRow}</div>
     </section>`;
@@ -2062,10 +2169,42 @@ function logDates(st) {
 function garminText(a) {
   return `${a.durationMin != null ? `${a.durationMin} 分` : ""}${a.avgHR != null ? ` · ❤️ ${Math.round(a.avgHR)}` : ""}${a.kcal != null ? ` · 🔥 ${Math.round(a.kcal)}` : ""}`;
 }
+function kgText(v) { return v == null ? "" : String(Math.round(Number(v) * 10) / 10); }
+function dayBodyMap(d, moves) {
+  const mv = Object.fromEntries(moves);
+  const p = todayPartsFromMoves(mv);
+  const counts = {};
+  const sources = {};
+  for (const [name, sets] of moves) {
+    const n = sets.filter((x) => x.done).length;
+    const m = musclesFor(name);
+    for (const part of [...m.primary, ...m.secondary]) {
+      bumpPart(counts, part, n);
+      (sources[part] ||= []).includes(name) || sources[part].push(name);
+    }
+  }
+  const nm = (arr) => arr.map((x) => PARTS[x] || x).join("、");
+  const sec = p.sec.filter((x) => !p.pri.includes(x));
+  const chips = MAIN_PARTS.filter((x) => counts[x]).map((x) => `<span class="chip">${esc(PARTS[x])} ${counts[x]} 組</span>`).join("");
+  return `<p class="note" data-testid="log-muscles-${d}">💪 主要：${esc(nm(p.pri)) || "—"}${sec.length ? `<br>輔助：${esc(nm(sec))}` : ""}</p>
+    ${chips ? `<div class="chips" data-testid="log-parts-${d}">${chips}</div>` : ""}
+    ${bodyMap(p.pri, sec, counts, sources, { day: fmtMD(d) })}`;
+}
 function logDetail(st, d) {
   const l = (st.logs || {})[d];
   const gs = garminWorkoutsOn(d);
-  const g = gs.map((a) => `<p class="muted" data-testid="log-garmin-${d}">⌚ Garmin ${esc(a.name || a.type)}：${garminText(a)}</p>`).join("");
+  const g = gs.map((a) => `<p class="muted" data-testid="log-garmin-${d}">⌚ ${fmtMD(d)} ${clockOf(a.startTime ? String(a.startTime).replace(" ", "T") : "")} ${esc(a.name || a.type)}：${garminText(a)}</p>${(a.children || []).map((c) => `<p class="muted">　${/strength/.test(c.type || "") ? "🏋️ 重訓" : /walk/.test(c.type || "") ? "🚶 健走" : /run/.test(c.type || "") ? "🏃 跑步" : "• " + esc(c.type || "")} ${garminText(c)}</p>`).join("")}`).join("");
+  if (hasGarminSets(d)) {
+    const moves = Object.entries(garminMovesOn(d));
+    const total = moves.reduce((s, [, x]) => s + x.length, 0);
+    const rows = moves.map(([name, sets]) => `<div class="stat" data-testid="log-move"><span>${esc(name)}</span><span>${sets.length} 組</span></div>
+      <p class="muted" style="margin:-4px 0 6px">${sets.map((x) => `${x.weight ? kgText(x.weight) + " kg×" : "徒手×"}${x.reps != null ? x.reps : "?"}`).join(" · ")}</p>`).join("");
+    return `<div class="log-detail" data-testid="log-detail-${d}">${g}
+      <p class="note" data-testid="log-garmin-sets-${d}">⌚ 動作來自 Garmin，共 ${total} 組，自動帶入</p>
+      ${rows}
+      ${dayBodyMap(d, moves)}
+    </div>`;
+  }
   const moves = Object.entries((l && l.moves) || {}).filter(([, sets]) => (sets || []).some((x) => x.done));
   if (!moves.length) {
     const def = plannedWorkoutFor(st, parseISO(d)) || "homeQ";
@@ -2081,14 +2220,10 @@ function logDetail(st, d) {
     const kg = done.map((x) => x.weight).filter((x) => x != null);
     return `<div class="stat"><span>${esc(String(name).replace(/（選做）/g, ""))}</span><span>${done.length} 組${reps.length ? ` × ${reps[reps.length - 1]}` : ""}${kg.length ? ` · ${kg[kg.length - 1]} kg` : ""}</span></div>`;
   }).join("");
-  const p = todayPartsFromMoves(Object.fromEntries(moves));
-  const nm = (arr) => arr.map((x) => PARTS[x] || x).join("、");
-  p.sec = p.sec.filter((x) => !p.pri.includes(x));
   return `<div class="log-detail" data-testid="log-detail-${d}">${g}
     ${l && l.backfill ? `<p class="muted">（依 Garmin 補登）做了幾輪？</p><div class="acts">${[1, 2, 3, 4].map((n) => `<button type="button" class="btn${moves.every(([, x]) => x.filter((y) => y.done).length === n) ? " primary" : ""}" data-set-rounds="${n}" data-date="${d}" data-testid="log-rounds-${n}">${n} 輪</button>`).join("")}</div>` : ""}
     ${rows}
-    <p class="note" data-testid="log-muscles-${d}">💪 主要：${esc(nm(p.pri)) || "—"}${p.sec.length ? `<br>輔助：${esc(nm(p.sec))}` : ""}</p>
-    ${bodyMap(p.pri, p.sec)}
+    ${dayBodyMap(d, moves)}
   </div>`;
 }
 function renderLogRows(st) {
@@ -2096,13 +2231,14 @@ function renderLogRows(st) {
   if (!dates.length) return `<p class="muted">還沒有訓練紀錄。</p>`;
   return dates.map((d) => {
     const l = (st.logs || {})[d];
-    const w = l && WORKOUTS[l.workoutId];
-    const n = l ? Object.values(l.moves || {}).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0) : 0;
+    const gSets = hasGarminSets(d);
+    const w = !gSets && l && WORKOUTS[l.workoutId];
+    const n = Object.values(dayMoves(st, d)).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0);
     const gs = garminWorkoutsOn(d);
     const name = w ? w.name : (gs[0] ? (gs[0].name || "訓練") : "訓練");
     const right = n ? `${n} 組` : "⚠ 未記動作";
     const open = ui.logOpen === d;
-    return `<div class="stat" role="button" data-log-open="${d}" data-log-row="${d}" data-testid="log-row-${d}"><span>${open ? "▾" : "▸"} ${fmtMD(d)} ${esc(name)}${gs.length ? " ⌚" : ""}</span><span>${right}</span></div>${open ? logDetail(st, d) : ""}`;
+    return `<div class="stat" role="button" data-log-open="${d}" data-src="${gSets ? "garmin" : "app"}" data-log-row="${d}" data-testid="log-row-${d}"><span>${open ? "▾" : "▸"} ${fmtMD(d)} ${esc(name)}${gs.length ? " ⌚" : ""}</span><span>${right}</span></div>${open ? logDetail(st, d) : ""}`;
   }).join("") + `<p class="muted">點一筆看動作和部位；長按可刪除 App 紀錄</p>`;
 }
 function renderLog(st) {
@@ -2780,7 +2916,7 @@ function finishWithScore(score) {
 function backfillFromGarmin(workoutId, date = todayKey()) {
   const st = load();
   const w = WORKOUTS[workoutId];
-  if (!w || ((st.logs || {})[date] || {}).finishedAt) return;
+  if (!w || ((st.logs || {})[date] || {}).finishedAt || hasGarminSets(date)) return;
   const moves = {};
   for (const step of w.steps || []) {
     const m = String(step.dose || "").match(/(\d+)\s*[×x]\s*(\d+)/);
@@ -3224,7 +3360,7 @@ document.getElementById("main").addEventListener("click", (e) => {
   const srBtn = e.target.closest("[data-set-rounds]");
   if (srBtn) { setBackfillRounds(srBtn.dataset.date, Number(srBtn.dataset.setRounds)); return; }
   const lo = e.target.closest("[data-log-open]");
-  if (lo) { ui.logOpen = ui.logOpen === lo.dataset.logOpen ? null : lo.dataset.logOpen; render(); return; }
+  if (lo) { ui.logOpen = ui.logOpen === lo.dataset.logOpen ? null : lo.dataset.logOpen; ui.bodyPart = null; render(); return; }
   if (e.target.closest("[data-start]")) {
     startWorkout();
     return;
@@ -3639,7 +3775,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.12-2";
+const APP_VERSION = "2026.11.15-1";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
