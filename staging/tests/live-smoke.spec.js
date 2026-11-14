@@ -306,7 +306,7 @@ for (const scheme of SCHEMES) {
       expect(tb.y + tb.height <= ib.y || tb.y >= ib.y + ib.height).toBe(true); // toast never covers the input
       await page.locator("[data-restore-in]").fill(code);
       await page.locator("[data-backup-restore]").click();
-      await page.waitForTimeout(500);
+      await page.waitForEvent("load", { timeout: 5000 }).catch(() => null); // restore reloads the app after 600 ms; don't let it cut into the next step
       const has = await page.evaluate(() => !!localStorage.getItem("fatcat-v2"));
       expect(has).toBe(true);
       return `code ${code.length} chars`;

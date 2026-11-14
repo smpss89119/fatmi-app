@@ -62,7 +62,7 @@ for (const scheme of (process.env.SMOKE_SCHEMES || "light,dark").split(",")) {
         const r = await page.evaluate(() => {
           const navEl = document.querySelector("nav#tabs"); const nav = window.__visible(navEl) ? navEl.getBoundingClientRect() : { top: innerHeight };
           const main = document.getElementById("main");
-          const sticky = [...main.querySelectorAll(".sticky-cta")].filter(window.__visible).map((e) => e.getBoundingClientRect()).filter((r) => r.top >= 0 && r.top < innerHeight);
+          const sticky = [...main.querySelectorAll(".sticky-cta")].filter(window.__visible).map((e) => e.getBoundingClientRect()).filter((r) => r.top >= 0 && r.top < innerHeight && r.bottom >= nav.top - 2); // only a bar that is actually stuck to the bottom covers content
           const inSticky = (e) => !!e.closest(".sticky-cta");
           const els = [...main.querySelectorAll("*")].filter((e) => window.__visible(e) && !inSticky(e) && getComputedStyle(e).position !== "fixed");
           let last = null, lb = -1; for (const e of els) { const b = e.getBoundingClientRect().bottom; if (b > lb) { lb = b; last = e; } }
