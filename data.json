@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-14T16:03:45+07:00",
+  "exportedAt": "2026-11-14T17:02:01+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1456,12 +1456,12 @@
       },
       {
         "date": "2026-11-14",
-        "kcal": 989.0,
-        "steps": 1107,
+        "kcal": 1805.0,
+        "steps": 3446,
         "sleepHours": null,
         "restingHR": 55.0,
         "weightKg": null,
-        "bodyBattery": 72.0
+        "bodyBattery": 27.0
       }
     ],
     "activities": [
