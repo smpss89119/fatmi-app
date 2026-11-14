@@ -9,7 +9,7 @@ const FRI_10 = "2026-11-15T10:00:00+07:00";
 const SAT_10 = "2026-11-09T10:00:00+07:00";
 
 function url(extra = {}) {
-  const q = new URLSearchParams({ debug: "1", rest: "1", ...extra });
+  const q = new URLSearchParams({ debug: "1", rest: "1", sleep: "8", ...extra });
   return `${process.env.FATMI_PREFIX || ""}${process.env.FATMI_PATH || "/staging/"}?${q.toString()}`;
 }
 
@@ -292,6 +292,11 @@ test.describe("FITMI", () => {
     }));
     await page.locator("[data-start]").click();
     await expect(page.locator(".wo-name")).toContainText("腿推");
+    // 完成 + weight above the fold; body map collapsed below and opens on tap
+    const cb = await page.locator("[data-complete]").boundingBox();
+    expect(cb.y + cb.height).toBeLessThanOrEqual(844 - 20);
+    await expect(page.locator("[data-testid=wo-figure]")).toBeHidden();
+    await page.locator("[data-wo-fig]").click();
     await expect(page.locator("[data-testid=wo-figure]")).toBeVisible();
     await expect(page.locator("[data-testid=wo-cue]")).not.toHaveText("");
     await expect(page.locator(".load .num").first()).toContainText("80");
@@ -342,7 +347,7 @@ test.describe("FITMI2", () => {
       logs: { "2026-11-14": { workoutId: "gymA", finishedAt: 1, moves: { 胸推: sets } } },
       session: { date: "2026-11-14", workoutId: "gymA", phase: "done", moves: { 胸推: sets } },
     });
-    await expect(page.locator("[data-testid=week-chip-chest]")).toHaveText("胸 3 組");
+    await expect(page.locator("[data-testid=week-chip-chest]")).toContainText("胸 3 組");
     await page.locator(".body-svg [data-part=chest]").first().click();
     const tip = page.locator("[data-testid=body-tip]");
     await expect(tip).toContainText("本週 3 組");

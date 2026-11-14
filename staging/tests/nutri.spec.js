@@ -197,7 +197,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     let blocked = "";
     page.once("dialog", (d) => { blocked = d.message(); d.accept(); });
     await page.locator("[data-testid=edit-save]").click();
-    await expect.poll(() => blocked).toBe("請先設定「一份是多少」再合併");
+    await expect.poll(() => blocked).toMatch(/^請先設定「.+」的「一份是多少」（例如 150 g），才能合併$/);
     await expect(page.locator("[data-testid=shop-edit-sheet]")).toBeVisible();
     await page.locator("[data-edit-close]").click();
     await expect(page.locator("[data-testid=shop-x-p]")).toBeVisible();
@@ -217,7 +217,7 @@ test.describe("NUTRI r6 (UI clicks)", () => {
     let blocked = "";
     page.once("dialog", (d) => { blocked = d.message(); d.accept(); });
     await page.locator("[data-testid=edit-save]").click();
-    await expect.poll(() => blocked).toBe("請先設定「一份是多少」再合併");
+    await expect.poll(() => blocked).toMatch(/^請先設定「.+」的「一份是多少」（例如 150 g），才能合併$/);
     await expect(page.locator("[data-testid=shop-edit-sheet]")).toBeVisible();
     await page.screenshot(shot("fatmi_r9_block.png"));
     await page.locator("[data-edit-close]").click();

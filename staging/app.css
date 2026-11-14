@@ -39,15 +39,15 @@ nav#tabs button.on i{filter:none;opacity:1}
 .note{font-size:16px;color:#7C2D12;background:#FFEDD5;border-radius:14px;padding:10px 14px;margin:10px 0;line-height:1.5;font-weight:600}
 .note.warn{background:#FEE2E2;color:#9A3412}
 .muted{color:var(--mut);font-size:15px;font-weight:600}
-.sec{font-size:14px;color:var(--mut);font-weight:800;letter-spacing:.06em;margin:20px 4px 8px}
+.sec{font-size:15px;color:var(--mut);font-weight:800;letter-spacing:.06em;margin:20px 4px 8px}
 .rings{display:flex;gap:16px;justify-content:center;margin:8px 0 12px}
 .ring{position:relative;width:122px;height:122px}
 .ring svg{width:122px;height:122px;transform:rotate(-90deg)}
 .ring .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px}
 .ring .n b{font-size:22px;font-weight:800;line-height:1.1}
-.ring .n span{font-size:12px;color:var(--mut);font-weight:700}
+.ring .n span{font-size:15px;color:var(--mut);font-weight:700}
 .meal-row{background:#fff;border-radius:16px;padding:12px 14px;margin:8px 0;box-shadow:0 1px 3px rgba(80,50,0,.08)}
-.meal-row .who{font-size:13px;font-weight:800;color:var(--mut);letter-spacing:.04em}
+.meal-row .who{font-size:15px;font-weight:800;color:var(--mut);letter-spacing:.04em}
 .meal-row h3{margin:2px 0 6px;font-size:18px}
 .meal-row .meta{font-size:15px;color:var(--mut);font-weight:600;margin-bottom:8px}
 .meal-row .row-acts{display:flex;gap:8px}
@@ -59,15 +59,15 @@ nav#tabs button.on i{filter:none;opacity:1}
 .swap-list button small{display:block;font-weight:600;color:var(--mut);margin-top:2px}
 .trend{display:grid;gap:10px}
 .trend-item{background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 1px 3px rgba(80,50,0,.08);border:0;width:100%;text-align:left;color:inherit;cursor:pointer}
-.trend-item .lbl{font-size:14px;font-weight:800;color:var(--mut)}
+.trend-item .lbl{font-size:15px;font-weight:800;color:var(--mut)}
 .trend-item .val{font-size:22px;font-weight:800;margin:2px 0 6px}
 .chart{width:100%;height:72px;display:block}
 .chart-lg{height:140px}
 .body-wrap{background:#fff;border-radius:18px;padding:10px 8px 14px;box-shadow:0 1px 3px rgba(80,50,0,.08)}
 .body-svg{width:100%;height:auto;display:block}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.chip{border:0;border-radius:999px;padding:8px 12px;background:#F4E6D0;color:var(--ink);font-weight:800;font-size:14px}
-.chip.low{background:#FFEDD5;color:var(--oa);outline:2px solid var(--oa)}
+.chip{border:0;border-radius:999px;padding:8px 12px;background:#F4E6D0;color:var(--ink);font-weight:800;font-size:15px}
+.chip.low{background:#FFEDD5;color:#9A3412;outline:2px solid var(--oa)}
 .chip.on{background:var(--o);color:#fff}
 .banner{background:#FFF7ED;border:2px solid var(--oa);border-radius:16px;padding:12px 14px;margin:10px 0;font-weight:700}
 .banner p{margin:0 0 8px}
@@ -98,7 +98,7 @@ nav#tabs button.on i{filter:none;opacity:1}
 .no .bad{color:#9a3412;font-weight:800}
 .no .good{color:#166534;font-weight:800}
 .yt{display:inline-flex;align-items:center;gap:4px;margin-top:8px;min-height:44px;padding:6px 12px;border-radius:12px;background:#FFEDD5;color:var(--od);text-decoration:none;font-weight:800;font-size:15px}
-.legend{display:flex;gap:14px;font-size:14px;font-weight:700;color:var(--mut);margin:6px 8px}
+.legend{display:flex;gap:14px;font-size:15px;font-weight:700;color:var(--mut);margin:6px 8px}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:middle}
 .legend .p{background:#C2410C}
 .legend .s{background:#F0B27A}
@@ -110,7 +110,7 @@ nav#tabs button.on i{filter:none;opacity:1}
 
 .swap-list button.on{background:var(--o);color:#fff}
 .swap-list button.on small{color:rgba(255,255,255,.9)}
-.est{font-size:14px;color:var(--mut);font-weight:700;margin:6px 0}
+.est{font-size:15px;color:var(--mut);font-weight:700;margin:6px 0}
 
 .toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:#1A1208;color:#fff;padding:10px 16px;border-radius:999px;font-weight:800;z-index:40;max-width:90%;text-align:center}
 .toast[hidden]{display:none!important}
@@ -137,11 +137,11 @@ nav#tabs button.on i{filter:none;opacity:1}
 .body-svg .m.is-on{filter:drop-shadow(0 0 16px rgba(194,65,12,.55))}
 .body-tip{margin:8px 8px 4px;padding:10px 12px;border-radius:12px;background:#FFF7ED;color:#7C2D12;font-weight:700;font-size:15px;min-height:44px;line-height:1.4}
 .body-tip[data-empty]{background:#F7F4F0;color:var(--mut);font-weight:600}
-.body-credit{margin:2px 8px 0;font-size:11px;color:var(--mut);font-weight:600}
+.body-credit{margin:2px 8px 0;font-size:15px;color:var(--mut);font-weight:600}
 .suggest{margin:2px 0 8px;font-size:15px;font-weight:600;color:var(--mut)}
 .portion-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
 .portion-row>span{font-weight:800;min-width:3.5em}
-.portion-row small{flex:1 1 100%;color:var(--mut);font-weight:600;font-size:13px}
+.portion-row small{flex:1 1 100%;color:var(--mut);font-weight:600;font-size:15px}
 .portion-row .stepper b{min-width:3.6em;text-align:center}
 .out-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
 .out-row>span{font-weight:800;min-width:3.5em}
@@ -152,7 +152,7 @@ nav#tabs button.on i{filter:none;opacity:1}
 .meal-row.eaten h3,.meal-row.eaten .suggest{text-decoration:none}
 .shop-hint{width:100%;text-align:left;border:0;background:#FFF7ED;color:#7C2D12;border-radius:14px;padding:12px 14px;font-weight:800;margin:8px 0;min-height:44px;box-shadow:0 1px 3px rgba(80,50,0,.08)}
 .shop-hint.collapsed{background:#F7F4F0;color:var(--mut);font-weight:700}
-.have-tag{color:#166534;font-weight:800;font-size:13px}
+.have-tag{color:#166534;font-weight:800;font-size:15px}
 .item.have{outline:2px solid #166534}
 .whey-stock{display:flex;align-items:center;gap:8px;margin-top:6px;font-weight:700}
 .item{cursor:pointer}
@@ -203,14 +203,14 @@ nav#tabs button.on i{filter:none;opacity:1}
 .shop-qty{justify-self:end;text-align:right;font-variant-numeric:tabular-nums;font-weight:800;color:var(--ink);white-space:nowrap}
 .shop-qty.whey-stock{display:grid;grid-template-columns:28px 28px 28px 14px;align-items:center;justify-items:center;gap:2px;margin:0}
 .shop-qty.whey-stock button{width:28px;height:28px;border:0;border-radius:8px;background:#FDE7C7;color:#9A3412;font-weight:900;padding:0}
-.shop-qty small{font-size:12px;color:var(--mut)}
+.shop-qty small{font-size:15px;color:var(--mut)}
 .shop-acts{display:grid;grid-template-columns:32px 32px;gap:8px;justify-self:end}
 .shop-acts .star,.shop-acts .ic{width:32px;height:32px;border:0;border-radius:10px;background:#F7F1E8;color:#9A3412;font-size:18px;line-height:32px;padding:0;text-align:center}
 .shop-acts .star.on{background:var(--o);color:#fff}
 .shop-acts span.ic{background:transparent}
 .shop-row.on{text-decoration:none}
 .shop-row.on .shop-name b{text-decoration:line-through}
-.shop-row .have-tag{font-size:12px;padding:2px 6px;border-radius:6px;background:#DCFCE7;color:#166534;white-space:nowrap}
+.shop-row .have-tag{font-size:15px;padding:2px 6px;border-radius:6px;background:#DCFCE7;color:#166534;white-space:nowrap}
 .shop-row.freq{outline:0;box-shadow:inset 3px 0 0 #C2410C,0 1px 3px rgba(80,50,0,.08)}
 .shop-bars{display:grid;gap:10px}
 .shop-bar{display:grid;grid-template-columns:56px 1fr 72px;align-items:center;gap:10px}
@@ -222,7 +222,7 @@ nav#tabs button.on i{filter:none;opacity:1}
 .shop-sec{display:flex;justify-content:space-between;align-items:baseline}
 .sec-n{font-variant-numeric:tabular-nums;color:var(--mut)}
 .shop-legend{text-align:center}
-.pend{font-size:11px;padding:2px 6px;border-radius:6px;background:#FEF3C7;color:#92400E;white-space:nowrap}
+.pend{font-size:15px;padding:2px 6px;border-radius:6px;background:#FEF3C7;color:#92400E;white-space:nowrap}
 .edit-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:8px 0;font-weight:700}
 label.edit-row{grid-template-columns:96px 1fr}
 .edit-row input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px;width:100%;max-width:100%;box-sizing:border-box}
@@ -272,7 +272,7 @@ body.mode-sleep header,body.mode-sleep nav#tabs{background:#000;color:#fff;borde
 .sl-legend i.avg{background:none;border-top:2px dashed #30D158;height:0;border-radius:0}
 .sl-empty{color:#8E8E93}
 .sleep-mini{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 10px;width:100%;border:0;border-radius:14px;background:#1C1C1E;color:#fff;padding:12px 14px;text-align:left;margin:8px 0}
-.sleep-mini .k{color:#8E8E93;font-size:13px;font-weight:600;align-self:center}
+.sleep-mini .k{color:#8E8E93;font-size:15px;font-weight:600;align-self:center}
 .sleep-mini .v{font-size:22px;font-weight:700;justify-self:end}
 .sleep-mini .bar{grid-column:1/3;display:flex;height:8px;border-radius:4px;overflow:hidden}
 .sleep-mini .bar i{display:block}
@@ -288,34 +288,34 @@ html.mode-sleep{background:#000}
 .else-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 112px;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
 .else-row:last-child{border-bottom:0}
 .else-row .nm{font-weight:800;display:flex;gap:6px;align-items:center;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.else-row .left{text-align:right;color:var(--mut);font-variant-numeric:tabular-nums;font-size:14px}
+.else-row .left{text-align:right;color:var(--mut);font-variant-numeric:tabular-nums;font-size:15px}
 .else-row .stp{display:grid;grid-template-columns:36px 32px 36px;align-items:center;justify-items:center;justify-self:end}
 .else-row .stp button{width:36px;height:36px;border:0;border-radius:10px;background:#FDE7C7;color:#9A3412;font-weight:900;font-size:18px}
 .else-row .stp b{font-variant-numeric:tabular-nums}
 .else-total{text-align:center;font-weight:900;font-size:20px;margin:14px 0 8px}
 
-.demo-tag{display:block;text-align:center;font-size:12px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}
-.now-pick .pend,.else-row .pend{font-size:11px;background:#fff1c2;color:#8a5a00;border-radius:6px;padding:1px 6px;margin-left:4px}
-.chip .sug{font-size:10px;color:#c2410c}
+.demo-tag{display:block;text-align:center;font-size:15px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}
+.now-pick .pend,.else-row .pend{font-size:15px;background:#fff1c2;color:#8a5a00;border-radius:6px;padding:1px 6px;margin-left:4px}
+.chip .sug{font-size:15px;color:#c2410c}
 
 body.mode-workout #ptr{display:none!important}
 
 .whey-pick{display:flex;flex-direction:column;gap:6px;margin:6px 0}
-.whey-series-btn{display:flex;width:100%;align-items:center;gap:6px;border:0;background:#FFF7ED;color:var(--od);border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px;cursor:pointer;text-align:left;min-height:40px}
+.whey-series-btn{display:flex;width:100%;align-items:center;gap:6px;border:0;background:#FFF7ED;color:var(--od);border-radius:12px;padding:8px 12px;font-weight:800;font-size:15px;cursor:pointer;text-align:left;min-height:40px}
 .whey-series.open .whey-series-btn{background:#FFEDD5}
 .whey-chips{margin:6px 0 2px;gap:6px}
-.chip-sm{padding:6px 10px;min-height:36px;font-size:13px;border-radius:999px}
+.chip-sm{padding:6px 10px;min-height:36px;font-size:15px;border-radius:999px}
 .else-list .whey-series{margin:6px 0}
 .else-list .whey-series-btn{margin-bottom:4px}
 
 .whey-pick{margin:6px 0}
-.whey-pick-label{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--mut);pointer-events:auto}
+.whey-pick-label{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--mut);pointer-events:auto}
 .whey-pick-cap{flex:0 0 auto}
 .whey-pick-label .whey-select{flex:1 1 160px}
 .whey-add{pointer-events:auto;position:relative;z-index:6;overflow:visible}
 .whey-select,.whey-add select{flex:1;min-height:44px;min-width:0;border-radius:12px;border:1px solid var(--line);background:#fff;padding:8px 36px 8px 12px;font-size:15px;font-weight:700;color:var(--ink);width:100%;max-width:100%;-webkit-appearance:menulist;appearance:menulist;pointer-events:auto;position:relative;z-index:6;touch-action:manipulation;cursor:pointer}
 .whey-add{display:flex;flex-direction:column;gap:8px;margin:8px 0;padding:10px;background:#FFF7ED;border-radius:14px}
-.whey-add-row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;overflow:visible}
+.whey-add-row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;overflow:visible}
 .whey-add-row span{min-width:2.5em;color:var(--mut);flex:0 0 auto}
 .whey-add-row select{flex:1 1 auto}
 
@@ -323,14 +323,14 @@ body.mode-workout #ptr{display:none!important}
 .shop-row .shop-qty.whey-stock{grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-top:8px}
 .shop-qty.whey-stock button{width:44px;height:44px;flex:0 0 44px}
 .shop-row .whey-bags{grid-column:1/-1;grid-row:3;display:flex;gap:10px;margin-top:10px}
-.shop-row .whey-bags .btn{flex:1;min-height:44px;padding:8px 10px;font-size:14px;margin:0}
+.shop-row .whey-bags .btn{flex:1;min-height:44px;padding:8px 10px;font-size:15px;margin:0}
 
 .shop-row .whey-flavors{grid-column:1/-1;grid-row:2;margin-top:8px;display:flex;flex-direction:column;gap:10px}
 .whey-frow{background:#FFF7ED;border-radius:12px;padding:8px}
 .whey-frow.low{outline:1px solid #F59E0B}
-.whey-fhead{font-size:14px;margin-bottom:6px}.whey-fhead b{margin-right:8px}
+.whey-fhead{font-size:15px;margin-bottom:6px}.whey-fhead b{margin-right:8px}
 .whey-fbtns{display:grid;grid-template-columns:44px 44px 1fr 1fr;gap:8px}
-.whey-fbtns .btn{min-height:44px;margin:0;padding:4px 6px;font-size:13px}
+.whey-fbtns .btn{min-height:44px;margin:0;padding:4px 6px;font-size:15px}
 .whey-total{font-weight:800;margin:0}
 .whey-nutri{font-weight:700;color:#9A3412;margin:6px 0}
 
@@ -339,42 +339,42 @@ body.mode-workout #ptr{display:none!important}
 .restore-btn:disabled{opacity:.5}
 .backup .btn{margin-top:8px}
 .backup-in{display:block;width:100%;box-sizing:border-box;margin-top:12px;border:1px solid #E7D7BF;border-radius:12px;padding:10px;font:16px/1.3 ui-monospace,Menlo,monospace;word-break:break-all;resize:vertical}
-.stg-tag{display:inline-block;vertical-align:middle;font-size:12px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}
+.stg-tag{display:inline-block;vertical-align:middle;font-size:15px;background:#ffe3c2;color:#8a3b00;border-radius:8px;padding:2px 8px;margin-left:6px}
 .backup summary{cursor:pointer;font-weight:800;color:var(--mut);list-style:revert}
 .info-i{position:relative}
 .info-i::after{content:"";position:absolute;inset:-8px}
 /* cardio card (2026.11.15-2) */
 .log-row{flex-direction:column;gap:2px}
 .log-row .lr-main{display:flex;justify-content:space-between;gap:8px}
-.log-sub{display:block;font-size:13px;font-weight:600;color:var(--mut);line-height:1.35}
+.log-sub{display:block;font-size:15px;font-weight:600;color:var(--mut);line-height:1.35}
 .cardio{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin:8px 0}
 .cd-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:16px;margin-bottom:8px}
 .zbar{display:flex;height:16px;border-radius:8px;overflow:hidden;background:#EEE;margin-bottom:6px}
 .zbar i{display:block;min-width:3px}
 .zrows{display:grid;gap:2px}
-.zrow{display:grid;grid-template-columns:12px minmax(0,1fr) auto 52px 44px;align-items:center;gap:6px;font-size:13px;padding:2px 0;color:var(--mut)}
+.zrow{display:grid;grid-template-columns:12px minmax(0,1fr) auto 52px 44px;align-items:center;gap:6px;font-size:15px;padding:2px 0;color:var(--mut)}
 .zrow i{width:12px;height:12px;border-radius:3px;display:block}
 .zrow span{font-weight:700;color:var(--ink,#1A1208);white-space:nowrap}
-.zrow em{font-style:normal;font-size:12px;white-space:nowrap}
+.zrow em{font-style:normal;font-size:15px;white-space:nowrap}
 .zrow b{text-align:right;white-space:nowrap}
 .zrow.big{font-size:15px;color:var(--ink,#1A1208)}
 .zrow.big b{font-weight:900}
-.cd-tip{font-size:13px;font-weight:700;margin:6px 0 2px;padding:6px 8px;border-radius:10px}
+.cd-tip{font-size:15px;font-weight:700;margin:6px 0 2px;padding:6px 8px;border-radius:10px}
 .cd-tip.warn{background:#FFF1E6;color:#9A3412}
 .cd-tip.ok{background:#ECFDF3;color:#166534}
 .cd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-top:8px}
 .cd-t{background:#FFF7ED;border-radius:10px;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;column-gap:4px;align-items:baseline;min-width:0}
 .cd-t span{grid-row:span 2;font-size:16px}
 .cd-t b{font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cd-t b small{font-size:12px;font-weight:700;color:var(--mut)}
-.cd-t em{font-style:normal;font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-t b small{font-size:15px;font-weight:700;color:var(--mut)}
+.cd-t em{font-style:normal;font-size:15px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cd-laps{display:flex;gap:6px;align-items:flex-end;margin-top:10px;overflow-x:auto}
 .cd-lap{display:flex;flex-direction:column;align-items:center;min-width:48px;font-size:11px;color:var(--mut)}
 .cd-lap b{font-size:12px;color:var(--ink,#1A1208)}
 .cd-lap i{display:block;width:22px;border-radius:5px 5px 2px 2px;margin:2px 0}
 .cd-lap span{font-weight:700;color:var(--ink,#1A1208)}
 .cd-lap em{font-style:normal}
-.week-cardio{font-size:14px;font-weight:700;margin:8px 0;color:var(--mut)}
+.week-cardio{font-size:15px;font-weight:700;margin:8px 0;color:var(--mut)}
 .week-cardio b{color:var(--ink,#1A1208);font-size:16px}
 /* layout & tap-target fixes (2026.11.15-2): every tappable >= 40px, >= 8px apart, never under the tab bar */
 .chips{margin-bottom:12px}
@@ -395,3 +395,127 @@ body.mode-workout #ptr{display:none!important}
 .backup summary{padding:9px 0;min-height:44px;box-sizing:border-box}
 .log-row{margin-bottom:8px}
 .log-row:last-of-type{margin-bottom:0}
+/* cardio wording (2026.11.15-3) */
+.cd-sec{margin:8px 0 4px;font-size:15px;font-weight:800}
+.cd-sec small{font-weight:600;color:var(--mut);font-size:15px}
+.zrow{grid-template-columns:12px minmax(0,1fr) auto 60px 40px;row-gap:0}
+.zrow .zsay{grid-column:2 / -1;font-size:15px;color:var(--mut);font-weight:600;margin-top:-2px}
+.cd-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cd-t{display:flex;flex-direction:column;gap:0}
+.cd-t em{font-size:15px;font-weight:700;color:var(--mut);white-space:normal}
+.cd-t b{white-space:normal;font-size:16px;line-height:1.3}
+.cd-t b small{font-size:15px}
+.cd-t.wide{grid-column:1 / -1}
+.cd-lap{min-width:64px}
+.cd-t b,.cd-t em{overflow:visible;text-overflow:clip;white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
+.cd-laps{flex-wrap:wrap}
+.cd-lap{min-width:84px}
+.cd-lap b,.cd-lap span{white-space:nowrap}
+/* UX rules (2026.11.15-3): 44px targets, tabular numbers, text status next to colour, light theme kept in dark mode */
+:root{color-scheme:light dark}
+body{font-variant-numeric:tabular-nums}
+.ring .n .st{display:block;font-style:normal;font-size:15px;font-weight:800;color:var(--mut)}
+.ring.ok .n .st{color:#166534}
+.chip .st{font-weight:700}
+.meal-time{min-height:44px}
+.info-i{width:44px;height:44px}
+.sl-seg button{min-height:44px}
+.short-btn{min-height:44px}
+.whey-series-btn{min-height:44px}
+.shop-acts{grid-template-columns:44px 44px}
+.shop-acts .star,.shop-acts .ic{width:44px;height:44px;line-height:44px}
+.shop-row{grid-template-columns:28px minmax(0,1fr) 92px 96px}
+.chip[role=button],button.chip{min-height:44px}
+.cd-lap em{white-space:nowrap}
+/* 44px catch-up (2026.11.15-3) */
+.log-row{min-height:44px;justify-content:center}
+.shop-acts{grid-template-columns:44px 44px}
+.shop-acts .star,.shop-acts .ic{width:44px;height:44px;line-height:44px}
+/* Dark mode follows the system (2026.11.15-3). iOS grouped-table colours: page #000, cards #1C1C1E, fills #2C2C2E. */
+@media (prefers-color-scheme: dark) {
+  :root{--bg:#000;--card:#1C1C1E;--ink:#F2F2F7;--mut:#AEAEB2;--line:#38383A;--od:#FDBA74;--ok:#4ADE80;--warn:#FDBA74;--idle:#3A3A3C}
+  html,body{background:var(--bg);color:var(--ink)}
+  header{background:rgba(0,0,0,.92);border-bottom-color:var(--line)}
+  nav#tabs{background:#121212;border-top-color:var(--line)}
+  .card,.meal-row,.swap-list button,.trend-item,.body-wrap,.back-grid button,.item,.no li,.sheet-card,.cardio,.eat-toggle,.ck,#ptr .ptr-disc{background:var(--card);color:var(--ink);box-shadow:none}
+  .shop-add input,.shop-add select,.whey-select,.whey-add select,.backup-in{background:#2C2C2E;color:var(--ink);border-color:var(--line)}
+  .btn{background:#3A2210;color:#FDBA74}
+  .btn.primary{background:#C2410C;color:#fff}
+  .btn.ghost{background:transparent;color:#FDBA74}
+  .btn.danger{background:#3B1414;color:#FCA5A5}
+  .hero .btn{background:rgba(255,255,255,.22);color:#fff}
+  .hero .btn.primary{background:#fff;color:#9A3412}
+  .note,.wo-cue,.remain,.yt,.body-tip,.shop-hint,.sheet-text,.whey-add,.whey-frow,.whey-series-btn,.whey-series.open .whey-series-btn,.cd-t,.banner,.cd-tip.warn{background:#3A2210;color:#FED7AA}
+  .note.warn{background:#3B1414;color:#FCA5A5}
+  .body-tip[data-empty],.shop-hint.collapsed{background:#2C2C2E;color:var(--mut)}
+  .chip{background:#2C2C2E;color:var(--ink)}
+  .chip.low{background:#3A2210;color:#FDBA74;outline-color:#FB923C}
+  .chip.on,.back-grid button.on,.swap-list button.on,.ck.on,.shop-acts .star.on{background:#C2410C;color:#fff}
+  .stepper button,.shop-qty.whey-stock button,.else-row .stp button,.shop-acts .star,.shop-acts .ic,.meal-del{background:#3A2210;color:#FDBA74}
+  .shop-acts span.ic{background:transparent}
+  .eat-toggle.yes{background:#166534;color:#fff;border-color:#166534}
+  .ring.ok b,.ring.ok .n .st,.no .good,.have-tag,.cd-tip.ok{color:#4ADE80}
+  .shop-row .have-tag,.cd-tip.ok{background:#0F2E1B}
+  .no .bad,.whey-nutri{color:#FDBA74}
+  .pend,.now-pick .pend,.else-row .pend{background:#3A2E05;color:#FDE68A}
+  .demo-tag,.stg-tag{background:#3A2210;color:#FED7AA}
+  .chip .sug{color:#FDBA74}
+  .zbar{background:#2C2C2E}
+  .zrow span,.zrow.big,.cd-lap b,.cd-lap span,.week-cardio b{color:var(--ink)}
+  .app-ver{color:#8E8E93}
+  .meal-time{background:rgba(255,255,255,.08)}
+  .toast{background:#F2F2F7;color:#000}
+  .sheet{background:rgba(0,0,0,.6)}
+  .body-svg .skin{fill:#48484A}
+  .body-svg .m{fill:#636366}
+  .item.have{outline-color:#4ADE80}
+  [style*="color:#5C4A36"]{color:var(--mut)!important}
+}
+/* 24h meal time: text shown, native picker invisible on top */
+.meal-time{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:72px;width:auto;min-height:44px;padding:0 10px;margin:-4px 0;border-radius:10px;font-weight:800;color:inherit;cursor:pointer}
+.meal-time .mt-in{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;margin:0;padding:0;cursor:pointer;font-size:16px}
+.meal-time:focus-within{outline:2px solid var(--o)}
+/* workout: set + 完成 above the fold; map collapsed below */
+.wo-dose{margin:2px 0 0}
+.wo-fig{margin:12px 0}
+.wo-fig > summary{min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--mut);cursor:pointer}
+.rest-box .undo-set{margin-top:12px;color:var(--mut);font-weight:700}
+.sleep-mini .v small{font-size:15px}
+.chip .st,.chip small{font-size:15px}
+.app-ver{color:var(--mut)}
+@media (prefers-color-scheme: dark) {
+  .who .nums,.chip .sug,#ptr.ready .ptr-disc,#ptr .ptr-disc,#ptr.loading .ptr-spin{color:#FDBA74}
+}
+/* sleep page: readable sizes + tab/clock contrast on black */
+body.mode-sleep{--mut:#AEAEB2;--od:#FDBA74}
+body.mode-sleep .clock,body.mode-sleep nav#tabs button{color:#AEAEB2}
+body.mode-sleep nav#tabs button.on{color:#FDBA74}
+.sl-seg button,.sl-nav,.sl-k,.sl-sched,.sl-avg .k,.sl-avg .d,.sl-legend,.sl-note,.sleep-mini .k{font-size:15px}
+.sl-big small,.sl-stage b small,.sl-avg .v small,.sleep-mini .v small{font-size:15px}
+@media (prefers-color-scheme: dark) { .ring-track{stroke:#2C2C2E} }
+/* Uxi round 2 (2026.11.15-3) */
+:root{--tabh:67px}
+main{padding-bottom:calc(var(--tabh) + var(--sb) + 32px)}
+body.mode-workout main{padding-bottom:calc(var(--sb) + 24px)}
+/* primary actions stay in the thumb zone */
+.sticky-cta{position:sticky;bottom:0;z-index:6;margin:8px -16px 0;padding:10px 16px calc(10px + var(--sb));background:var(--bg);box-shadow:0 -1px 0 var(--line);display:flex;flex-direction:column;gap:8px}
+.sticky-cta.tabbed{bottom:calc(var(--tabh) + var(--sb));padding-bottom:10px}
+.sticky-cta .short-btn{margin:0;align-self:center}
+/* toast: top banner, never over inputs, keyboard or the tab bar */
+.toast{top:calc(var(--st) + 64px);bottom:auto}
+/* sleep page: whole chrome dark, same back label as other pages */
+body.mode-sleep nav#tabs{background:#000!important;border-top-color:#1C1C1E}
+.sl-back{min-height:44px;font-weight:700}
+/* quick-version trigger reason, always visible */
+.hero .why{margin:4px 0 8px;font-size:16px;font-weight:700;color:#fff}
+@media (prefers-color-scheme: dark){ .hero .why{color:#FED7AA} }
+/* shop: name gets the room, wraps instead of "…" */
+.shop-row{grid-template-columns:28px minmax(0,1fr) auto 96px}
+.shop-row .shop-name b{white-space:normal;overflow:visible;text-overflow:clip;word-break:keep-all;overflow-wrap:anywhere}
+.shop-row .shop-name{flex-wrap:wrap}
+.sl-top{grid-template-columns:auto 1fr auto}.sl-back{white-space:nowrap}.sl-top > span{min-width:120px}
+main{padding-bottom:calc(var(--tabh) + var(--sb) + 48px)}
+:root{--tabh:80px}
+.sticky-cta.tabbed{bottom:var(--navh,calc(var(--tabh) + var(--sb)))}
+main{padding-bottom:calc(var(--navh,calc(var(--tabh) + var(--sb))) + 40px)}
+body.mode-workout main{padding-bottom:calc(var(--sb) + 24px)}

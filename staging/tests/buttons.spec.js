@@ -59,7 +59,8 @@ async function nth(page, i) {
 const snap = (page) => page.evaluate(() => [location.hash, document.body.className, document.getElementById('main').innerHTML.length + ':' + document.getElementById('main').innerText, localStorage.getItem('fatcat-v2'), !!document.querySelector('.sheet'), document.activeElement && document.activeElement.tagName].join('|'));
 
 test.setTimeout(900000);
-test('every interactive element on every page', async ({ page, context }) => {
+for (const scheme of ['light', 'dark']) test(`every interactive element on every page (${scheme})`, async ({ page, context }) => {
+  await page.emulateMedia({ colorScheme: scheme });
   await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
   const errs = []; page.on('pageerror', (e) => errs.push(e.message));
   await setup(page);
@@ -101,7 +102,7 @@ test('every interactive element on every page', async ({ page, context }) => {
       });
       if (!g.inView) fail.push('not in viewport');
       if (g.covered) fail.push(`covered by "${g.by}"`);
-      if (g.w < 40 || g.h < 40) fail.push(`small ${Math.round(g.w)}×${Math.round(g.h)}`);
+      if (g.w < 44 || g.h < 44) fail.push(`small ${Math.round(g.w)}×${Math.round(g.h)}`);
       const before = await snap(page);
       const e0 = errs.length;
       const tagName = await h.evaluate((e) => e.tagName);
@@ -140,13 +141,13 @@ test('every interactive element on every page', async ({ page, context }) => {
         const g = await h.evaluate((e) => { const r = e.getBoundingClientRect(); const t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { w: r.width, h: r.height, covered: !(t && (t === e || e.contains(t))), by: t ? (t.innerText || t.tagName).slice(0, 20) : null, right: r.right }; });
         const fail = [];
         if (g.covered) fail.push(`covered by "${g.by}"`);
-        if (g.w < 40 || g.h < 40) fail.push(`small ${Math.round(g.w)}×${Math.round(g.h)}`);
+        if (g.w < 44 || g.h < 44) fail.push(`small ${Math.round(g.w)}×${Math.round(g.h)}`);
         if (g.right > width + 1) fail.push('off screen');
         results.push({ page: tag, label: it.label, fail, effect: 'geometry' });
       }
     }
   }
-  fs.writeFileSync('/workspace/fatmi-layout/buttons-report.json', JSON.stringify(results, null, 1));
+  fs.writeFileSync(`/workspace/fatmi-layout/buttons-report-${scheme}.json`, JSON.stringify(results, null, 1));
   const bad = results.filter((r) => r.fail.length);
   const noEffect = results.filter((r) => !r.fail.length && r.effect === false);
   console.log(`checked ${results.filter((r) => 'effect' in r).length} elements; failures ${bad.length}; no visible effect ${noEffect.length}`);
