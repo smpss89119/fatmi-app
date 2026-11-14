@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-14T23:04:06+07:00",
+  "exportedAt": "2026-11-14T23:40:38+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -1402,7 +1402,53 @@
             "type": "stair_climbing",
             "durationMin": 39.0,
             "avgHR": 125.0,
-            "kcal": 387.0
+            "kcal": 387.0,
+            "cardio": {
+              "type": "stair_climbing",
+              "durationMin": 39.0,
+              "avgHR": 125.0,
+              "maxHR": 144.0,
+              "steps": 112,
+              "aerobicTE": 2.5,
+              "anaerobicTE": 0.0,
+              "teLabel": "AEROBIC_BASE",
+              "load": 40.0,
+              "kcal": 387.0,
+              "zones": [
+                {
+                  "z": 1,
+                  "min": 6.0,
+                  "low": 95
+                },
+                {
+                  "z": 2,
+                  "min": 22.8,
+                  "low": 114
+                },
+                {
+                  "z": 3,
+                  "min": 8.5,
+                  "low": 133
+                },
+                {
+                  "z": 4,
+                  "min": 0.0,
+                  "low": 152
+                },
+                {
+                  "z": 5,
+                  "min": 0.0,
+                  "low": 171
+                }
+              ],
+              "laps": [
+                {
+                  "km": 0.0,
+                  "sec": 2337,
+                  "hr": 125.0
+                }
+              ]
+            }
           }
         ],
         "sets": [
@@ -1508,7 +1554,62 @@
             "type": "walking",
             "durationMin": 20.6,
             "avgHR": 136.0,
-            "kcal": 248.0
+            "kcal": 248.0,
+            "cardio": {
+              "type": "walking",
+              "durationMin": 20.6,
+              "distanceKm": 1.53,
+              "paceSec": 742,
+              "speedKmh": 4.9,
+              "avgHR": 136.0,
+              "maxHR": 148.0,
+              "steps": 2118,
+              "cadence": 96.0,
+              "aerobicTE": 2.8,
+              "anaerobicTE": 1.5,
+              "teLabel": "AEROBIC_BASE",
+              "load": 68.0,
+              "kcal": 248.0,
+              "zones": [
+                {
+                  "z": 1,
+                  "min": 0.0,
+                  "low": 95
+                },
+                {
+                  "z": 2,
+                  "min": 2.9,
+                  "low": 114
+                },
+                {
+                  "z": 3,
+                  "min": 17.8,
+                  "low": 133
+                },
+                {
+                  "z": 4,
+                  "min": 0.0,
+                  "low": 152
+                },
+                {
+                  "z": 5,
+                  "min": 0.0,
+                  "low": 171
+                }
+              ],
+              "laps": [
+                {
+                  "km": 1.0,
+                  "sec": 868,
+                  "hr": 135.0
+                },
+                {
+                  "km": 0.53,
+                  "sec": 371,
+                  "hr": 140.0
+                }
+              ]
+            }
           }
         ],
         "sets": [
@@ -1626,7 +1727,72 @@
             "type": "walking",
             "durationMin": 30.2,
             "avgHR": 162.0,
-            "kcal": 463.0
+            "kcal": 463.0,
+            "cardio": {
+              "type": "walking",
+              "durationMin": 30.2,
+              "distanceKm": 3.08,
+              "paceSec": 577,
+              "speedKmh": 6.2,
+              "avgHR": 162.0,
+              "maxHR": 173.0,
+              "steps": 3386,
+              "cadence": 111.0,
+              "aerobicTE": 4.3,
+              "anaerobicTE": 1.7,
+              "teLabel": "VO2MAX",
+              "load": 182.0,
+              "kcal": 463.0,
+              "zones": [
+                {
+                  "z": 1,
+                  "min": 0.1,
+                  "low": 95
+                },
+                {
+                  "z": 2,
+                  "min": 1.0,
+                  "low": 114
+                },
+                {
+                  "z": 3,
+                  "min": 2.3,
+                  "low": 133
+                },
+                {
+                  "z": 4,
+                  "min": 24.9,
+                  "low": 152
+                },
+                {
+                  "z": 5,
+                  "min": 1.9,
+                  "low": 171
+                }
+              ],
+              "laps": [
+                {
+                  "km": 1.0,
+                  "sec": 665,
+                  "hr": 153.0
+                },
+                {
+                  "km": 1.0,
+                  "sec": 551,
+                  "hr": 165.0
+                },
+                {
+                  "km": 1.0,
+                  "sec": 549,
+                  "hr": 168.0
+                },
+                {
+                  "km": 0.08,
+                  "sec": 46,
+                  "hr": 168.0
+                }
+              ]
+            }
           }
         ],
         "sets": [

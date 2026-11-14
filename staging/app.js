@@ -1938,6 +1938,8 @@ function renderHome(st) {
     return `<span class="chip${n < 6 ? " low" : ""}" data-testid="week-chip-${p}">${esc(PARTS[p])} ${n} 組</span>`;
   }).join("");
 
+  const wc = weekCardio(t);
+  const cardioLine = wc.n ? `<p class="week-cardio" data-testid="week-cardio">🫀 本週有氧 <b>${wc.min}</b> 分 · Z2 以上 <b>${wc.z2up}</b> 分 · 燃脂 Z2 <b>${wc.z2}</b> 分</p>` : "";
   const gAttach = todayLog && (todayLog.garmin || matchGarmin(todayKey()));
   const gLine = gAttach
     ? `<p class="muted">Garmin${gAttach.name ? ` · ${esc(gAttach.name)}` : ""}：${gAttach.durationMin != null ? `${gAttach.durationMin} 分` : ""}${gAttach.avgHR != null ? ` · 心率 ${Math.round(gAttach.avgHR)}` : ""}${gAttach.kcal != null ? ` · ${Math.round(gAttach.kcal)} kcal` : ""}</p>`
@@ -1977,6 +1979,7 @@ function renderHome(st) {
     <p class="sec">部位圖</p>
     ${bodyMap(parts.pri, parts.sec, week)}
     <div class="chips">${chips}</div>
+    ${cardioLine}
     ${gLine}
     <button type="button" class="btn full" data-go="log" data-testid="go-log">📋 訓練紀錄（練了什麼）</button>
     ${renderSunday(st)}
@@ -2159,11 +2162,130 @@ function deleteLog(date) {
   render();
 }
 function garminWorkoutsOn(date) {
-  return (LIVE.garmin.activities || []).filter((a) => a.date === date && isGarminWorkout(a));
+  return (LIVE.garmin.activities || []).filter((a) => a.date === date && (isGarminWorkout(a) || a.cardio));
+}
+// ---- Cardio (data.json activities[].cardio and children[].cardio) ----
+const ZONES = [
+  { z: 1, name: "暖身", color: "#9CA3AF" },
+  { z: 2, name: "燃脂", color: "#3B82F6" },
+  { z: 3, name: "有氧", color: "#22C55E" },
+  { z: 4, name: "乳酸閾", color: "#F97316" },
+  { z: 5, name: "極限", color: "#DC2626" },
+];
+function cardioIcon(t) {
+  t = String(t || "");
+  if (/walk/.test(t)) return ["🚶", "健走"];
+  if (/hik/.test(t)) return ["🥾", "登山"];
+  if (/treadmill/.test(t)) return ["🏃", "跑步機"];
+  if (/run/.test(t)) return ["🏃", "跑步"];
+  if (/cycl|bik/.test(t)) return ["🚴", "騎車"];
+  if (/elliptical/.test(t)) return ["🌀", "滑步機"];
+  if (/stair/.test(t)) return ["🪜", "爬樓梯"];
+  if (/row/.test(t)) return ["🚣", "划船機"];
+  if (/swim/.test(t)) return ["🏊", "游泳"];
+  return ["🫀", "有氧"];
+}
+function cardioOn(date) {
+  const out = [];
+  for (const a of LIVE.garmin.activities || []) {
+    if (a.date !== date) continue;
+    if (a.cardio) out.push(a.cardio);
+    for (const c of a.children || []) if (c.cardio) out.push(c.cardio);
+  }
+  return out;
+}
+function paceText(sec) { if (!sec) return ""; const m = Math.floor(sec / 60), x = Math.round(sec % 60); return `${m}'${String(x).padStart(2, "0")}"`; }
+function zoneRange(zones, i) {
+  const lo = zones[i] && zones[i].low;
+  const nx = zones[i + 1] && zones[i + 1].low;
+  if (lo == null) return "";
+  return nx != null ? `${lo}–${nx - 1}` : `${lo}+`;
+}
+function zoneMins(c) {
+  const out = {};
+  for (const z of c.zones || []) out[z.z] = Number(z.min) || 0;
+  return out;
+}
+function teText(v) {
+  if (v == null) return "";
+  const n = Number(v);
+  return n >= 5 ? "過量" : n >= 4 ? "大幅提升" : n >= 3 ? "提升" : n >= 2 ? "維持" : n >= 1 ? "輕微" : "無效果";
+}
+function cardioSummary(c) {
+  const [ic, nm] = cardioIcon(c.type);
+  const zm = zoneMins(c);
+  const tot = Object.values(zm).reduce((s, x) => s + x, 0);
+  let top = null;
+  for (const z of ZONES) if (zm[z.z] && (!top || zm[z.z] > zm[top.z])) top = z;
+  return `${ic} ${nm} ${Math.round(c.durationMin || 0)} 分${c.distanceKm ? ` · ${c.distanceKm} km` : ""}${c.avgHR ? ` · ❤️ ${Math.round(c.avgHR)}` : ""}${top && tot ? ` · 多在 Z${top.z} ${top.name} ${Math.round(zm[top.z] / tot * 100)}%` : ""}`;
+}
+function lapChart(c) {
+  const laps = (c.laps || []).filter((l) => l.km >= 0.5 && l.sec > 0);
+  if (laps.length < 2) return "";
+  const hrs = laps.map((l) => l.hr || 0);
+  const lo = Math.min(...hrs.filter(Boolean)) - 10, hi = Math.max(...hrs) + 2;
+  const zones = c.zones || [];
+  const colorOf = (hr) => { let col = ZONES[0].color; zones.forEach((z, i) => { if (z.low != null && hr >= z.low) col = ZONES[i] ? ZONES[i].color : col; }); return col; };
+  return `<div class="cd-laps" data-testid="cardio-laps">${laps.map((l, i) => {
+    const h = l.hr ? Math.max(12, Math.round((l.hr - lo) / (hi - lo) * 44)) : 6;
+    return `<div class="cd-lap"><b>${l.hr ? Math.round(l.hr) : "—"}</b><i style="height:${h}px;background:${colorOf(l.hr)}"></i><span>${paceText(l.sec / l.km)}</span><em>${i + 1} km</em></div>`;
+  }).join("")}</div>`;
+}
+function cardioCard(c, key) {
+  const [ic, nm] = cardioIcon(c.type);
+  const zm = zoneMins(c);
+  const tot = Object.values(zm).reduce((s, x) => s + x, 0);
+  const tiles = [
+    c.distanceKm ? ["📏", `${c.distanceKm}`, "km"] : null,
+    c.paceSec ? ["⏱", paceText(c.paceSec), "/km"] : null,
+    c.speedKmh ? ["🚀", `${c.speedKmh}`, "km/h"] : null,
+    c.avgHR ? ["❤️", `${Math.round(c.avgHR)}${c.maxHR ? `<small>/${Math.round(c.maxHR)}</small>` : ""}`, "平均/最高"] : null,
+    c.steps ? ["👣", `${c.steps}`, c.cadence ? `步 · ${Math.round(c.cadence)}/分` : "步"] : null,
+    c.elevGain ? ["⛰", `+${Math.round(c.elevGain)}`, "m"] : null,
+    c.kcal ? ["🔥", `${Math.round(c.kcal)}`, "kcal"] : null,
+    c.aerobicTE != null ? ["💪", `${c.aerobicTE}${c.anaerobicTE != null ? `<small>/${c.anaerobicTE}</small>` : ""}`, `有氧${teText(c.aerobicTE)}${c.anaerobicTE != null ? "/無氧" : ""}`] : null,
+  ].filter(Boolean);
+  let zoneHtml = "";
+  if (tot > 0) {
+    const zs = c.zones || [];
+    const bar = ZONES.map((z) => zm[z.z] ? `<i style="flex:${zm[z.z]};background:${z.color}" title="Z${z.z}"></i>` : "").join("");
+    const rows = ZONES.map((z) => {
+      const i = zs.findIndex((x) => x.z === z.z);
+      const m = zm[z.z] || 0;
+      const pct = Math.round(m / tot * 100);
+      return `<div class="zrow${pct >= 40 ? " big" : ""}" data-testid="zone-${key}-${z.z}"><i style="background:${z.color}"></i><span>Z${z.z} ${z.name}</span><em>${i >= 0 ? zoneRange(zs, i) : ""}</em><b>${m >= 1 ? Math.round(m) : m ? "<1" : 0} 分</b><b class="pct">${pct}%</b></div>`;
+    }).join("");
+    const high = ((zm[4] || 0) + (zm[5] || 0)) / tot;
+    const z2 = zs.find((x) => x.z === 2);
+    const tip = high >= 0.5 && z2
+      ? `<p class="cd-tip warn" data-testid="cardio-tip-${key}">⚠ ${Math.round(high * 100)}% 在 Z4 以上，偏高。想燃脂，心率壓在 Z2 ${zoneRange(zs, zs.indexOf(z2))}</p>`
+      : ((zm[2] || 0) + (zm[3] || 0)) / tot >= 0.5 ? `<p class="cd-tip ok" data-testid="cardio-tip-${key}">✅ 多數在 Z2–Z3，燃脂／有氧區</p>` : "";
+    zoneHtml = `<div class="zbar" data-testid="zbar-${key}">${bar}</div><div class="zrows">${rows}</div>${tip}`;
+  }
+  return `<div class="cardio" data-testid="cardio-${key}">
+    <div class="cd-head"><span>${ic} ${nm}</span><b>${Math.round(c.durationMin || 0)} 分</b></div>
+    ${zoneHtml}
+    ${tiles.length ? `<div class="cd-grid">${tiles.map(([i, v, u]) => `<div class="cd-t"><span>${i}</span><b>${v}</b><em>${u}</em></div>`).join("")}</div>` : ""}
+    ${lapChart(c)}
+  </div>`;
+}
+function weekCardio(d = now()) {
+  const { mon } = weekRange(d);
+  let min = 0, z2up = 0, z2 = 0, n = 0;
+  for (let i = 0; i < 7; i++) {
+    for (const c of cardioOn(todayKey(addDays(mon, i)))) {
+      n++;
+      min += Number(c.durationMin) || 0;
+      const zm = zoneMins(c);
+      z2 += zm[2] || 0;
+      z2up += (zm[2] || 0) + (zm[3] || 0) + (zm[4] || 0) + (zm[5] || 0);
+    }
+  }
+  return { n, min: Math.round(min), z2up: Math.round(z2up), z2: Math.round(z2) };
 }
 function logDates(st) {
   const set = new Set(Object.keys(st.logs || {}).filter((d) => st.logs[d].finishedAt || Object.keys(st.logs[d].moves || {}).length));
-  for (const a of LIVE.garmin.activities || []) if (a.date && isGarminWorkout(a)) set.add(a.date);
+  for (const a of LIVE.garmin.activities || []) if (a.date && (isGarminWorkout(a) || a.cardio)) set.add(a.date);
   return [...set].sort().reverse();
 }
 function garminText(a) {
@@ -2193,7 +2315,8 @@ function dayBodyMap(d, moves) {
 function logDetail(st, d) {
   const l = (st.logs || {})[d];
   const gs = garminWorkoutsOn(d);
-  const g = gs.map((a) => `<p class="muted" data-testid="log-garmin-${d}">⌚ ${fmtMD(d)} ${clockOf(a.startTime ? String(a.startTime).replace(" ", "T") : "")} ${esc(a.name || a.type)}：${garminText(a)}</p>${(a.children || []).map((c) => `<p class="muted">　${/strength/.test(c.type || "") ? "🏋️ 重訓" : /walk/.test(c.type || "") ? "🚶 健走" : /run/.test(c.type || "") ? "🏃 跑步" : "• " + esc(c.type || "")} ${garminText(c)}</p>`).join("")}`).join("");
+  let ci = 0;
+  const g = gs.map((a) => `<p class="muted" data-testid="log-garmin-${d}">⌚ ${fmtMD(d)} ${clockOf(a.startTime ? String(a.startTime).replace(" ", "T") : "")} ${esc(a.name || a.type)}：${garminText(a)}</p>${a.cardio ? cardioCard(a.cardio, `${d}-${ci++}`) : ""}${(a.children || []).map((c) => c.cardio ? cardioCard(c.cardio, `${d}-${ci++}`) : `<p class="muted">　${/strength/.test(c.type || "") ? "🏋️ 重訓" : "• " + esc(c.type || "")} ${garminText(c)}</p>`).join("")}`).join("");
   if (hasGarminSets(d)) {
     const moves = Object.entries(garminMovesOn(d));
     const total = moves.reduce((s, [, x]) => s + x.length, 0);
@@ -2206,6 +2329,7 @@ function logDetail(st, d) {
     </div>`;
   }
   const moves = Object.entries((l && l.moves) || {}).filter(([, sets]) => (sets || []).some((x) => x.done));
+  if (!moves.length && !gs.some(isGarminWorkout)) return `<div class="log-detail" data-testid="log-detail-${d}">${g}</div>`;
   if (!moves.length) {
     const def = plannedWorkoutFor(st, parseISO(d)) || "homeQ";
     const opts = ["homeQ", "gymA", "gymB"].filter((id) => WORKOUTS[id]);
@@ -2236,9 +2360,12 @@ function renderLogRows(st) {
     const n = Object.values(dayMoves(st, d)).reduce((s, x) => s + (x || []).filter((y) => y.done).length, 0);
     const gs = garminWorkoutsOn(d);
     const name = w ? w.name : (gs[0] ? (gs[0].name || "訓練") : "訓練");
-    const right = n ? `${n} 組` : "⚠ 未記動作";
+    const cardio = cardioOn(d);
+    const strengthDay = n || gs.some(isGarminWorkout) || (l && l.workoutId);
+    const right = n ? `${n} 組` : strengthDay ? "⚠ 未記動作" : "🫀";
     const open = ui.logOpen === d;
-    return `<div class="stat" role="button" data-log-open="${d}" data-src="${gSets ? "garmin" : "app"}" data-log-row="${d}" data-testid="log-row-${d}"><span>${open ? "▾" : "▸"} ${fmtMD(d)} ${esc(name)}${gs.length ? " ⌚" : ""}</span><span>${right}</span></div>${open ? logDetail(st, d) : ""}`;
+    const sub = cardio.map((c) => `<span class="log-sub" data-testid="log-cardio-sum-${d}">${esc(cardioSummary(c))}</span>`).join("");
+    return `<div class="stat log-row${sub ? " has-sub" : ""}" role="button" data-log-open="${d}" data-src="${gSets ? "garmin" : "app"}" data-log-row="${d}" data-testid="log-row-${d}"><span class="lr-main"><span>${open ? "▾" : "▸"} ${fmtMD(d)} ${esc(name)}${gs.length ? " ⌚" : ""}</span><span>${right}</span></span>${sub}</div>${open ? logDetail(st, d) : ""}`;
   }).join("") + `<p class="muted">點一筆看動作和部位；長按可刪除 App 紀錄</p>`;
 }
 function renderLog(st) {
@@ -3775,7 +3902,7 @@ window.addEventListener("hashchange", () => {
 
 const ASSETS = ["./", "./index.html", "./app.js", "./app.css", "./data.js", "./data.json", "./body-svg.js", "./version.json", "./sw.js", "./manifest.webmanifest?v=preview-30", "./icon-180-20261107p25.png", "./icon-512-20261107p25.png"];
 let loadedVersion = null;
-const APP_VERSION = "2026.11.15-1";
+const APP_VERSION = "2026.11.15-2";
 const SITE = /\/staging\//.test(location.pathname) ? "staging" : /\/preview\//.test(location.pathname) ? "preview" : "live";
 const CACHE_PREFIX = SITE === "staging" ? "fatcat-staging-" : SITE === "preview" ? "fatcat-preview-" : "fatcat-2-";
 let pendingReload = false;
