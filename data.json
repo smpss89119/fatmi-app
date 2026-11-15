@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-15T21:49:43+07:00",
+  "exportedAt": "2026-11-15T22:52:18+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -2532,15 +2532,15 @@
           "weeklyAvg": 54.0,
           "status": "BALANCED"
         },
-        "vo2max": null,
+        "vo2max": 53.4,
         "trainingStatus": "Maintaining",
         "trainingLoad": {
-          "acute": 245.0,
+          "acute": 249.0,
           "chronic": 219.0,
           "acwr": 1.1,
           "acwrStatus": "OPTIMAL",
           "focus": {
-            "aerobicLow": 24.0,
+            "aerobicLow": 28.0,
             "aerobicHigh": 164.0,
             "anaerobic": 18.0,
             "feedback": "AEROBIC_LOW_SHORTAGE"
@@ -3992,6 +3992,111 @@
             "km": 0.0,
             "sec": 3607,
             "hr": 108.0
+          }
+        ]
+      },
+      {
+        "type": "walking",
+        "date": "2026-11-15",
+        "startTime": "2026-11-15 22:52:56",
+        "durationMin": 21.4,
+        "avgHR": 80.0,
+        "kcal": 110.0,
+        "name": "香山區 步行",
+        "id": 25088463207,
+        "cardio": {
+          "type": "walking",
+          "durationMin": 21.4,
+          "distanceKm": 1.62,
+          "paceSec": 743,
+          "speedKmh": 4.8,
+          "avgHR": 80.0,
+          "maxHR": 114.0,
+          "steps": 2230,
+          "cadence": 101.0,
+          "elevGain": 9.0,
+          "aerobicTE": 0.3,
+          "anaerobicTE": 0.0,
+          "teLabel": "RECOVERY",
+          "load": 4.0,
+          "kcal": 110.0,
+          "zones": [
+            {
+              "z": 1,
+              "min": 6.3,
+              "low": 95
+            },
+            {
+              "z": 2,
+              "min": 0.1,
+              "low": 114
+            },
+            {
+              "z": 3,
+              "min": 0.0,
+              "low": 133
+            },
+            {
+              "z": 4,
+              "min": 0.0,
+              "low": 152
+            },
+            {
+              "z": 5,
+              "min": 0.0,
+              "low": 171
+            }
+          ],
+          "laps": [
+            {
+              "km": 1.0,
+              "sec": 825,
+              "hr": 92.0
+            },
+            {
+              "km": 0.62,
+              "sec": 461,
+              "hr": 58.0
+            }
+          ]
+        },
+        "zones": [
+          {
+            "z": 1,
+            "min": 6.3,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 0.1,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 0.0,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 0.0,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 0.0,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 1.0,
+            "sec": 825,
+            "hr": 92.0
+          },
+          {
+            "km": 0.62,
+            "sec": 461,
+            "hr": 58.0
           }
         ]
       }
