@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-16T21:46:48+07:00",
+  "exportedAt": "2026-11-16T22:55:04+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -2606,12 +2606,12 @@
       },
       {
         "date": "2026-11-16",
-        "kcal": 1714.0,
-        "steps": 3953,
+        "kcal": 2207.0,
+        "steps": 7351,
         "sleepHours": 6.6,
         "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 47.0,
+        "bodyBattery": 22.0,
         "sleepScore": 84,
         "sleepDeepMin": 56,
         "sleepLightMin": 257,
@@ -2620,36 +2620,36 @@
         "bodyBatteryHigh": 86.0,
         "bodyBatteryLow": 5.0,
         "bodyBatteryCharged": 81.0,
-        "bodyBatteryDrained": 42.0,
-        "stressAvg": 19.0,
-        "stressMax": 83.0,
+        "bodyBatteryDrained": 67.0,
+        "stressAvg": 26.0,
+        "stressMax": 97.0,
         "hrv": {
           "lastNightAvg": 77.0,
           "weeklyAvg": 58.0,
           "status": "BALANCED"
         },
-        "vo2max": 53.4,
+        "vo2max": 52.6,
         "trainingStatus": "Maintaining",
         "trainingLoad": {
-          "acute": 222.0,
+          "acute": 226.0,
           "chronic": 219.0,
           "acwr": 1.0,
           "acwrStatus": "OPTIMAL",
           "focus": {
-            "aerobicLow": 28.0,
+            "aerobicLow": 32.0,
             "aerobicHigh": 164.0,
             "anaerobic": 18.0,
             "feedback": "AEROBIC_LOW_SHORTAGE"
           }
         },
         "intensityMinutes": {
-          "moderate": 0,
-          "vigorous": 0,
-          "total": 0
+          "moderate": 20,
+          "vigorous": 2,
+          "total": 24
         },
         "floors": {
-          "up": 0.7,
-          "down": 1.7
+          "up": 3.4,
+          "down": 3.1
         },
         "sleep": {
           "start": "2026-11-16T01:25",
@@ -4168,6 +4168,111 @@
             "km": 0.62,
             "sec": 461,
             "hr": 58.0
+          }
+        ]
+      },
+      {
+        "type": "walking",
+        "date": "2026-11-16",
+        "startTime": "2026-11-16 22:30:10",
+        "durationMin": 21.5,
+        "avgHR": 97.0,
+        "kcal": 111.0,
+        "name": "香山區 步行",
+        "id": 25097796336,
+        "cardio": {
+          "type": "walking",
+          "durationMin": 21.5,
+          "distanceKm": 1.67,
+          "paceSec": 711,
+          "speedKmh": 5.1,
+          "avgHR": 97.0,
+          "maxHR": 110.0,
+          "steps": 2236,
+          "cadence": 102.0,
+          "elevGain": 8.0,
+          "aerobicTE": 0.3,
+          "anaerobicTE": 0.0,
+          "teLabel": "RECOVERY",
+          "load": 4.0,
+          "kcal": 111.0,
+          "zones": [
+            {
+              "z": 1,
+              "min": 16.4,
+              "low": 95
+            },
+            {
+              "z": 2,
+              "min": 0.0,
+              "low": 114
+            },
+            {
+              "z": 3,
+              "min": 0.0,
+              "low": 133
+            },
+            {
+              "z": 4,
+              "min": 0.0,
+              "low": 152
+            },
+            {
+              "z": 5,
+              "min": 0.0,
+              "low": 171
+            }
+          ],
+          "laps": [
+            {
+              "km": 1.0,
+              "sec": 807,
+              "hr": 95.0
+            },
+            {
+              "km": 0.67,
+              "sec": 482,
+              "hr": 100.0
+            }
+          ]
+        },
+        "zones": [
+          {
+            "z": 1,
+            "min": 16.4,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 0.0,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 0.0,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 0.0,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 0.0,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 1.0,
+            "sec": 807,
+            "hr": 95.0
+          },
+          {
+            "km": 0.67,
+            "sec": 482,
+            "hr": 100.0
           }
         ]
       }
