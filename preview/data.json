@@ -1,56 +1,8 @@
 {
-  "exportedAt": "2026-11-16T22:55:04+07:00",
+  "exportedAt": "2026-11-17T06:54:42+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-18",
-        "kcal": 2826.0,
-        "steps": 10020,
-        "sleepHours": 5.2,
-        "restingHR": 47.0,
-        "weightKg": null,
-        "bodyBattery": 7.0,
-        "sleepScore": 78,
-        "sleepDeepMin": 63,
-        "sleepLightMin": 162,
-        "sleepRemMin": 88,
-        "sleepAwakeMin": 1,
-        "bodyBatteryHigh": 87.0,
-        "bodyBatteryLow": 7.0,
-        "bodyBatteryCharged": 77.0,
-        "bodyBatteryDrained": 84.0,
-        "stressAvg": 35.0,
-        "stressMax": 96.0,
-        "hrv": {
-          "lastNightAvg": 72.0,
-          "weeklyAvg": 60.0,
-          "status": "BALANCED"
-        },
-        "vo2max": 53.9,
-        "trainingStatus": "Maintaining",
-        "trainingLoad": {
-          "acute": 218.0,
-          "chronic": 219.0,
-          "acwr": 0.9,
-          "acwrStatus": "OPTIMAL",
-          "focus": {
-            "aerobicLow": 381.0,
-            "aerobicHigh": 58.0,
-            "anaerobic": 15.0,
-            "feedback": "AEROBIC_HIGH_SHORTAGE"
-          }
-        },
-        "intensityMinutes": {
-          "moderate": 8,
-          "vigorous": 50,
-          "total": 108
-        },
-        "floors": {
-          "up": 4.4,
-          "down": 4.8
-        }
-      },
       {
         "date": "2026-10-19",
         "kcal": 2215.0,
@@ -2606,12 +2558,12 @@
       },
       {
         "date": "2026-11-16",
-        "kcal": 2207.0,
-        "steps": 7351,
+        "kcal": 2293.0,
+        "steps": 7704,
         "sleepHours": 6.6,
         "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 22.0,
+        "bodyBattery": 19.0,
         "sleepScore": 84,
         "sleepDeepMin": 56,
         "sleepLightMin": 257,
@@ -2620,8 +2572,8 @@
         "bodyBatteryHigh": 86.0,
         "bodyBatteryLow": 5.0,
         "bodyBatteryCharged": 81.0,
-        "bodyBatteryDrained": 67.0,
-        "stressAvg": 26.0,
+        "bodyBatteryDrained": 70.0,
+        "stressAvg": 27.0,
         "stressMax": 97.0,
         "hrv": {
           "lastNightAvg": 77.0,
@@ -2722,428 +2674,42 @@
           ],
           "lightMin": 257
         }
+      },
+      {
+        "date": "2026-11-17",
+        "kcal": 265.0,
+        "steps": 67,
+        "sleepHours": null,
+        "restingHR": 54.0,
+        "weightKg": null,
+        "bodyBattery": 32.0,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": 32.0,
+        "bodyBatteryLow": 16.0,
+        "bodyBatteryCharged": 16.0,
+        "bodyBatteryDrained": 3.0,
+        "stressAvg": 25.0,
+        "stressMax": 68.0,
+        "hrv": null,
+        "vo2max": null,
+        "trainingStatus": null,
+        "trainingLoad": null,
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 0.0,
+          "down": 0.0
+        }
       }
     ],
     "activities": [
-      {
-        "type": "multi_sport",
-        "date": "2026-10-17",
-        "startTime": "2026-10-17 07:12:22",
-        "durationMin": 95.9,
-        "avgHR": null,
-        "kcal": 646.0,
-        "name": "複合式運動",
-        "id": 24750615397,
-        "children": [
-          {
-            "id": 24750615380,
-            "type": "strength_training",
-            "durationMin": 57.0,
-            "avgHR": 89.0,
-            "kcal": 259.0,
-            "sets": [
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 29.0,
-                "reps": 26
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 38.0,
-                "reps": 14
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 47.0,
-                "reps": 8
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 47.0,
-                "reps": 8
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 38.0,
-                "reps": 11
-              },
-              {
-                "name": "SEATED_CABLE_ROW",
-                "cat": "ROW",
-                "kg": 35.0,
-                "reps": 31
-              },
-              {
-                "name": null,
-                "cat": "ROW",
-                "kg": 50.0,
-                "reps": 14
-              },
-              {
-                "name": null,
-                "cat": "UNKNOWN",
-                "kg": 55.0,
-                "reps": 12
-              },
-              {
-                "name": "SEATED_CABLE_ROW",
-                "cat": "ROW",
-                "kg": 60.0,
-                "reps": 10
-              },
-              {
-                "name": "SEATED_CABLE_ROW",
-                "cat": "ROW",
-                "kg": 60.0,
-                "reps": 7
-              },
-              {
-                "name": "LAT_PULLDOWN",
-                "cat": "PULL_UP",
-                "kg": 40.0,
-                "reps": 10
-              },
-              {
-                "name": "LAT_PULLDOWN",
-                "cat": "PULL_UP",
-                "kg": 40.0,
-                "reps": 12
-              },
-              {
-                "name": "LAT_PULLDOWN",
-                "cat": "PULL_UP",
-                "kg": 40.0,
-                "reps": 8
-              }
-            ],
-            "zones": [
-              {
-                "z": 1,
-                "min": 12.3,
-                "low": 95
-              },
-              {
-                "z": 2,
-                "min": 1.0,
-                "low": 114
-              },
-              {
-                "z": 3,
-                "min": 0.0,
-                "low": 133
-              },
-              {
-                "z": 4,
-                "min": 0.0,
-                "low": 152
-              },
-              {
-                "z": 5,
-                "min": 0.0,
-                "low": 171
-              }
-            ],
-            "laps": [
-              {
-                "km": 0.0,
-                "sec": 3418,
-                "hr": 89.0
-              }
-            ]
-          },
-          {
-            "id": 24750615381,
-            "type": "stair_climbing",
-            "durationMin": 39.0,
-            "avgHR": 125.0,
-            "kcal": 387.0,
-            "cardio": {
-              "type": "stair_climbing",
-              "durationMin": 39.0,
-              "avgHR": 125.0,
-              "maxHR": 144.0,
-              "steps": 112,
-              "aerobicTE": 2.5,
-              "anaerobicTE": 0.0,
-              "teLabel": "AEROBIC_BASE",
-              "load": 40.0,
-              "kcal": 387.0,
-              "zones": [
-                {
-                  "z": 1,
-                  "min": 6.0,
-                  "low": 95
-                },
-                {
-                  "z": 2,
-                  "min": 22.8,
-                  "low": 114
-                },
-                {
-                  "z": 3,
-                  "min": 8.5,
-                  "low": 133
-                },
-                {
-                  "z": 4,
-                  "min": 0.0,
-                  "low": 152
-                },
-                {
-                  "z": 5,
-                  "min": 0.0,
-                  "low": 171
-                }
-              ],
-              "laps": [
-                {
-                  "km": 0.0,
-                  "sec": 2337,
-                  "hr": 125.0
-                }
-              ]
-            },
-            "sets": [
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 29.0,
-                "reps": 26
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 38.0,
-                "reps": 14
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 47.0,
-                "reps": 8
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 47.0,
-                "reps": 8
-              },
-              {
-                "name": null,
-                "cat": "BENCH_PRESS",
-                "kg": 38.0,
-                "reps": 11
-              },
-              {
-                "name": "SEATED_CABLE_ROW",
-                "cat": "ROW",
-                "kg": 35.0,
-                "reps": 31
-              },
-              {
-                "name": null,
-                "cat": "ROW",
-                "kg": 50.0,
-                "reps": 14
-              },
-              {
-                "name": null,
-                "cat": "UNKNOWN",
-                "kg": 55.0,
-                "reps": 12
-              },
-              {
-                "name": "SEATED_CABLE_ROW",
-                "cat": "ROW",
-                "kg": 60.0,
-                "reps": 10
-              },
-              {
-                "name": "SEATED_CABLE_ROW",
-                "cat": "ROW",
-                "kg": 60.0,
-                "reps": 7
-              },
-              {
-                "name": "LAT_PULLDOWN",
-                "cat": "PULL_UP",
-                "kg": 40.0,
-                "reps": 10
-              },
-              {
-                "name": "LAT_PULLDOWN",
-                "cat": "PULL_UP",
-                "kg": 40.0,
-                "reps": 12
-              },
-              {
-                "name": "LAT_PULLDOWN",
-                "cat": "PULL_UP",
-                "kg": 40.0,
-                "reps": 8
-              }
-            ],
-            "zones": [
-              {
-                "z": 1,
-                "min": 6.0,
-                "low": 95
-              },
-              {
-                "z": 2,
-                "min": 22.8,
-                "low": 114
-              },
-              {
-                "z": 3,
-                "min": 8.5,
-                "low": 133
-              },
-              {
-                "z": 4,
-                "min": 0.0,
-                "low": 152
-              },
-              {
-                "z": 5,
-                "min": 0.0,
-                "low": 171
-              }
-            ],
-            "laps": [
-              {
-                "km": 0.0,
-                "sec": 2337,
-                "hr": 125.0
-              }
-            ]
-          }
-        ],
-        "sets": [
-          {
-            "name": null,
-            "cat": "BENCH_PRESS",
-            "kg": 29.0,
-            "reps": 26
-          },
-          {
-            "name": null,
-            "cat": "BENCH_PRESS",
-            "kg": 38.0,
-            "reps": 14
-          },
-          {
-            "name": null,
-            "cat": "BENCH_PRESS",
-            "kg": 47.0,
-            "reps": 8
-          },
-          {
-            "name": null,
-            "cat": "BENCH_PRESS",
-            "kg": 47.0,
-            "reps": 8
-          },
-          {
-            "name": null,
-            "cat": "BENCH_PRESS",
-            "kg": 38.0,
-            "reps": 11
-          },
-          {
-            "name": "SEATED_CABLE_ROW",
-            "cat": "ROW",
-            "kg": 35.0,
-            "reps": 31
-          },
-          {
-            "name": null,
-            "cat": "ROW",
-            "kg": 50.0,
-            "reps": 14
-          },
-          {
-            "name": null,
-            "cat": "UNKNOWN",
-            "kg": 55.0,
-            "reps": 12
-          },
-          {
-            "name": "SEATED_CABLE_ROW",
-            "cat": "ROW",
-            "kg": 60.0,
-            "reps": 10
-          },
-          {
-            "name": "SEATED_CABLE_ROW",
-            "cat": "ROW",
-            "kg": 60.0,
-            "reps": 7
-          },
-          {
-            "name": "LAT_PULLDOWN",
-            "cat": "PULL_UP",
-            "kg": 40.0,
-            "reps": 10
-          },
-          {
-            "name": "LAT_PULLDOWN",
-            "cat": "PULL_UP",
-            "kg": 40.0,
-            "reps": 12
-          },
-          {
-            "name": "LAT_PULLDOWN",
-            "cat": "PULL_UP",
-            "kg": 40.0,
-            "reps": 8
-          }
-        ],
-        "zones": [
-          {
-            "z": 1,
-            "min": 18.3,
-            "low": 95
-          },
-          {
-            "z": 2,
-            "min": 23.8,
-            "low": 114
-          },
-          {
-            "z": 3,
-            "min": 8.5,
-            "low": 133
-          },
-          {
-            "z": 4,
-            "min": 0.0,
-            "low": 152
-          },
-          {
-            "z": 5,
-            "min": 0.0,
-            "low": 171
-          }
-        ],
-        "laps": [
-          {
-            "km": 0.0,
-            "sec": 3418,
-            "hr": 89.0
-          },
-          {
-            "km": 0.0,
-            "sec": 2337,
-            "hr": 125.0
-          }
-        ]
-      },
       {
         "type": "multi_sport",
         "date": "2026-10-18",
