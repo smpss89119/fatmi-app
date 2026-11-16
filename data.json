@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-16T06:50:31+07:00",
+  "exportedAt": "2026-11-16T07:46:39+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -2606,27 +2606,42 @@
       },
       {
         "date": "2026-11-16",
-        "kcal": 132.0,
-        "steps": 43,
-        "sleepHours": null,
-        "restingHR": 55.0,
+        "kcal": 726.0,
+        "steps": 129,
+        "sleepHours": 6.6,
+        "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 6.0,
-        "sleepScore": null,
-        "sleepDeepMin": null,
-        "sleepLightMin": null,
-        "sleepRemMin": null,
-        "sleepAwakeMin": null,
-        "bodyBatteryHigh": 8.0,
-        "bodyBatteryLow": 6.0,
-        "bodyBatteryCharged": 0.0,
-        "bodyBatteryDrained": 2.0,
-        "stressAvg": 35.0,
+        "bodyBattery": 84.0,
+        "sleepScore": 84,
+        "sleepDeepMin": 56,
+        "sleepLightMin": 257,
+        "sleepRemMin": 81,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 86.0,
+        "bodyBatteryLow": 5.0,
+        "bodyBatteryCharged": 81.0,
+        "bodyBatteryDrained": 5.0,
+        "stressAvg": 14.0,
         "stressMax": 83.0,
-        "hrv": null,
-        "vo2max": null,
-        "trainingStatus": null,
-        "trainingLoad": null,
+        "hrv": {
+          "lastNightAvg": 77.0,
+          "weeklyAvg": 58.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 53.4,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 222.0,
+          "chronic": 219.0,
+          "acwr": 1.0,
+          "acwrStatus": "OPTIMAL",
+          "focus": {
+            "aerobicLow": 28.0,
+            "aerobicHigh": 164.0,
+            "anaerobic": 18.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
         "intensityMinutes": {
           "moderate": 0,
           "vigorous": 0,
@@ -2635,6 +2650,77 @@
         "floors": {
           "up": 0.0,
           "down": 0.0
+        },
+        "sleep": {
+          "start": "2026-11-16T01:25",
+          "end": "2026-11-16T08:00",
+          "deepMin": 56,
+          "coreMin": 257,
+          "remMin": 81,
+          "awakeMin": 1,
+          "segments": [
+            [
+              0,
+              7,
+              "core"
+            ],
+            [
+              7,
+              52,
+              "deep"
+            ],
+            [
+              52,
+              89,
+              "core"
+            ],
+            [
+              89,
+              90,
+              "awake"
+            ],
+            [
+              90,
+              146,
+              "core"
+            ],
+            [
+              146,
+              171,
+              "rem"
+            ],
+            [
+              171,
+              195,
+              "core"
+            ],
+            [
+              195,
+              206,
+              "deep"
+            ],
+            [
+              206,
+              261,
+              "core"
+            ],
+            [
+              261,
+              311,
+              "rem"
+            ],
+            [
+              311,
+              389,
+              "core"
+            ],
+            [
+              389,
+              394,
+              "rem"
+            ]
+          ],
+          "lightMin": 257
         }
       }
     ],
