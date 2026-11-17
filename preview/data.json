@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-17T15:53:20+07:00",
+  "exportedAt": "2026-11-17T16:51:07+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -2677,12 +2677,12 @@
       },
       {
         "date": "2026-11-17",
-        "kcal": 1445.0,
-        "steps": 3725,
+        "kcal": 1553.0,
+        "steps": 4635,
         "sleepHours": 6.3,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 55.0,
+        "bodyBattery": 50.0,
         "sleepScore": 81,
         "sleepDeepMin": 64,
         "sleepLightMin": 245,
@@ -2691,8 +2691,8 @@
         "bodyBatteryHigh": 81.0,
         "bodyBatteryLow": 16.0,
         "bodyBatteryCharged": 67.0,
-        "bodyBatteryDrained": 31.0,
-        "stressAvg": 20.0,
+        "bodyBatteryDrained": 36.0,
+        "stressAvg": 21.0,
         "stressMax": 75.0,
         "hrv": {
           "lastNightAvg": 59.0,
