@@ -1,56 +1,8 @@
 {
-  "exportedAt": "2026-11-17T22:50:52+07:00",
+  "exportedAt": "2026-11-18T06:50:45+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-19",
-        "kcal": 2215.0,
-        "steps": 6019,
-        "sleepHours": 7.3,
-        "restingHR": 46.0,
-        "weightKg": null,
-        "bodyBattery": 27.0,
-        "sleepScore": 99,
-        "sleepDeepMin": 82,
-        "sleepLightMin": 246,
-        "sleepRemMin": 110,
-        "sleepAwakeMin": 1,
-        "bodyBatteryHigh": 96.0,
-        "bodyBatteryLow": 7.0,
-        "bodyBatteryCharged": 89.0,
-        "bodyBatteryDrained": 69.0,
-        "stressAvg": 21.0,
-        "stressMax": 89.0,
-        "hrv": {
-          "lastNightAvg": 76.0,
-          "weeklyAvg": 63.0,
-          "status": "BALANCED"
-        },
-        "vo2max": 53.9,
-        "trainingStatus": "Maintaining",
-        "trainingLoad": {
-          "acute": 185.0,
-          "chronic": 219.0,
-          "acwr": 0.8,
-          "acwrStatus": "OPTIMAL",
-          "focus": {
-            "aerobicLow": 381.0,
-            "aerobicHigh": 58.0,
-            "anaerobic": 15.0,
-            "feedback": "AEROBIC_HIGH_SHORTAGE"
-          }
-        },
-        "intensityMinutes": {
-          "moderate": 0,
-          "vigorous": 0,
-          "total": 0
-        },
-        "floors": {
-          "up": 10.6,
-          "down": 8.7
-        }
-      },
       {
         "date": "2026-10-20",
         "kcal": 2207.0,
@@ -2677,12 +2629,12 @@
       },
       {
         "date": "2026-11-17",
-        "kcal": 2257.0,
-        "steps": 6703,
+        "kcal": 2355.0,
+        "steps": 6773,
         "sleepHours": 6.3,
         "restingHR": 50.0,
         "weightKg": null,
-        "bodyBattery": 19.0,
+        "bodyBattery": 16.0,
         "sleepScore": 81,
         "sleepDeepMin": 64,
         "sleepLightMin": 245,
@@ -2691,8 +2643,8 @@
         "bodyBatteryHigh": 81.0,
         "bodyBatteryLow": 16.0,
         "bodyBatteryCharged": 67.0,
-        "bodyBatteryDrained": 67.0,
-        "stressAvg": 30.0,
+        "bodyBatteryDrained": 70.0,
+        "stressAvg": 31.0,
         "stressMax": 93.0,
         "hrv": {
           "lastNightAvg": 59.0,
@@ -2853,298 +2805,42 @@
           ],
           "lightMin": 245
         }
+      },
+      {
+        "date": "2026-11-18",
+        "kcal": 521.0,
+        "steps": 190,
+        "sleepHours": null,
+        "restingHR": 49.0,
+        "weightKg": null,
+        "bodyBattery": 67.0,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": 67.0,
+        "bodyBatteryLow": 11.0,
+        "bodyBatteryCharged": 56.0,
+        "bodyBatteryDrained": 5.0,
+        "stressAvg": 19.0,
+        "stressMax": 85.0,
+        "hrv": null,
+        "vo2max": null,
+        "trainingStatus": null,
+        "trainingLoad": null,
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 0.0,
+          "down": 0.0
+        }
       }
     ],
     "activities": [
-      {
-        "type": "multi_sport",
-        "date": "2026-10-18",
-        "startTime": "2026-10-18 10:07:48",
-        "durationMin": 42.7,
-        "avgHR": null,
-        "kcal": 478.0,
-        "name": "複合式運動",
-        "id": 24762623235,
-        "children": [
-          {
-            "id": 24762623230,
-            "type": "strength_training",
-            "durationMin": 22.0,
-            "avgHR": 123.0,
-            "kcal": 230.0,
-            "sets": [
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 20.0,
-                "reps": 20
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 30.0,
-                "reps": 21
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 40.0,
-                "reps": 17
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 40.0,
-                "reps": 12
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 50.0,
-                "reps": 7
-              }
-            ],
-            "zones": [
-              {
-                "z": 1,
-                "min": 1.6,
-                "low": 95
-              },
-              {
-                "z": 2,
-                "min": 15.9,
-                "low": 114
-              },
-              {
-                "z": 3,
-                "min": 3.5,
-                "low": 133
-              },
-              {
-                "z": 4,
-                "min": 0.0,
-                "low": 152
-              },
-              {
-                "z": 5,
-                "min": 0.0,
-                "low": 171
-              }
-            ],
-            "laps": [
-              {
-                "km": 0.0,
-                "sec": 1323,
-                "hr": 123.0
-              }
-            ]
-          },
-          {
-            "id": 24762623232,
-            "type": "walking",
-            "durationMin": 20.6,
-            "avgHR": 136.0,
-            "kcal": 248.0,
-            "cardio": {
-              "type": "walking",
-              "durationMin": 20.6,
-              "distanceKm": 1.53,
-              "paceSec": 742,
-              "speedKmh": 4.9,
-              "avgHR": 136.0,
-              "maxHR": 148.0,
-              "steps": 2118,
-              "cadence": 96.0,
-              "aerobicTE": 2.8,
-              "anaerobicTE": 1.5,
-              "teLabel": "AEROBIC_BASE",
-              "load": 68.0,
-              "kcal": 248.0,
-              "zones": [
-                {
-                  "z": 1,
-                  "min": 0.0,
-                  "low": 95
-                },
-                {
-                  "z": 2,
-                  "min": 2.9,
-                  "low": 114
-                },
-                {
-                  "z": 3,
-                  "min": 17.8,
-                  "low": 133
-                },
-                {
-                  "z": 4,
-                  "min": 0.0,
-                  "low": 152
-                },
-                {
-                  "z": 5,
-                  "min": 0.0,
-                  "low": 171
-                }
-              ],
-              "laps": [
-                {
-                  "km": 1.0,
-                  "sec": 868,
-                  "hr": 135.0
-                },
-                {
-                  "km": 0.53,
-                  "sec": 371,
-                  "hr": 140.0
-                }
-              ]
-            },
-            "sets": [
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 20.0,
-                "reps": 20
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 30.0,
-                "reps": 21
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 40.0,
-                "reps": 17
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 40.0,
-                "reps": 12
-              },
-              {
-                "name": null,
-                "cat": "SQUAT",
-                "kg": 50.0,
-                "reps": 7
-              }
-            ],
-            "zones": [
-              {
-                "z": 1,
-                "min": 0.0,
-                "low": 95
-              },
-              {
-                "z": 2,
-                "min": 2.9,
-                "low": 114
-              },
-              {
-                "z": 3,
-                "min": 17.8,
-                "low": 133
-              },
-              {
-                "z": 4,
-                "min": 0.0,
-                "low": 152
-              },
-              {
-                "z": 5,
-                "min": 0.0,
-                "low": 171
-              }
-            ],
-            "laps": [
-              {
-                "km": 1.0,
-                "sec": 868,
-                "hr": 135.0
-              },
-              {
-                "km": 0.53,
-                "sec": 371,
-                "hr": 140.0
-              }
-            ]
-          }
-        ],
-        "sets": [
-          {
-            "name": null,
-            "cat": "SQUAT",
-            "kg": 20.0,
-            "reps": 20
-          },
-          {
-            "name": null,
-            "cat": "SQUAT",
-            "kg": 30.0,
-            "reps": 21
-          },
-          {
-            "name": null,
-            "cat": "SQUAT",
-            "kg": 40.0,
-            "reps": 17
-          },
-          {
-            "name": null,
-            "cat": "SQUAT",
-            "kg": 40.0,
-            "reps": 12
-          },
-          {
-            "name": null,
-            "cat": "SQUAT",
-            "kg": 50.0,
-            "reps": 7
-          }
-        ],
-        "zones": [
-          {
-            "z": 1,
-            "min": 1.6,
-            "low": 95
-          },
-          {
-            "z": 2,
-            "min": 18.8,
-            "low": 114
-          },
-          {
-            "z": 3,
-            "min": 21.3,
-            "low": 133
-          },
-          {
-            "z": 4,
-            "min": 0.0,
-            "low": 152
-          },
-          {
-            "z": 5,
-            "min": 0.0,
-            "low": 171
-          }
-        ],
-        "laps": [
-          {
-            "km": 0.0,
-            "sec": 1323,
-            "hr": 123.0
-          },
-          {
-            "km": 1.53,
-            "sec": 1239,
-            "hr": 136.0
-          }
-        ]
-      },
       {
         "type": "strength_training",
         "date": "2026-11-10",
