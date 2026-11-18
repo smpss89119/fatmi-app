@@ -1,56 +1,8 @@
 {
-  "exportedAt": "2026-11-18T22:54:08+07:00",
+  "exportedAt": "2026-11-19T06:52:27+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-20",
-        "kcal": 2207.0,
-        "steps": 5938,
-        "sleepHours": 7.8,
-        "restingHR": 46.0,
-        "weightKg": null,
-        "bodyBattery": 24.0,
-        "sleepScore": 98,
-        "sleepDeepMin": 100,
-        "sleepLightMin": 253,
-        "sleepRemMin": 114,
-        "sleepAwakeMin": 2,
-        "bodyBatteryHigh": 100.0,
-        "bodyBatteryLow": 24.0,
-        "bodyBatteryCharged": 76.0,
-        "bodyBatteryDrained": 79.0,
-        "stressAvg": 26.0,
-        "stressMax": 89.0,
-        "hrv": {
-          "lastNightAvg": 65.0,
-          "weeklyAvg": 63.0,
-          "status": "BALANCED"
-        },
-        "vo2max": 53.9,
-        "trainingStatus": "Maintaining",
-        "trainingLoad": {
-          "acute": 152.0,
-          "chronic": 219.0,
-          "acwr": 0.6,
-          "acwrStatus": "LOW",
-          "focus": {
-            "aerobicLow": 381.0,
-            "aerobicHigh": 58.0,
-            "anaerobic": 15.0,
-            "feedback": "AEROBIC_HIGH_SHORTAGE"
-          }
-        },
-        "intensityMinutes": {
-          "moderate": 0,
-          "vigorous": 0,
-          "total": 0
-        },
-        "floors": {
-          "up": 6.1,
-          "down": 6.9
-        }
-      },
       {
         "date": "2026-10-21",
         "kcal": 2237.0,
@@ -2963,6 +2915,39 @@
             ]
           ],
           "lightMin": 222
+        }
+      },
+      {
+        "date": "2026-11-19",
+        "kcal": 104.0,
+        "steps": 33,
+        "sleepHours": null,
+        "restingHR": 53.0,
+        "weightKg": null,
+        "bodyBattery": 17.0,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": 17.0,
+        "bodyBatteryLow": 14.0,
+        "bodyBatteryCharged": 3.0,
+        "bodyBatteryDrained": 0.0,
+        "stressAvg": 19.0,
+        "stressMax": 40.0,
+        "hrv": null,
+        "vo2max": null,
+        "trainingStatus": null,
+        "trainingLoad": null,
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 0.0,
+          "down": 0.0
         }
       }
     ],
