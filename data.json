@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-20T21:57:18+07:00",
+  "exportedAt": "2026-11-20T22:03:23+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -9268,5 +9268,15 @@
     "garmin": true,
     "inbody": true
   },
-  "chatMeals": {}
+  "chatMeals": {
+    "2026-11-20": [
+      {
+        "id": "c1795187003",
+        "time": "23:00",
+        "name": "生啤 3 大杯＋肉串 4 支＋蔬菜串燒",
+        "kcal": 1300,
+        "protein": 44
+      }
+    ]
+  }
 }
