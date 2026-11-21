@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-21T21:47:56+07:00",
+  "exportedAt": "2026-11-21T22:55:20+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -3098,16 +3098,16 @@
           "weeklyAvg": 61.0,
           "status": "BALANCED"
         },
-        "vo2max": 52.6,
-        "trainingStatus": "Recovery",
+        "vo2max": 51.9,
+        "trainingStatus": "Productive",
         "trainingLoad": {
-          "acute": 96.0,
+          "acute": 333.0,
           "chronic": 219.0,
-          "acwr": 0.4,
-          "acwrStatus": "LOW",
+          "acwr": 1.5,
+          "acwrStatus": "HIGH",
           "focus": {
             "aerobicLow": 44.0,
-            "aerobicHigh": 164.0,
+            "aerobicHigh": 351.0,
             "anaerobic": 18.0,
             "feedback": "AEROBIC_LOW_SHORTAGE"
           }
@@ -4248,6 +4248,181 @@
             "km": 0.0,
             "sec": 1499,
             "hr": 107.0
+          }
+        ]
+      },
+      {
+        "type": "running",
+        "date": "2026-11-21",
+        "startTime": "2026-11-21 22:59:28",
+        "durationMin": 46.0,
+        "avgHR": 158.0,
+        "kcal": 675.0,
+        "name": "香山區 跑步",
+        "id": 25153685369,
+        "cardio": {
+          "type": "running",
+          "durationMin": 46.0,
+          "distanceKm": 8.34,
+          "paceSec": 329,
+          "speedKmh": 11.0,
+          "avgHR": 158.0,
+          "maxHR": 180.0,
+          "steps": 7310,
+          "cadence": 160.0,
+          "elevGain": 29.0,
+          "aerobicTE": 4.6,
+          "anaerobicTE": 0.0,
+          "teLabel": "LACTATE_THRESHOLD",
+          "load": 186.0,
+          "kcal": 675.0,
+          "zones": [
+            {
+              "z": 1,
+              "min": 0.2,
+              "low": 95
+            },
+            {
+              "z": 2,
+              "min": 0.3,
+              "low": 114
+            },
+            {
+              "z": 3,
+              "min": 7.2,
+              "low": 133
+            },
+            {
+              "z": 4,
+              "min": 34.8,
+              "low": 152
+            },
+            {
+              "z": 5,
+              "min": 3.2,
+              "low": 171
+            }
+          ],
+          "laps": [
+            {
+              "km": 1.0,
+              "sec": 318,
+              "hr": 140.0
+            },
+            {
+              "km": 1.0,
+              "sec": 323,
+              "hr": 159.0
+            },
+            {
+              "km": 1.0,
+              "sec": 325,
+              "hr": 152.0
+            },
+            {
+              "km": 1.0,
+              "sec": 337,
+              "hr": 160.0
+            },
+            {
+              "km": 1.0,
+              "sec": 321,
+              "hr": 162.0
+            },
+            {
+              "km": 1.0,
+              "sec": 338,
+              "hr": 157.0
+            },
+            {
+              "km": 1.0,
+              "sec": 328,
+              "hr": 170.0
+            },
+            {
+              "km": 1.0,
+              "sec": 350,
+              "hr": 165.0
+            },
+            {
+              "km": 0.34,
+              "sec": 118,
+              "hr": 164.0
+            }
+          ]
+        },
+        "zones": [
+          {
+            "z": 1,
+            "min": 0.2,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 0.3,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 7.2,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 34.8,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 3.2,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 1.0,
+            "sec": 318,
+            "hr": 140.0
+          },
+          {
+            "km": 1.0,
+            "sec": 323,
+            "hr": 159.0
+          },
+          {
+            "km": 1.0,
+            "sec": 325,
+            "hr": 152.0
+          },
+          {
+            "km": 1.0,
+            "sec": 337,
+            "hr": 160.0
+          },
+          {
+            "km": 1.0,
+            "sec": 321,
+            "hr": 162.0
+          },
+          {
+            "km": 1.0,
+            "sec": 338,
+            "hr": 157.0
+          },
+          {
+            "km": 1.0,
+            "sec": 328,
+            "hr": 170.0
+          },
+          {
+            "km": 1.0,
+            "sec": 350,
+            "hr": 165.0
+          },
+          {
+            "km": 0.34,
+            "sec": 118,
+            "hr": 164.0
           }
         ]
       }
