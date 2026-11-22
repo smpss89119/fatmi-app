@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-22T21:52:23+07:00",
+  "exportedAt": "2026-11-22T22:51:02+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -3242,12 +3242,12 @@
       },
       {
         "date": "2026-11-22",
-        "kcal": 1616.0,
-        "steps": 3599,
+        "kcal": 2408.0,
+        "steps": 4755,
         "sleepHours": 6.6,
         "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": 24.0,
+        "bodyBattery": 8.0,
         "sleepScore": 88,
         "sleepDeepMin": 90,
         "sleepLightMin": 209,
@@ -3256,8 +3256,8 @@
         "bodyBatteryHigh": 71.0,
         "bodyBatteryLow": 5.0,
         "bodyBatteryCharged": 66.0,
-        "bodyBatteryDrained": 47.0,
-        "stressAvg": 38.0,
+        "bodyBatteryDrained": 63.0,
+        "stressAvg": 42.0,
         "stressMax": 90.0,
         "hrv": {
           "lastNightAvg": 55.0,
@@ -3267,21 +3267,21 @@
         "vo2max": 51.9,
         "trainingStatus": "Productive",
         "trainingLoad": {
-          "acute": 281.0,
+          "acute": 322.0,
           "chronic": 219.0,
-          "acwr": 1.2,
+          "acwr": 1.4,
           "acwrStatus": "OPTIMAL",
           "focus": {
-            "aerobicLow": 44.0,
+            "aerobicLow": 64.0,
             "aerobicHigh": 351.0,
-            "anaerobic": 18.0,
+            "anaerobic": 30.0,
             "feedback": "AEROBIC_LOW_SHORTAGE"
           }
         },
         "intensityMinutes": {
-          "moderate": 0,
-          "vigorous": 0,
-          "total": 0
+          "moderate": 45,
+          "vigorous": 9,
+          "total": 63
         },
         "floors": {
           "up": 2.2,
@@ -4524,6 +4524,142 @@
             "km": 0.34,
             "sec": 118,
             "hr": 164.0
+          }
+        ]
+      },
+      {
+        "type": "strength_training",
+        "date": "2026-11-22",
+        "startTime": "2026-11-22 21:56:39",
+        "durationMin": 60.2,
+        "avgHR": 110.0,
+        "kcal": 403.0,
+        "name": "肌力訓練",
+        "id": 25163914507,
+        "sets": [
+          {
+            "name": "WEIGHTED_SQUAT",
+            "cat": "SQUAT",
+            "kg": 30.0,
+            "reps": 21
+          },
+          {
+            "name": "WEIGHTED_SQUAT",
+            "cat": "SQUAT",
+            "kg": 40.0,
+            "reps": 18
+          },
+          {
+            "name": "WEIGHTED_SQUAT",
+            "cat": "SQUAT",
+            "kg": 50.0,
+            "reps": 14
+          },
+          {
+            "name": "WEIGHTED_SQUAT",
+            "cat": "SQUAT",
+            "kg": 60.0,
+            "reps": 10
+          },
+          {
+            "name": "WEIGHTED_SQUAT",
+            "cat": "SQUAT",
+            "kg": 60.0,
+            "reps": 9
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 29.0,
+            "reps": 31
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 42.5,
+            "reps": 13
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 42.5,
+            "reps": 8
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 42.5,
+            "reps": 9
+          },
+          {
+            "name": null,
+            "cat": "BENCH_PRESS",
+            "kg": 42.5,
+            "reps": 8
+          },
+          {
+            "name": "SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE",
+            "cat": "FLYE",
+            "kg": 33.0,
+            "reps": 14
+          },
+          {
+            "name": "SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE",
+            "cat": "FLYE",
+            "kg": 40.0,
+            "reps": 12
+          },
+          {
+            "name": "SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE",
+            "cat": "FLYE",
+            "kg": 40.0,
+            "reps": 8
+          },
+          {
+            "name": "SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE",
+            "cat": "FLYE",
+            "kg": 33.0,
+            "reps": 9
+          },
+          {
+            "name": "SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE",
+            "cat": "FLYE",
+            "kg": 33.0,
+            "reps": 8
+          }
+        ],
+        "zones": [
+          {
+            "z": 1,
+            "min": 40.3,
+            "low": 95
+          },
+          {
+            "z": 2,
+            "min": 18.4,
+            "low": 114
+          },
+          {
+            "z": 3,
+            "min": 0.7,
+            "low": 133
+          },
+          {
+            "z": 4,
+            "min": 0.0,
+            "low": 152
+          },
+          {
+            "z": 5,
+            "min": 0.0,
+            "low": 171
+          }
+        ],
+        "laps": [
+          {
+            "km": 0.0,
+            "sec": 3615,
+            "hr": 110.0
           }
         ]
       }
