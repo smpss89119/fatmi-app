@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-22T16:45:41+07:00",
+  "exportedAt": "2026-11-22T17:50:36+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -3247,7 +3247,7 @@
         "sleepHours": 6.6,
         "restingHR": 51.0,
         "weightKg": null,
-        "bodyBattery": 70.0,
+        "bodyBattery": 24.0,
         "sleepScore": 88,
         "sleepDeepMin": 90,
         "sleepLightMin": 209,
@@ -3256,7 +3256,7 @@
         "bodyBatteryHigh": 71.0,
         "bodyBatteryLow": 5.0,
         "bodyBatteryCharged": 66.0,
-        "bodyBatteryDrained": 1.0,
+        "bodyBatteryDrained": 47.0,
         "stressAvg": 38.0,
         "stressMax": 90.0,
         "hrv": {
