@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-24T06:45:56+07:00",
+  "exportedAt": "2026-11-24T07:47:15+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -3479,27 +3479,42 @@
       },
       {
         "date": "2026-11-24",
-        "kcal": 206.0,
-        "steps": 208,
-        "sleepHours": null,
-        "restingHR": 53.0,
+        "kcal": 743.0,
+        "steps": 419,
+        "sleepHours": 7.2,
+        "restingHR": 46.0,
         "weightKg": null,
-        "bodyBattery": 27.0,
-        "sleepScore": null,
-        "sleepDeepMin": null,
-        "sleepLightMin": null,
-        "sleepRemMin": null,
-        "sleepAwakeMin": null,
-        "bodyBatteryHigh": 27.0,
+        "bodyBattery": 89.0,
+        "sleepScore": 92,
+        "sleepDeepMin": 100,
+        "sleepLightMin": 275,
+        "sleepRemMin": 60,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 94.0,
         "bodyBatteryLow": 11.0,
-        "bodyBatteryCharged": 16.0,
-        "bodyBatteryDrained": 1.0,
-        "stressAvg": 18.0,
-        "stressMax": 72.0,
-        "hrv": null,
-        "vo2max": null,
-        "trainingStatus": null,
-        "trainingLoad": null,
+        "bodyBatteryCharged": 83.0,
+        "bodyBatteryDrained": 6.0,
+        "stressAvg": 13.0,
+        "stressMax": 89.0,
+        "hrv": {
+          "lastNightAvg": 76.0,
+          "weeklyAvg": 59.0,
+          "status": "BALANCED"
+        },
+        "vo2max": 51.9,
+        "trainingStatus": "Maintaining",
+        "trainingLoad": {
+          "acute": 209.0,
+          "chronic": 219.0,
+          "acwr": 0.9,
+          "acwrStatus": "OPTIMAL",
+          "focus": {
+            "aerobicLow": 64.0,
+            "aerobicHigh": 351.0,
+            "anaerobic": 30.0,
+            "feedback": "AEROBIC_LOW_SHORTAGE"
+          }
+        },
         "intensityMinutes": {
           "moderate": 0,
           "vigorous": 0,
@@ -3507,7 +3522,113 @@
         },
         "floors": {
           "up": 0.0,
-          "down": 0.0
+          "down": 0.7
+        },
+        "sleep": {
+          "start": "2026-11-24T00:34",
+          "end": "2026-11-24T07:50",
+          "deepMin": 100,
+          "coreMin": 275,
+          "remMin": 60,
+          "awakeMin": 1,
+          "segments": [
+            [
+              0,
+              3,
+              "core"
+            ],
+            [
+              3,
+              28,
+              "deep"
+            ],
+            [
+              28,
+              37,
+              "core"
+            ],
+            [
+              37,
+              67,
+              "deep"
+            ],
+            [
+              67,
+              89,
+              "core"
+            ],
+            [
+              89,
+              98,
+              "rem"
+            ],
+            [
+              98,
+              131,
+              "core"
+            ],
+            [
+              131,
+              148,
+              "rem"
+            ],
+            [
+              148,
+              160,
+              "core"
+            ],
+            [
+              160,
+              192,
+              "deep"
+            ],
+            [
+              192,
+              223,
+              "core"
+            ],
+            [
+              223,
+              239,
+              "rem"
+            ],
+            [
+              239,
+              289,
+              "core"
+            ],
+            [
+              289,
+              302,
+              "deep"
+            ],
+            [
+              302,
+              341,
+              "core"
+            ],
+            [
+              341,
+              342,
+              "awake"
+            ],
+            [
+              342,
+              365,
+              "core"
+            ],
+            [
+              365,
+              383,
+              "rem"
+            ],
+            [
+              383,
+              436,
+              "core"
+            ]
+          ],
+          "lightMin": 275
         }
       }
     ],
