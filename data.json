@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-26T06:54:37+07:00",
+  "exportedAt": "2026-11-26T07:51:52+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
@@ -3686,24 +3686,28 @@
       },
       {
         "date": "2026-11-26",
-        "kcal": 112.0,
-        "steps": 55,
-        "sleepHours": null,
-        "restingHR": 53.0,
+        "kcal": 721.0,
+        "steps": 72,
+        "sleepHours": 6.9,
+        "restingHR": 47.0,
         "weightKg": null,
-        "bodyBattery": 15.0,
-        "sleepScore": null,
-        "sleepDeepMin": null,
-        "sleepLightMin": null,
-        "sleepRemMin": null,
-        "sleepAwakeMin": null,
-        "bodyBatteryHigh": 18.0,
+        "bodyBattery": 91.0,
+        "sleepScore": 89,
+        "sleepDeepMin": 54,
+        "sleepLightMin": 232,
+        "sleepRemMin": 128,
+        "sleepAwakeMin": 1,
+        "bodyBatteryHigh": 91.0,
         "bodyBatteryLow": 15.0,
-        "bodyBatteryCharged": 0.0,
+        "bodyBatteryCharged": 76.0,
         "bodyBatteryDrained": 3.0,
-        "stressAvg": 41.0,
+        "stressAvg": 15.0,
         "stressMax": 87.0,
-        "hrv": null,
+        "hrv": {
+          "lastNightAvg": 65.0,
+          "weeklyAvg": 58.0,
+          "status": "BALANCED"
+        },
         "vo2max": 51.9,
         "trainingStatus": "Maintaining",
         "trainingLoad": {
@@ -3726,6 +3730,127 @@
         "floors": {
           "up": 0.0,
           "down": 0.0
+        },
+        "sleep": {
+          "start": "2026-11-26T01:08",
+          "end": "2026-11-26T08:03",
+          "deepMin": 54,
+          "coreMin": 232,
+          "remMin": 128,
+          "awakeMin": 1,
+          "segments": [
+            [
+              0,
+              10,
+              "core"
+            ],
+            [
+              10,
+              31,
+              "deep"
+            ],
+            [
+              31,
+              32,
+              "awake"
+            ],
+            [
+              32,
+              40,
+              "core"
+            ],
+            [
+              40,
+              55,
+              "deep"
+            ],
+            [
+              55,
+              74,
+              "core"
+            ],
+            [
+              74,
+              103,
+              "rem"
+            ],
+            [
+              103,
+              127,
+              "core"
+            ],
+            [
+              127,
+              136,
+              "deep"
+            ],
+            [
+              136,
+              160,
+              "core"
+            ],
+            [
+              160,
+              186,
+              "rem"
+            ],
+            [
+              186,
+              207,
+              "core"
+            ],
+            [
+              207,
+              216,
+              "deep"
+            ],
+            [
+              216,
+              254,
+              "core"
+            ],
+            [
+              254,
+              282,
+              "rem"
+            ],
+            [
+              282,
+              289,
+              "core"
+            ],
+            [
+              289,
+              296,
+              "rem"
+            ],
+            [
+              296,
+              354,
+              "core"
+            ],
+            [
+              354,
+              385,
+              "rem"
+            ],
+            [
+              385,
+              393,
+              "core"
+            ],
+            [
+              393,
+              400,
+              "rem"
+            ],
+            [
+              400,
+              414,
+              "core"
+            ]
+          ],
+          "lightMin": 232
         }
       }
     ],
