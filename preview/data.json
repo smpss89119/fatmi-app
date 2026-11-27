@@ -1,56 +1,8 @@
 {
-  "exportedAt": "2026-11-27T22:48:25+07:00",
+  "exportedAt": "2026-11-28T06:47:43+07:00",
   "timezone": "Asia/Bangkok",
   "garmin": {
     "daily": [
-      {
-        "date": "2026-10-29",
-        "kcal": 2224.0,
-        "steps": 5578,
-        "sleepHours": 6.5,
-        "restingHR": 50.0,
-        "weightKg": null,
-        "bodyBattery": 6.0,
-        "sleepScore": 83,
-        "sleepDeepMin": 92,
-        "sleepLightMin": 211,
-        "sleepRemMin": 90,
-        "sleepAwakeMin": 0,
-        "bodyBatteryHigh": 72.0,
-        "bodyBatteryLow": 6.0,
-        "bodyBatteryCharged": 61.0,
-        "bodyBatteryDrained": 69.0,
-        "stressAvg": 41.0,
-        "stressMax": 93.0,
-        "hrv": {
-          "lastNightAvg": 56.0,
-          "weeklyAvg": 52.0,
-          "status": "UNBALANCED"
-        },
-        "vo2max": 53.9,
-        "trainingStatus": "Detraining",
-        "trainingLoad": {
-          "acute": 0.0,
-          "chronic": 219.0,
-          "acwr": 0.0,
-          "acwrStatus": "LOW",
-          "focus": {
-            "aerobicLow": 381.0,
-            "aerobicHigh": 58.0,
-            "anaerobic": 15.0,
-            "feedback": "AEROBIC_HIGH_SHORTAGE"
-          }
-        },
-        "intensityMinutes": {
-          "moderate": 0,
-          "vigorous": 0,
-          "total": 0
-        },
-        "floors": {
-          "up": 9.5,
-          "down": 2.2
-        }
-      },
       {
         "date": "2026-10-30",
         "kcal": 2272.0,
@@ -3807,23 +3759,23 @@
       },
       {
         "date": "2026-11-27",
-        "kcal": 1822.0,
-        "steps": 7072,
+        "kcal": 2283.0,
+        "steps": 8266,
         "sleepHours": 6.8,
         "restingHR": 47.0,
         "weightKg": null,
-        "bodyBattery": 35.0,
+        "bodyBattery": 13.0,
         "sleepScore": 85,
         "sleepDeepMin": 39,
         "sleepLightMin": 219,
         "sleepRemMin": 152,
         "sleepAwakeMin": 2,
         "bodyBatteryHigh": 90.0,
-        "bodyBatteryLow": 19.0,
+        "bodyBatteryLow": 13.0,
         "bodyBatteryCharged": 71.0,
-        "bodyBatteryDrained": 58.0,
-        "stressAvg": 27.0,
-        "stressMax": 89.0,
+        "bodyBatteryDrained": 80.0,
+        "stressAvg": 33.0,
+        "stressMax": 94.0,
         "hrv": {
           "lastNightAvg": 58.0,
           "weeklyAvg": 56.0,
@@ -3952,6 +3904,39 @@
             ]
           ],
           "lightMin": 219
+        }
+      },
+      {
+        "date": "2026-11-28",
+        "kcal": 211.0,
+        "steps": 211,
+        "sleepHours": null,
+        "restingHR": 52.0,
+        "weightKg": null,
+        "bodyBattery": 10.0,
+        "sleepScore": null,
+        "sleepDeepMin": null,
+        "sleepLightMin": null,
+        "sleepRemMin": null,
+        "sleepAwakeMin": null,
+        "bodyBatteryHigh": 13.0,
+        "bodyBatteryLow": 10.0,
+        "bodyBatteryCharged": 0.0,
+        "bodyBatteryDrained": 3.0,
+        "stressAvg": 42.0,
+        "stressMax": 76.0,
+        "hrv": null,
+        "vo2max": null,
+        "trainingStatus": null,
+        "trainingLoad": null,
+        "intensityMinutes": {
+          "moderate": 0,
+          "vigorous": 0,
+          "total": 0
+        },
+        "floors": {
+          "up": 0.0,
+          "down": 0.0
         }
       }
     ],
